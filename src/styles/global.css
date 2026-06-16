@@ -1013,3 +1013,374 @@ html, body {
   color: #166534;
   text-align: center;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   DATA HUB — Screen 4  (dh- prefix)
+═══════════════════════════════════════════════════════════ */
+
+/* ── Header ── */
+.dh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 18px 14px;
+  background: #fff;
+  border-bottom: 1px solid #f1f5f9;
+}
+.dh-h-title { font-size: 22px; font-weight: 800; color: #0f172a; }
+.dh-h-sub   { display: flex; align-items: center; font-size: 12px; color: #64748b; margin-top: 3px; }
+.dh-h-badge {
+  background: linear-gradient(135deg,#0d9488,#0284c7);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 20px;
+}
+
+/* ── Pulse animation ── */
+@keyframes dhpulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.dh-pulse-ring {
+  position: absolute;
+  inset: -4px;
+  border: 1.5px solid;
+  border-radius: 50%;
+  animation: dhpulse 1.8s ease-out infinite;
+}
+
+/* ── Sections ── */
+.dh-section { padding: 14px 18px 0; }
+.dh-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.dh-alert-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+.dh-dismiss {
+  font-size: 12px;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+/* ── Confidence card ── */
+.dh-conf-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 8px #0000000d;
+  margin-bottom: 4px;
+}
+.dh-conf-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.dh-conf-label { font-size: 13px; font-weight: 600; color: #334155; }
+.dh-conf-val   { font-size: 20px; font-weight: 800; color: #0d9488; }
+.dh-conf-track {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.dh-conf-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#14b8a6,#0284c7);
+  border-radius: 6px;
+  transition: width 0.8s ease;
+}
+.dh-conf-segments {
+  display: flex;
+  gap: 3px;
+  height: 4px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.dh-seg { border-radius: 2px; transition: background 0.3s; min-width: 4px; }
+.dh-conf-legend { display: flex; gap: 10px; font-size: 10px; color: #94a3b8; flex-wrap: wrap; }
+.dh-conf-tip {
+  margin-top: 10px;
+  background: #fef9c3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #854d0e;
+}
+
+/* ── Disease Alert Cards ── */
+.dh-alert-card {
+  border: 1.5px solid;
+  border-radius: 13px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.dh-alert-card:active { box-shadow: 0 2px 12px #0000001a; }
+.dh-alert-top { display: flex; align-items: flex-start; gap: 10px; }
+.dh-alert-emoji { font-size: 24px; flex-shrink: 0; }
+.dh-alert-info { flex: 1; }
+.dh-alert-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
+.dh-alert-markers { font-size: 11px; color: #64748b; margin-top: 3px; }
+.dh-alert-sev { font-size: 18px; flex-shrink: 0; }
+.dh-alert-body { margin-top: 12px; padding-top: 12px; border-top: 1px solid #0000001a; }
+.dh-alert-detail { font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 10px; }
+.dh-alert-fix-head { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.dh-alert-fix { font-size: 13px; color: #1e3a5f; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }
+.dh-alert-retest { display: inline-block; background: #fff; border-radius: 20px; padding: 4px 10px; font-size: 11px; color: #475569; margin-bottom: 8px; }
+.dh-alert-disclaimer { font-size: 10px; color: #94a3b8; font-style: italic; }
+
+/* ── Source cards — Connected ── */
+.dh-source-card {
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.dh-source-connected { color: #fff; }
+.dh-sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dh-sc-left { display: flex; align-items: center; gap: 12px; }
+.dh-sc-icon { font-size: 28px; }
+.dh-sc-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+.dh-sc-sync { display: flex; align-items: center; margin-top: 4px; }
+.dh-sc-biomarkers { text-align: center; font-size: 22px; font-weight: 800; color: rgba(255,255,255,0.9); line-height: 1; }
+.dh-sc-cta {
+  width: 100%;
+  margin-top: 12px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dh-sc-cta:active { background: rgba(255,255,255,0.25); }
+
+/* ── CGM preview ── */
+.dh-cgm-preview {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.dh-cgm-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 6px;
+}
+
+/* ── Data chips ── */
+.dh-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.dh-chip {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.dh-chip-grey {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+/* ── Source cards — Available ── */
+.dh-source-available {
+  background: #fff;
+  border: 1.5px solid #f1f5f9;
+  box-shadow: 0 1px 6px #0000000a;
+}
+.dh-av-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dh-av-name { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.3; max-width: 200px; }
+.dh-av-plus { text-align: center; font-size: 20px; font-weight: 800; color: #0d9488; line-height: 1; }
+.dh-av-sub  { font-size: 12px; color: #64748b; line-height: 1.5; margin-top: 6px; }
+.dh-av-brands { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.dh-av-cta {
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  border: 1.5px solid;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* ── Badge ── */
+.dh-badge {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* ── Modal ── */
+.dh-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.dh-sheet {
+  width: 390px;
+  max-height: 88vh;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  overflow-y: auto;
+  padding: 8px 0 32px;
+  position: relative;
+}
+.dh-sheet-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: #f1f5f9;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+}
+.dh-modal-body { padding: 20px 20px 8px; }
+.dh-modal-icon { font-size: 40px; text-align: center; margin-bottom: 8px; }
+.dh-modal-title { font-size: 20px; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 8px; }
+.dh-modal-desc  { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 16px; text-align: center; }
+.dh-modal-list  { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.dh-ml-item { font-size: 13px; color: #334155; line-height: 1.4; }
+.dh-modal-cta {
+  width: 100%;
+  padding: 14px;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.dh-modal-note { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 10px; line-height: 1.5; }
+.dh-modal-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.dh-step { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #334155; line-height: 1.5; }
+.dh-snum {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── ABHA input ── */
+.dh-abha-input-wrap { margin-bottom: 16px; }
+.dh-abha-label { font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px; }
+.dh-abha-input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: 0.1em;
+  outline: none;
+  text-align: center;
+}
+.dh-abha-input:focus { border-color: #047857; }
+
+/* ── Connected badge ── */
+.dh-connected-badge {
+  background: #dcfce7;
+  border: 1.5px solid #86efac;
+  color: #15803d;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ── Brand buttons (Ring, Scale) ── */
+.dh-brand-row { display: flex; gap: 10px; }
+.dh-brand-btn {
+  flex: 1;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.dh-brand-btn.sel { border-color: #0d9488; background: #e6f7f5; }
+.dh-brand-name { font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 6px; }
+.dh-brand-sub  { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+/* ── Epigenetic partner cards ── */
+.dh-epig-labs { display: flex; gap: 10px; margin: 12px 0; }
+.dh-epig-lab {
+  flex: 1;
+  border: 1.5px solid #ede9fe;
+  border-radius: 12px;
+  padding: 12px;
+  background: #faf5ff;
+  text-align: center;
+  font-size: 13px;
+  color: #334155;
+}
+.dh-epig-lab span { font-size: 11px; color: #7c3aed; }
