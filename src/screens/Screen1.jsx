@@ -1,5 +1,67 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+const INSIGHT_TEXT = 'Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.'
+
+/* ── Ask Doctor Modal ── */
+function AskDoctorModal({ onClose }) {
+  const [question, setQuestion] = useState('')
+  const [sent,     setSent]     = useState(false)
+  const textRef = useRef(null)
+
+  useEffect(() => { textRef.current?.focus() }, [])
+
+  function sendWhatsApp() {
+    const msg = encodeURIComponent(
+      `Hi, I'm using HealthOS and have a question about my health insight.\n\n` +
+      `*My HealthOS insight says:*\n"${INSIGHT_TEXT}"\n\n` +
+      `*My question:*\n${question.trim()}`
+    )
+    window.open(`https://wa.me/?text=${msg}`, '_blank')
+    setSent(true)
+  }
+
+  return (
+    <div className="fm-overlay" onClick={onClose}>
+      <div className="fm-modal ask-modal" onClick={e => e.stopPropagation()}>
+        <button className="fm-close-x" onClick={onClose}>✕</button>
+
+        {!sent ? <>
+          <div className="ask-modal-head">🩺 Ask a Doctor</div>
+          <div className="ask-modal-sub">Type your question below. We'll open WhatsApp so you can send it to any doctor or health professional in your contacts.</div>
+
+          <div className="ask-context-box">
+            <div className="ask-context-label">Your insight</div>
+            <div className="ask-context-text">"{INSIGHT_TEXT}"</div>
+          </div>
+
+          <textarea
+            ref={textRef}
+            className="ask-textarea"
+            placeholder="e.g. What does high LDL mean for my heart risk? What foods should I avoid?"
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+            rows={4}
+          />
+
+          <button
+            className="fm-submit ask-wa-send"
+            disabled={!question.trim()}
+            onClick={sendWhatsApp}
+          >
+            📱 Send via WhatsApp →
+          </button>
+          <div className="ask-modal-note">Opens WhatsApp — pick any doctor from your contacts to send</div>
+        </> : <>
+          <div style={{ fontSize: 48, textAlign: 'center' }}>✅</div>
+          <div className="ask-modal-head">Question ready to send!</div>
+          <div className="ask-modal-sub">WhatsApp opened with your question pre-filled. Just pick your doctor from contacts and hit send.</div>
+          <button className="fm-submit" onClick={onClose}>Done</button>
+        </>}
+      </div>
+    </div>
+  )
+}
 
 /* ── Constants ── */
 const AVATAR_COLORS = ['#14b8a6','#6366f1','#e0b341','#ec4899','#10b981','#e08c3b','#3b82f6']
@@ -280,6 +342,7 @@ export default function Screen1() {
   const [pending,   setPending]   = useState([])
   const [loading,   setLoading]   = useState(true)
   const [showInvite, setShowInvite] = useState(false)
+  const [showAsk,   setShowAsk]   = useState(false)
   const [selected,  setSelected]  = useState(null)
 
   const loadFamily = useCallback(async () => {
@@ -320,15 +383,13 @@ export default function Screen1() {
 
       {/* AI Insight */}
       <div className="card">
-        <div className="insight-text">
-          Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.
-        </div>
+        <div className="insight-text">{INSIGHT_TEXT}</div>
         <div className="ask-row">
           <div className="ask-row-label">
             <span>Not sure what this means?</span>
             <span className="ask-row-sub">Ask a real doctor — replies within 24h</span>
           </div>
-          <button className="ask-btn">Ask →</button>
+          <button className="ask-btn" onClick={() => setShowAsk(true)}>Ask →</button>
         </div>
       </div>
 
@@ -435,6 +496,8 @@ export default function Screen1() {
       <div className="why-row"><span className="c">✓</span><span><b>Your data is always yours</b> — BioAge history stays even if you cancel</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>No surprise renewals</b> — reminder 7 days before any charge, 30 days free first</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>Available worldwide</b> — ₹399/yr in India, $99/yr internationally</span></div>
+
+      {showAsk && <AskDoctorModal onClose={() => setShowAsk(false)} />}
 
       {showInvite && (
         <InviteModal

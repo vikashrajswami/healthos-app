@@ -558,6 +558,37 @@ html, body {
 .theme-pill.selected { border-color: #14b8a6; color: #e6e9ef; background: rgba(20,184,166,.1); }
 .theme-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
 
+/* ── Ask Doctor Modal ── */
+.ask-modal { max-height: 90vh; overflow-y: auto; }
+.ask-modal-head { font-size: 20px; font-weight: 800; color: #1a2030; text-align: center; margin-bottom: 6px; }
+.ask-modal-sub { font-size: 13px; color: #8993a8; text-align: center; line-height: 1.5; margin-bottom: 14px; }
+.ask-context-box {
+  background: #f0f4f8;
+  border-left: 3px solid var(--accent, #14b8a6);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.ask-context-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #8993a8; margin-bottom: 4px; }
+.ask-context-text { font-size: 13px; color: #4a5568; line-height: 1.5; font-style: italic; }
+.ask-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1.5px solid #d6dce8;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1a2030;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.ask-textarea:focus { border-color: var(--accent, #14b8a6); }
+.ask-wa-send { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.ask-modal-note { font-size: 11px; color: #8993a8; text-align: center; margin-top: 8px; }
+
 /* ── Invite Modal ── */
 .invite-phone-wrap {
   display: flex;
