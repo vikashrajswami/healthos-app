@@ -3,61 +3,138 @@ import { useNavigate } from 'react-router-dom'
 
 const INSIGHT_TEXT = 'Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.'
 
-/* ── Ask Doctor Modal ── */
-function AskDoctorModal({ onClose }) {
-  const [question, setQuestion] = useState('')
-  const [sent,     setSent]     = useState(false)
-  const textRef = useRef(null)
+const QUICK_QUESTIONS = [
+  'What does high LDL mean?',
+  'How do I lower inflammation?',
+  'Best foods for biological age?',
+  'How does sleep affect BioAge?',
+]
 
-  useEffect(() => { textRef.current?.focus() }, [])
+/* ── AI Chat Modal ── */
+function AIChatModal({ onClose }) {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: `Hi! I'm your HealthOS AI health guide. 🧬\n\nI can see your current insight:\n*"${INSIGHT_TEXT}"*\n\nAsk me anything about your biomarkers, biological age, nutrition, sleep, or longevity habits — I'm here to help!`,
+    },
+  ])
+  const [input,   setInput]   = useState('')
+  const [loading, setLoading] = useState(false)
+  const bottomRef = useRef(null)
+  const inputRef  = useRef(null)
 
-  function sendWhatsApp() {
-    const msg = encodeURIComponent(
-      `Hi, I'm using HealthOS and have a question about my health insight.\n\n` +
-      `*My HealthOS insight says:*\n"${INSIGHT_TEXT}"\n\n` +
-      `*My question:*\n${question.trim()}`
-    )
-    window.open(`https://wa.me/?text=${msg}`, '_blank')
-    setSent(true)
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  async function sendMessage(text) {
+    const userText = (text || input).trim()
+    if (!userText || loading) return
+    setInput('')
+
+    const nextMessages = [...messages, { role: 'user', content: userText }]
+    setMessages(nextMessages)
+    setLoading(true)
+
+    try {
+      const res  = await fetch('/api/chat', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          context:  INSIGHT_TEXT,
+          messages: nextMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
+      })
+      const data = await res.json()
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.error || 'Sorry, something went wrong.' }])
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Connection error — please check your internet and try again.' }])
+    }
+    setLoading(false)
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
   return (
-    <div className="fm-overlay" onClick={onClose}>
-      <div className="fm-modal ask-modal" onClick={e => e.stopPropagation()}>
-        <button className="fm-close-x" onClick={onClose}>✕</button>
+    <div className="chat-overlay" onClick={onClose}>
+      <div className="chat-sheet" onClick={e => e.stopPropagation()}>
 
-        {!sent ? <>
-          <div className="ask-modal-head">🩺 Ask a Doctor</div>
-          <div className="ask-modal-sub">Type your question below. We'll open WhatsApp so you can send it to any doctor or health professional in your contacts.</div>
-
-          <div className="ask-context-box">
-            <div className="ask-context-label">Your insight</div>
-            <div className="ask-context-text">"{INSIGHT_TEXT}"</div>
+        {/* Header */}
+        <div className="chat-header">
+          <div className="chat-header-left">
+            <div className="chat-avatar">🧬</div>
+            <div>
+              <div className="chat-title">HealthOS AI</div>
+              <div className="chat-status">● Online · Powered by Claude</div>
+            </div>
           </div>
+          <button className="chat-close" onClick={onClose}>✕</button>
+        </div>
 
+        {/* Messages */}
+        <div className="chat-messages">
+          {messages.map((m, i) => (
+            <div key={i} className={`chat-bubble-wrap ${m.role}`}>
+              {m.role === 'assistant' && <div className="chat-ai-icon">🧬</div>}
+              <div className={`chat-bubble ${m.role}`}>
+                {m.content.split('\n').map((line, j) => (
+                  <span key={j}>
+                    {line.startsWith('*') && line.endsWith('*')
+                      ? <em style={{ fontStyle: 'italic', color: '#4a5568' }}>{line.slice(1, -1)}</em>
+                      : line}
+                    {j < m.content.split('\n').length - 1 && <br />}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="chat-bubble-wrap assistant">
+              <div className="chat-ai-icon">🧬</div>
+              <div className="chat-bubble assistant chat-typing">
+                <span /><span /><span />
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Quick questions (only show at start) */}
+        {messages.length === 1 && !loading && (
+          <div className="chat-quick-list">
+            {QUICK_QUESTIONS.map(q => (
+              <button key={q} className="chat-quick-btn" onClick={() => sendMessage(q)}>
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Input */}
+        <div className="chat-input-row">
           <textarea
-            ref={textRef}
-            className="ask-textarea"
-            placeholder="e.g. What does high LDL mean for my heart risk? What foods should I avoid?"
-            value={question}
-            onChange={e => setQuestion(e.target.value)}
-            rows={4}
+            ref={inputRef}
+            className="chat-input"
+            placeholder="Ask anything about your health…"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            rows={1}
           />
-
           <button
-            className="fm-submit ask-wa-send"
-            disabled={!question.trim()}
-            onClick={sendWhatsApp}
+            className="chat-send-btn"
+            disabled={!input.trim() || loading}
+            onClick={() => sendMessage()}
           >
-            📱 Send via WhatsApp →
+            ↑
           </button>
-          <div className="ask-modal-note">Opens WhatsApp — pick any doctor from your contacts to send</div>
-        </> : <>
-          <div style={{ fontSize: 48, textAlign: 'center' }}>✅</div>
-          <div className="ask-modal-head">Question ready to send!</div>
-          <div className="ask-modal-sub">WhatsApp opened with your question pre-filled. Just pick your doctor from contacts and hit send.</div>
-          <button className="fm-submit" onClick={onClose}>Done</button>
-        </>}
+        </div>
+        <div className="chat-disclaimer">AI guidance only · Not a substitute for medical advice</div>
       </div>
     </div>
   )
@@ -387,7 +464,7 @@ export default function Screen1() {
         <div className="ask-row">
           <div className="ask-row-label">
             <span>Not sure what this means?</span>
-            <span className="ask-row-sub">Ask a real doctor — replies within 24h</span>
+            <span className="ask-row-sub">Ask our AI health guide — instant answers</span>
           </div>
           <button className="ask-btn" onClick={() => setShowAsk(true)}>Ask →</button>
         </div>
@@ -497,7 +574,7 @@ export default function Screen1() {
       <div className="why-row"><span className="c">✓</span><span><b>No surprise renewals</b> — reminder 7 days before any charge, 30 days free first</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>Available worldwide</b> — ₹399/yr in India, $99/yr internationally</span></div>
 
-      {showAsk && <AskDoctorModal onClose={() => setShowAsk(false)} />}
+      {showAsk && <AIChatModal onClose={() => setShowAsk(false)} />}
 
       {showInvite && (
         <InviteModal

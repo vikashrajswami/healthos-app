@@ -4,6 +4,7 @@ import cors    from 'cors'
 import uploadRouter      from './routes/upload.js'
 import biomarkersRouter  from './routes/biomarkers.js'
 import invitesRouter     from './routes/invites.js'
+import chatRouter        from './routes/chat.js'
 
 const app  = express()
 const PORT = process.env.PORT || 3001
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use('/api/upload',      uploadRouter)
 app.use('/api/biomarkers',  biomarkersRouter)
 app.use('/api/invites',     invitesRouter)
+app.use('/api/chat',        chatRouter)
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }))
 
