@@ -220,7 +220,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'messages array required' })
   }
 
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
     return res.json({ reply: "HealthOS AI is setting up. Please check back shortly!" })
   }
@@ -230,47 +230,31 @@ export default async function handler(req, res) {
       ? `${SYSTEM_PROMPT}\n\nCURRENT USER CONTEXT:\n${userContext}`
       : SYSTEM_PROMPT
 
-    /* Convert messages to Gemini format (role: user | model) */
-    const history = messages.slice(0, -1).map(m => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }))
-    const lastMsg = messages[messages.length - 1].content
-
-    /* Try models in order until one works */
-    const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
-    let reply = null
-    let lastError = null
-
-    for (const model of MODELS) {
-      const body = {
-        systemInstruction: { parts: [{ text: systemWithContext }] },
-        contents: [
-          ...history,
-          { role: 'user', parts: [{ text: lastMsg }] },
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemWithContext },
+          ...messages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
         ],
-        generationConfig: { maxOutputTokens: 700, temperature: 0.7 },
-      }
+        max_tokens: 700,
+        temperature: 0.7,
+      }),
+    })
 
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-      )
-      const data = await resp.json()
+    const data = await resp.json()
 
-      if (resp.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        reply = data.candidates[0].content.parts[0].text
-        break
-      }
-      lastError = data?.error?.message || `${model} failed`
-      console.error(`${model} error:`, JSON.stringify(data?.error || data))
-    }
-
-    if (!reply) {
-      console.error('All models failed. Last error:', lastError)
+    if (!resp.ok) {
+      console.error('Groq error:', JSON.stringify(data))
       return res.status(500).json({ error: 'AI temporarily unavailable. Please try again.' })
     }
 
+    const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.'
     return res.json({ reply })
   } catch (err) {
     console.error('Chat error:', err.message)
