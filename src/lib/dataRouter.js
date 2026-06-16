@@ -79,7 +79,7 @@ export const BIOMARKER_ROUTES = [
     id: 'hrv', name: 'Heart Rate Variability', icon: '💓', category: 'Cardiovascular',
     sources: [
       { id: 'ring',      label: 'Smart ring (most accurate)', quality: 'live', icon: '💍' },
-      { id: 'healthkit', label: 'Apple Watch / wearable',     quality: 'live', icon: '❤️' },
+      { id: 'healthkit', label: 'Wearable health sync',       quality: 'live', icon: '❤️' },
     ],
     labTest: {
       test: 'ECG + resting HRV test (cardiologist or sports lab)',
@@ -90,8 +90,8 @@ export const BIOMARKER_ROUTES = [
   {
     id: 'resting_hr', name: 'Resting Heart Rate', icon: '❤️', category: 'Cardiovascular',
     sources: [
-      { id: 'ring',      label: 'Smart ring reading',            quality: 'live', icon: '💍' },
-      { id: 'healthkit', label: 'Apple Watch / Google Health',   quality: 'live', icon: '❤️' },
+      { id: 'ring',      label: 'Smart ring reading',   quality: 'live', icon: '💍' },
+      { id: 'healthkit', label: 'Wearable health sync', quality: 'live', icon: '❤️' },
     ],
     labTest: {
       test: 'Manual pulse count (60 seconds on waking, before getting up)',
@@ -115,7 +115,7 @@ export const BIOMARKER_ROUTES = [
   {
     id: 'vo2max', name: 'VO2 Max', icon: '🏃', category: 'Cardiovascular',
     sources: [
-      { id: 'healthkit', label: 'VO2 max estimate from Apple Watch / Garmin', quality: 'good', icon: '❤️' },
+      { id: 'healthkit', label: 'VO2 max estimate from fitness wearable',      quality: 'good', icon: '❤️' },
       { id: 'ring',      label: 'Fitness estimate from smart ring',            quality: 'good', icon: '💍' },
     ],
     labTest: {
@@ -247,7 +247,7 @@ export const BIOMARKER_ROUTES = [
     id: 'sleep', name: 'Sleep Quality', icon: '😴', category: 'Recovery',
     sources: [
       { id: 'ring',      label: 'Smart ring sleep staging (most accurate)', quality: 'live', icon: '💍' },
-      { id: 'healthkit', label: 'Apple Watch / Google Health sleep',         quality: 'live', icon: '❤️' },
+      { id: 'healthkit', label: 'Wearable sleep tracking',                    quality: 'live', icon: '❤️' },
     ],
     labTest: {
       test: 'Home sleep apnea test (if snoring / low energy despite sleep)',
@@ -259,7 +259,7 @@ export const BIOMARKER_ROUTES = [
     id: 'spo2', name: 'Blood Oxygen (SpO2)', icon: '🫧', category: 'Recovery',
     sources: [
       { id: 'ring',      label: 'Smart ring SpO2 (overnight)', quality: 'live', icon: '💍' },
-      { id: 'healthkit', label: 'Apple Watch / pulse oximeter', quality: 'live', icon: '❤️' },
+      { id: 'healthkit', label: 'Wearable / pulse oximeter',    quality: 'live', icon: '❤️' },
     ],
     labTest: {
       test: 'Pulse oximeter (₹800 at any pharmacy)',
@@ -310,10 +310,10 @@ export const BIOMARKER_ROUTES = [
   {
     id: 'epigenetic_age', name: 'Epigenetic (DNA) Age', icon: '🧬', category: 'Advanced',
     sources: [
-      { id: 'epigenetic', label: 'TruDiagnostic / TruMe test', quality: 'annual', icon: '🧬' },
+      { id: 'epigenetic', label: 'Certified epigenetic test kit', quality: 'annual', icon: '🧬' },
     ],
     labTest: {
-      test: 'Epigenetic clock test — TruMe (India, ₹8,999) or TruDiagnostic (~$299)',
+      test: 'Epigenetic clock test — certified home kit from any accredited epigenetic lab',
       interval: 'Annual',
       why: 'DNA methylation clocks are the most scientifically validated BioAge measurement on Earth',
     },
@@ -325,7 +325,7 @@ export const BIOMARKER_ROUTES = [
       { id: 'lab', label: 'Standalone telomere test', quality: 'annual', icon: '🩸' },
     ],
     labTest: {
-      test: 'Telomere length test (Life Length or SpectraCell)',
+      test: 'Telomere length test — available at certified genetic / longevity labs',
       interval: 'Annual',
       why: 'Telomere length directly measures cellular ageing — shorter = older at the DNA level',
     },

@@ -1,41 +1,41 @@
 import { useState } from 'react'
 import { routeGrouped, coveragePercent, CATEGORY_META } from '../lib/dataRouter'
 
-/* ─── Simulated live data (will come from real integrations) ─── */
-const LIVE = {
-  hscrp: 2.1, hba1c: 5.8, ldl: 142, vitaminD: 22,
-  testosterone: 520, hrv: 58, restingHR: 72, sleep: 6.8,
-  glucose: 94, bodyFat: 22.4, muscleMass: 61.2, steps: 8240,
-  spO2: 97, deepSleep: 18, bioAge: 34, actualAge: 41,
-}
-
-/* ─── Disease detection rules ─── */
-const ALERTS = [
+/* ─── Health alert rules (only triggered by real uploaded lab data) ─── */
+const ALERT_RULES = [
   {
     id: 'prediabetes', severity: 'caution', emoji: '🩸',
-    title: 'Pre-Diabetes Risk Detected',
-    detail: 'HbA1c 5.8% is in the pre-diabetic range (5.7–6.4%). Left untreated, this progresses to Type 2 Diabetes in 3–5 years.',
-    markers: ['HbA1c: 5.8%', 'LDL: 142 mg/dL'],
-    fix: 'Walk 15 mins after every meal · Low-GI diet · Berberine 500mg 2x/day',
+    title: 'Elevated Blood Sugar Range',
+    detail: 'Your HbA1c reading is in the pre-diabetic range (5.7–6.4%). This is an early signal worth discussing with your doctor before it progresses.',
+    fix: 'Walk 15 mins after meals · Choose low-GI foods · Get this confirmed by your doctor',
+    discuss: 'Ask your doctor about an OGTT (Oral Glucose Tolerance Test) to confirm and get a personalised plan.',
     retest: '90 days',
   },
   {
     id: 'vitD', severity: 'watch', emoji: '☀️',
-    title: 'Vitamin D Deficiency',
-    detail: 'At 22 ng/mL you are in the insufficient range. Affects 200+ genes including testosterone, immunity and bone density.',
-    markers: ['Vitamin D: 22 ng/mL'],
-    fix: 'Vitamin D3 5000 IU + K2 200mcg daily with your fattiest meal',
+    title: 'Low Vitamin D Level',
+    detail: 'Your Vitamin D is in the insufficient range. This affects immunity, bone density, mood, and many other functions.',
+    fix: 'Get 20 mins of morning sunlight daily · Eat fatty fish, eggs, and fortified foods',
+    discuss: 'Ask your doctor what supplementation dose is right for you — it varies by individual.',
     retest: '90 days',
   },
   {
     id: 'inflammation', severity: 'watch', emoji: '🔥',
-    title: 'Borderline Inflammation',
-    detail: 'hsCRP 2.1 mg/L sits in the borderline zone (1–3). Chronic low-grade inflammation accelerates every hallmark of ageing.',
-    markers: ['hsCRP: 2.1 mg/L'],
-    fix: 'Omega-3 3g/day · Turmeric + black pepper · Cut sugar & processed food',
+    title: 'Borderline Inflammation Marker',
+    detail: 'Your hsCRP sits in the borderline zone (1–3 mg/L). Chronic low-grade inflammation accelerates biological ageing.',
+    fix: 'Increase omega-3 rich foods (fish, flaxseeds, walnuts) · Reduce processed food and sugar · Prioritise sleep',
+    discuss: 'Ask your doctor to rule out any underlying cause and discuss an anti-inflammatory plan.',
     retest: '90 days',
   },
 ]
+
+/* Check if user has real uploaded lab data */
+function getRealAlerts() {
+  try {
+    const data = localStorage.getItem('healthos_lab_alerts')
+    return data ? JSON.parse(data) : null
+  } catch { return null }
+}
 
 const SEV = {
   urgent:  { bg:'#fee2e2', border:'#fca5a5', text:'#dc2626', tag:'🚨 Urgent' },
@@ -68,7 +68,7 @@ const SOURCES = [
     icon: '❤️',
     name: 'Apple Health · Google Health',
     sub: 'One connection covers ALL your wearables instantly',
-    brands: 'Apple Watch · Garmin · Fitbit · Samsung · Polar · Whoop',
+    brands: 'Any smartwatch · smart ring · fitness band · or phone sensors',
     weight: 20,
     connected: true,
     dataChips: ['HRV 58ms', 'Sleep 6.8h', '8,240 steps', 'RHR 72'],
@@ -82,16 +82,16 @@ const SOURCES = [
     id: 'cgm',
     priority: 3,
     icon: '📡',
-    name: 'CGM — Abbott FreeStyle Libre',
+    name: 'Continuous Glucose Monitor (CGM)',
     sub: 'Real-time blood glucose every 5 minutes, 24/7 for 14 days',
-    brands: 'FreeStyle Libre 2 · Libre 3 · LibreView app',
+    brands: 'Any CGM sensor available at pharmacies · connects via companion app',
     weight: 15,
     connected: false,
     dataChips: ['Glucose 24/7', 'Time in Range', 'Meal Spikes', 'Fasting Pattern'],
     lastSync: null,
     color: '#7c3aed',
     grad: 'linear-gradient(135deg,#2e1065,#4c1d95)',
-    ctaLabel: 'Connect LibreView',
+    ctaLabel: 'Connect CGM Device',
     badge: 'DIFFERENTIATOR',
     badgeColor: '#7c3aed',
     biomarkers: 6,
@@ -102,7 +102,7 @@ const SOURCES = [
     icon: '💍',
     name: 'Smart Ring',
     sub: 'Continuous HRV, deep sleep, skin temperature and recovery',
-    brands: 'Ultrahuman Ring Air · Oura Ring Gen 3',
+    brands: 'Any smart ring with HRV, sleep, and temperature sensors',
     weight: 10,
     connected: false,
     dataChips: ['HRV trend', 'Deep sleep %', 'Skin temp', 'Recovery score'],
@@ -138,7 +138,7 @@ const SOURCES = [
     icon: '⚖️',
     name: 'Smart Scale',
     sub: 'Body fat %, muscle mass, visceral fat score and bone mass',
-    brands: 'Withings Body+ · Xiaomi Mi Scale · Garmin Index',
+    brands: 'Any smart body composition scale with app connectivity',
     weight: 5,
     connected: false,
     dataChips: ['Body fat %', 'Muscle mass', 'Visceral fat', 'Bone mass'],
@@ -154,7 +154,7 @@ const SOURCES = [
     icon: '🧬',
     name: 'Epigenetic Clock Test',
     sub: 'DNA methylation analysis — the gold standard for true biological age',
-    brands: 'TruDiagnostic · TruMe · Chronomics · Elysium',
+    brands: 'Any certified epigenetic testing lab · home kit · import results as PDF',
     weight: 0,
     connected: false,
     dataChips: ['DNA BioAge', 'DunedinPACE', 'Telomere length', 'Methylation score'],
@@ -177,9 +177,9 @@ function LabModal({ onClose }) {
       <div className="dh-modal-title">Lab Report Upload</div>
       <div className="dh-modal-desc">Upload any blood test PDF or photo. HealthOS AI reads every biomarker automatically — works with any lab in India or worldwide.</div>
       <div className="dh-modal-list">
-        <div className="dh-ml-item">✓ Dr Lal PathLabs, SRL, Thyrocare, Apollo, Metropolis</div>
-        <div className="dh-ml-item">✓ Any government hospital report</div>
-        <div className="dh-ml-item">✓ International labs (NHS, Quest, LabCorp)</div>
+        <div className="dh-ml-item">✓ Any NABL-certified diagnostic lab in India</div>
+        <div className="dh-ml-item">✓ Government and private hospital pathology reports</div>
+        <div className="dh-ml-item">✓ International lab reports from any country</div>
         <div className="dh-ml-item">✓ PDF files and phone photos accepted</div>
       </div>
       <button className="dh-modal-cta" onClick={onClose} style={{ background: '#0d9488' }}>
@@ -212,16 +212,16 @@ function CGMModal({ onClose }) {
   return (
     <div className="dh-modal-body">
       <div className="dh-modal-icon">📡</div>
-      <div className="dh-modal-title">Abbott FreeStyle Libre</div>
+      <div className="dh-modal-title">Continuous Glucose Monitor</div>
       <div className="dh-modal-desc">Wear a small sensor on your upper arm for 14 days. It reads your blood sugar every 5 minutes — revealing how every meal, sleep and workout affects your metabolism.</div>
       <div className="dh-modal-steps">
-        <div className="dh-step"><span className="dh-snum">1</span><span>Buy FreeStyle Libre 2 or 3 sensor (available at any pharmacy, ~₹2000)</span></div>
-        <div className="dh-step"><span className="dh-snum">2</span><span>Download the LibreLink app and scan to activate</span></div>
-        <div className="dh-step"><span className="dh-snum">3</span><span>Create a free LibreView account and enable data sharing</span></div>
-        <div className="dh-step"><span className="dh-snum">4</span><span>Connect your LibreView account to HealthOS below</span></div>
+        <div className="dh-step"><span className="dh-snum">1</span><span>Buy a CGM sensor from any pharmacy or online (typically ₹1,500–2,500 for 14 days)</span></div>
+        <div className="dh-step"><span className="dh-snum">2</span><span>Download the companion app that came with your sensor and activate it</span></div>
+        <div className="dh-step"><span className="dh-snum">3</span><span>Enable data sharing in the app settings</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>Connect your CGM account to HealthOS below</span></div>
       </div>
       <button className="dh-modal-cta" style={{ background: '#7c3aed' }}>
-        Connect LibreView Account
+        Connect CGM Account
       </button>
       <div className="dh-modal-note">Why CGM? Lab HbA1c is a 3-month average. CGM shows the actual spikes after each meal — the real driver of glycation and accelerated ageing.</div>
     </div>
@@ -229,35 +229,23 @@ function CGMModal({ onClose }) {
 }
 
 function RingModal({ onClose }) {
-  const [brand, setBrand] = useState(null)
   return (
     <div className="dh-modal-body">
       <div className="dh-modal-icon">💍</div>
       <div className="dh-modal-title">Connect Smart Ring</div>
-      <div className="dh-modal-desc">Smart rings are the most accurate continuous health trackers — worn 24/7 including sleep. Choose your ring brand:</div>
-      <div className="dh-brand-row">
-        <button className={`dh-brand-btn ${brand==='ultrahuman'?'sel':''}`} onClick={() => setBrand('ultrahuman')}>
-          <span style={{fontSize:24}}>🇮🇳</span>
-          <div className="dh-brand-name">Ultrahuman</div>
-          <div className="dh-brand-sub">Ring Air · Made in India</div>
-        </button>
-        <button className={`dh-brand-btn ${brand==='oura'?'sel':''}`} onClick={() => setBrand('oura')}>
-          <span style={{fontSize:24}}>⭕</span>
-          <div className="dh-brand-name">Oura Ring</div>
-          <div className="dh-brand-sub">Gen 3 · Global leader</div>
-        </button>
+      <div className="dh-modal-desc">Smart rings are the most accurate continuous health trackers — worn 24/7 including during sleep. Any ring that tracks HRV, sleep, and temperature works with HealthOS.</div>
+      <div className="dh-modal-list">
+        <div className="dh-ml-item">✓ HRV — most accurate measurement of any wearable form factor</div>
+        <div className="dh-ml-item">✓ Sleep stages: deep, REM, light, awake — tracked all night</div>
+        <div className="dh-ml-item">✓ Skin temperature — detects illness, inflammation, and cycle changes</div>
+        <div className="dh-ml-item">✓ Resting heart rate, blood oxygen (SpO2), respiratory rate</div>
+        <div className="dh-ml-item">✓ Daily recovery score — tells you if your body is ready to train</div>
       </div>
-      {brand && (
-        <div className="dh-modal-list" style={{marginTop:12}}>
-          <div className="dh-ml-item">✓ HRV — most accurate of any wearable form factor</div>
-          <div className="dh-ml-item">✓ Sleep stages: deep, REM, light, awake</div>
-          <div className="dh-ml-item">✓ Skin temperature (tracks illness, ovulation, inflammation)</div>
-          <div className="dh-ml-item">✓ Resting heart rate, SpO2, respiratory rate</div>
-          <div className="dh-ml-item">✓ Recovery score: tells you if your body is ready to train</div>
-        </div>
-      )}
-      <button className="dh-modal-cta" style={{ background: '#b45309', opacity: brand?1:0.5 }}>
-        {brand ? `Connect ${brand === 'ultrahuman' ? 'Ultrahuman' : 'Oura'} Account` : 'Select a ring brand above'}
+      <div className="dh-modal-note" style={{marginBottom:14,color:'#475569'}}>
+        How to connect: Open your ring's companion app → go to Settings → enable Health platform sharing → HealthOS will receive your data automatically.
+      </div>
+      <button className="dh-modal-cta" style={{ background: '#b45309' }}>
+        Connect via Health App
       </button>
     </div>
   )
@@ -334,17 +322,11 @@ function ScaleModal({ onClose }) {
       <div className="dh-modal-icon">⚖️</div>
       <div className="dh-modal-title">Connect Smart Scale</div>
       <div className="dh-modal-desc">A smart scale measures body fat %, muscle mass, visceral fat, and bone density — data that directly tracks whether your longevity protocol is working at the body composition level.</div>
-      <div className="dh-brand-row">
-        <button className="dh-brand-btn">
-          <span style={{fontSize:24}}>🔵</span>
-          <div className="dh-brand-name">Withings</div>
-          <div className="dh-brand-sub">Body+ / Body Scan</div>
-        </button>
-        <button className="dh-brand-btn">
-          <span style={{fontSize:24}}>🔴</span>
-          <div className="dh-brand-name">Xiaomi</div>
-          <div className="dh-brand-sub">Mi Scale 2 / S400</div>
-        </button>
+      <div className="dh-modal-steps" style={{marginTop:4,marginBottom:4}}>
+        <div className="dh-step"><span className="dh-snum">1</span><span>Get any smart body composition scale with a companion app</span></div>
+        <div className="dh-step"><span className="dh-snum">2</span><span>Enable health data sharing in the scale's app settings</span></div>
+        <div className="dh-step"><span className="dh-snum">3</span><span>Connect to Apple Health or Google Fit to sync automatically</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>HealthOS reads your body composition data from health sync</span></div>
       </div>
       <div className="dh-modal-list" style={{marginTop:12}}>
         <div className="dh-ml-item">✓ Body fat % — ideal for longevity: 10–20% (men), 18–28% (women)</div>
@@ -375,8 +357,8 @@ function EpigeneticModal({ onClose }) {
         <div className="dh-ml-item">✓ Updates your BioAge with lab-grade precision</div>
       </div>
       <div className="dh-epig-labs">
-        <div className="dh-epig-lab"><strong>TruDiagnostic</strong><br/><span>Global leader · ~$299</span></div>
-        <div className="dh-epig-lab"><strong>TruMe</strong><br/><span>India-based · ~₹8,999</span></div>
+        <div className="dh-epig-lab"><strong>International Lab</strong><br/><span>Global certified lab · home kit ships worldwide</span></div>
+        <div className="dh-epig-lab"><strong>India-based Lab</strong><br/><span>NABL-certified · home kit available</span></div>
       </div>
       <div className="dh-modal-steps" style={{marginTop:8}}>
         <div className="dh-step"><span className="dh-snum">1</span><span>Order test kit (ships to your home)</span></div>
@@ -486,39 +468,57 @@ export default function Screen4() {
         </div>
       </div>
 
-      {/* ── Disease Alerts ── */}
+      {/* ── Health Alerts (real data only) ── */}
       {!alertsClosed && (
         <div className="dh-section">
           <div className="dh-section-head">
-            <span>⚕️ Health Alerts <span className="dh-alert-count">{ALERTS.length}</span></span>
-            <button className="dh-dismiss" onClick={() => setAlertsClosed(true)}>Dismiss all</button>
+            <span>⚕️ Health Alerts</span>
+            {getRealAlerts() && <button className="dh-dismiss" onClick={() => setAlertsClosed(true)}>Dismiss</button>}
           </div>
-          {ALERTS.map(a => {
-            const s = SEV[a.severity]
-            const isOpen = expanded[a.id]
-            return (
-              <div key={a.id} className="dh-alert-card" style={{background:s.bg,borderColor:s.border}}
-                onClick={() => setExpanded(p=>({...p,[a.id]:!p[a.id]}))}>
-                <div className="dh-alert-top">
-                  <span className="dh-alert-emoji">{a.emoji}</span>
-                  <div className="dh-alert-info">
-                    <div className="dh-alert-title" style={{color:s.text}}>{a.title}</div>
-                    <div className="dh-alert-markers">{a.markers.join(' · ')}</div>
-                  </div>
-                  <span className="dh-alert-sev" style={{background:s.text}}>{a.severity === 'caution' ? '🟠' : '🟡'}</span>
-                </div>
-                {isOpen && (
-                  <div className="dh-alert-body">
-                    <div className="dh-alert-detail">{a.detail}</div>
-                    <div className="dh-alert-fix-head">What to do:</div>
-                    <div className="dh-alert-fix">{a.fix}</div>
-                    <div className="dh-alert-retest">Retest in: {a.retest}</div>
-                    <div className="dh-alert-disclaimer">Not a medical diagnosis · Confirm with your doctor</div>
-                  </div>
-                )}
+          {getRealAlerts() ? (
+            <>
+              <div className="dh-alert-edu-banner">
+                📋 <strong>For educational awareness only.</strong> These signals are based on your uploaded lab data.
+                They are not a medical diagnosis. Always consult your doctor to interpret your results.
               </div>
-            )
-          })}
+              {ALERT_RULES.map(a => {
+                const s = SEV[a.severity]
+                const isOpen = expanded[a.id]
+                return (
+                  <div key={a.id} className="dh-alert-card" style={{background:s.bg,borderColor:s.border}}
+                    onClick={() => setExpanded(p=>({...p,[a.id]:!p[a.id]}))}>
+                    <div className="dh-alert-top">
+                      <span className="dh-alert-emoji">{a.emoji}</span>
+                      <div className="dh-alert-info">
+                        <div className="dh-alert-title" style={{color:s.text}}>{a.title}</div>
+                      </div>
+                      <span className="dh-alert-sev" style={{background:s.text}}>{a.severity === 'caution' ? '🟠' : '🟡'}</span>
+                    </div>
+                    {isOpen && (
+                      <div className="dh-alert-body">
+                        <div className="dh-alert-detail">{a.detail}</div>
+                        <div className="dh-alert-fix-head">General lifestyle steps:</div>
+                        <div className="dh-alert-fix">{a.fix}</div>
+                        <div className="dh-alert-fix-head" style={{marginTop:8}}>💬 Discuss with your doctor:</div>
+                        <div className="dh-alert-fix">{a.discuss}</div>
+                        <div className="dh-alert-retest">Suggested retest: {a.retest}</div>
+                        <div className="dh-alert-disclaimer">⚕️ Not a medical diagnosis · For awareness only · Consult your doctor</div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </>
+          ) : (
+            <div className="dh-alert-empty">
+              <div className="dh-ae-icon">🩺</div>
+              <div className="dh-ae-title">No health alerts yet</div>
+              <div className="dh-ae-body">
+                Upload a lab report and HealthOS will flag any biomarkers outside the healthy range — with educational context and questions to raise with your doctor.
+              </div>
+              <div className="dh-ae-note">⚕️ Alerts are educational, not medical diagnoses</div>
+            </div>
+          )}
         </div>
       )}
 
@@ -712,7 +712,7 @@ export default function Screen4() {
                 </div>
 
                 <div className="dh-lp-note">
-                  Tip: Take this list to Dr Lal PathLabs, SRL, or Thyrocare. Most panels cost ₹1500–4000 and cover all these markers.
+                  Tip: Take this list to any NABL-certified diagnostic lab near you. Most panels cost ₹1500–4000 and cover all these markers.
                   Upload your results here and HealthOS fills all the gaps automatically.
                 </div>
               </>

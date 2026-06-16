@@ -25,7 +25,7 @@ export default function Screen9() {
           ✓ <b>Unlimited AI coach</b> + doctor escalation<br/>
           ✓ Unlimited report uploads & analysis<br/>
           ✓ Personalized age-reversal diet plan<br/>
-          ✓ Unlimited device connections (Oura, WHOOP, Apple, Fitbit...)<br/>
+          ✓ Unlimited device connections (smart rings, wearables, CGM, scales...)<br/>
           ✓ Cancel anytime during trial — pay nothing
         </div>
       </div>

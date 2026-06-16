@@ -12,6 +12,14 @@ import Screen8 from './screens/Screen8'
 import Screen9 from './screens/Screen9'
 import JoinScreen from './screens/JoinScreen'
 import SmartPanelReport from './screens/SmartPanelReport'
+import LabDoorstepScreen from './screens/LabDoorstepScreen'
+import HealthVaultScreen from './screens/HealthVaultScreen'
+import SignupDesignsPreview from './screens/SignupDesignsPreview'
+import SignupDesignsPreview2 from './screens/SignupDesignsPreview2'
+import SignupDesignsPreview3 from './screens/SignupDesignsPreview3'
+import SignupScreen from './screens/SignupScreen'
+import TermsScreen from './screens/TermsScreen'
+import PaymentScreen from './screens/PaymentScreen'
 
 const THEMES = [
   { id: 'teal',  label: '1 · Clinical Trust', dot: '#14b8a6' },
@@ -79,6 +87,17 @@ function BottomNav() {
   )
 }
 
+function MedicalDisclaimer() {
+  const { pathname } = useLocation()
+  const fullPage = ['/smart-panel', '/lab-doorstep', '/vault', '/signup-preview', '/signup-preview-2', '/signup-preview-3', '/signup', '/terms', '/payment'].includes(pathname)
+  if (fullPage) return null
+  return (
+    <div className="global-disclaimer">
+      ⚕️ HealthOS is for health education only · Not a substitute for medical advice · Consult your doctor for diagnosis or treatment
+    </div>
+  )
+}
+
 function ThemeSwitcher({ theme, setTheme }) {
   return (
     <div className="theme-switcher">
@@ -100,6 +119,7 @@ export default function App() {
     <BrowserRouter>
       <div data-theme={theme} className="app-shell">
         <ThemeSwitcher theme={theme} setTheme={setTheme} />
+        <MedicalDisclaimer />
         <div style={{ paddingTop: 40 }}>
           <Routes>
             <Route path="/"          element={<Screen1 />} />
@@ -113,6 +133,14 @@ export default function App() {
             <Route path="/subscribe" element={<Screen9 />} />
             <Route path="/join/:code" element={<JoinScreen />} />
             <Route path="/smart-panel" element={<SmartPanelReport />} />
+            <Route path="/lab-doorstep" element={<LabDoorstepScreen />} />
+            <Route path="/vault" element={<HealthVaultScreen />} />
+            <Route path="/signup-preview" element={<SignupDesignsPreview />} />
+            <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
+            <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
+            <Route path="/signup" element={<SignupScreen />} />
+            <Route path="/terms" element={<TermsScreen />} />
+            <Route path="/payment" element={<PaymentScreen />} />
           </Routes>
         </div>
         <BottomNav />

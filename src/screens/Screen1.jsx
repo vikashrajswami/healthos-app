@@ -1,8 +1,137 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAIResponse } from '../lib/healthAI'
+import { getProfile, saveProfile, calcBioAge } from '../lib/userProfile'
 
-const INSIGHT_TEXT = 'Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.'
+const QUIZ_STEPS = [
+  {
+    key: 'name', type: 'text', q: "What's your name?", placeholder: 'Your first name',
+  },
+  {
+    key: 'age', type: 'number', q: 'What is your current age?', placeholder: 'e.g. 35',
+  },
+  {
+    key: 'exercise', q: 'How physically active are you?',
+    opts: [
+      { v: 'high',  icon: '🏃', label: 'Very active',    sub: '5+ days/week exercise' },
+      { v: 'mid',   icon: '🚶', label: 'Moderately active', sub: '2–4 days/week' },
+      { v: 'low',   icon: '🛋️', label: 'Mostly sedentary', sub: 'Little movement daily' },
+    ],
+  },
+  {
+    key: 'smoke', q: 'Do you smoke or use tobacco?',
+    opts: [
+      { v: 'no',   icon: '✅', label: 'Non-smoker',  sub: 'Never or quit long ago' },
+      { v: 'past', icon: '🚭', label: 'Ex-smoker',   sub: 'Quit within last year' },
+      { v: 'yes',  icon: '🚬', label: 'Current smoker', sub: 'Daily or occasionally' },
+    ],
+  },
+  {
+    key: 'sleep', q: 'How is your sleep quality?',
+    opts: [
+      { v: 'great', icon: '😴', label: 'Good sleep',    sub: '7–9 hrs, wake refreshed' },
+      { v: 'ok',    icon: '😐', label: 'Average sleep', sub: '5–6 hrs or inconsistent' },
+      { v: 'poor',  icon: '😩', label: 'Poor sleep',    sub: 'Tired most mornings' },
+    ],
+  },
+  {
+    key: 'diet', q: 'How would you describe your daily diet?',
+    opts: [
+      { v: 'good',  icon: '🥗', label: 'Mostly healthy', sub: 'Whole foods, low sugar' },
+      { v: 'mixed', icon: '🍱', label: 'Mixed',          sub: 'Some healthy, some not' },
+      { v: 'poor',  icon: '🍔', label: 'Unhealthy',      sub: 'Processed, high sugar' },
+    ],
+  },
+  {
+    key: 'stress', q: 'What is your daily stress level?',
+    opts: [
+      { v: 'low',  icon: '😌', label: 'Low stress',    sub: 'Mostly calm and rested' },
+      { v: 'mid',  icon: '😐', label: 'Moderate',      sub: 'Some pressure, manageable' },
+      { v: 'high', icon: '😤', label: 'High stress',   sub: 'Chronically stressed or anxious' },
+    ],
+  },
+]
+
+function BioAgeQuizModal({ onDone }) {
+  const [step, setStep]       = useState(0)
+  const [name, setName]       = useState('')
+  const [age, setAge]         = useState('')
+  const [answers, setAnswers] = useState({})
+
+  const current = QUIZ_STEPS[step]
+
+  function next() {
+    if (step < QUIZ_STEPS.length - 1) setStep(s => s + 1)
+    else finish()
+  }
+
+  function pickOpt(key, v) {
+    const next = { ...answers, [key]: v }
+    setAnswers(next)
+    if (step < QUIZ_STEPS.length - 1) setStep(s => s + 1)
+    else finishWith(next)
+  }
+
+  function finish() { finishWith(answers) }
+
+  function finishWith(ans) {
+    const actualAge = parseInt(age) || 30
+    const bioage    = calcBioAge(actualAge, ans)
+    const profile   = { name: name.trim() || 'You', actualAge, bioage, answers: ans, quizDone: true, doneAt: Date.now() }
+    saveProfile(profile)
+    localStorage.setItem('healthos_username', profile.name)
+    onDone(profile)
+  }
+
+  const progress = Math.round(((step + 1) / QUIZ_STEPS.length) * 100)
+
+  return (
+    <div className="quiz-overlay">
+      <div className="quiz-sheet">
+        <div className="quiz-progress-bar"><div className="quiz-progress-fill" style={{ width: `${progress}%` }} /></div>
+        <div className="quiz-step-label">{step + 1} of {QUIZ_STEPS.length}</div>
+        <div className="quiz-q">{current.q}</div>
+
+        {current.type === 'text' && (
+          <div className="quiz-text-wrap">
+            <input className="quiz-text-input" placeholder={current.placeholder}
+              value={name} onChange={e => setName(e.target.value)}
+              autoFocus onKeyDown={e => e.key === 'Enter' && name.trim() && next()} />
+            <button className="quiz-next-btn" disabled={!name.trim()} onClick={next}>Continue →</button>
+          </div>
+        )}
+
+        {current.type === 'number' && (
+          <div className="quiz-text-wrap">
+            <input className="quiz-text-input" type="number" placeholder={current.placeholder} min={10} max={110}
+              value={age} onChange={e => setAge(e.target.value)}
+              autoFocus onKeyDown={e => e.key === 'Enter' && age && next()} />
+            <button className="quiz-next-btn" disabled={!age || parseInt(age) < 10} onClick={next}>Continue →</button>
+          </div>
+        )}
+
+        {current.opts && (
+          <div className="quiz-opts">
+            {current.opts.map(o => (
+              <button key={o.v} className={`quiz-opt ${answers[current.key] === o.v ? 'selected' : ''}`}
+                onClick={() => pickOpt(current.key, o.v)}>
+                <span className="quiz-opt-icon">{o.icon}</span>
+                <div className="quiz-opt-text">
+                  <div className="quiz-opt-label">{o.label}</div>
+                  <div className="quiz-opt-sub">{o.sub}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="quiz-disclaimer">
+          This estimate is based on lifestyle factors. Upload a lab report for precise BioAge measurement.
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const QUICK_QUESTIONS = [
   { emoji: '🔬', text: 'What does my BioAge score mean?' },
@@ -429,6 +558,8 @@ export default function Screen1() {
   const userId   = getUserId()
   const userName = getUserName()
 
+  const [profile,   setProfile]   = useState(() => getProfile())
+  const [showQuiz,  setShowQuiz]  = useState(false)
   const [members,   setMembers]   = useState([])
   const [pending,   setPending]   = useState([])
   const [loading,   setLoading]   = useState(true)
@@ -462,22 +593,47 @@ export default function Screen1() {
       <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
 
       {/* Hero */}
-      <div className="hero">
-        <div className="lbl">Your Biological Age</div>
-        <div className="big">34 <span className="big-sub">vs actual age 41</span></div>
-        <div className="delta">↓ 7 years younger · improved 0.4 this month</div>
-        <div className="btns">
-          <button className="b1" onClick={() => nav('/trends')}>View Trends</button>
-          <button className="b2" onClick={() => nav('/share')}>Share Card</button>
+      {profile?.quizDone ? (
+        <div className="hero">
+          <div className="lbl">Your Biological Age · {profile.name}</div>
+          <div className="big">
+            {profile.bioage} <span className="big-sub">vs actual age {profile.actualAge}</span>
+          </div>
+          {profile.bioage < profile.actualAge ? (
+            <div className="delta">↓ {profile.actualAge - profile.bioage} years biologically younger</div>
+          ) : profile.bioage > profile.actualAge ? (
+            <div className="delta" style={{color:'#f97316'}}>↑ {profile.bioage - profile.actualAge} years older than ideal · reversible</div>
+          ) : (
+            <div className="delta">Biological age matches actual — room to improve</div>
+          )}
+          <div className="hero-source-note">Based on lifestyle quiz · Upload a lab report for precise measurement</div>
+          <div className="btns">
+            <button className="b1" onClick={() => nav('/upload')}>Upload Lab Report</button>
+            <button className="b2" onClick={() => nav('/devices')}>Connect Device</button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="hero hero-empty">
+          <div className="lbl">Your Biological Age</div>
+          <div className="big-empty">—</div>
+          <div className="hero-empty-text">Answer 7 quick questions to get your estimated BioAge in under 2 minutes</div>
+          <button className="hero-quiz-btn" onClick={() => setShowQuiz(true)}>
+            🧬 Get My BioAge Estimate →
+          </button>
+          <div className="hero-empty-sub">Or upload a lab report for precise measurement</div>
+        </div>
+      )}
 
       {/* AI Insight */}
       <div className="card">
-        <div className="insight-text">{INSIGHT_TEXT}</div>
+        <div className="insight-text">
+          {profile?.quizDone
+            ? `Hi ${profile.name}! Your BioAge estimate is ${profile.bioage}. Upload a blood panel to get biomarker-level insights — we'll analyse hsCRP, HbA1c, cholesterol, vitamins, hormones, and more.`
+            : 'Complete your BioAge quiz above, then upload a lab report. HealthOS reads every biomarker automatically and shows exactly what is ageing you faster — and what to do about it.'}
+        </div>
         <div className="ask-row">
           <div className="ask-row-label">
-            <span>Not sure what this means?</span>
+            <span>Have a question about your health?</span>
             <span className="ask-row-sub">Ask our AI health guide — instant answers</span>
           </div>
           <button className="ask-btn" onClick={() => setShowAsk(true)}>Ask →</button>
@@ -587,6 +743,10 @@ export default function Screen1() {
       <div className="why-row"><span className="c">✓</span><span><b>Your data is always yours</b> — BioAge history stays even if you cancel</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>No surprise renewals</b> — reminder 7 days before any charge, 30 days free first</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>Available worldwide</b> — ₹399/yr in India, $99/yr internationally</span></div>
+
+      {showQuiz && (
+        <BioAgeQuizModal onDone={p => { setProfile(p); setShowQuiz(false) }} />
+      )}
 
       {showAsk && <AIChatModal onClose={() => setShowAsk(false)} />}
 

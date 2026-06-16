@@ -37,10 +37,12 @@ The powerful truth: BioAge is reversible. Every healthy habit you build lowers i
 4. Reduce hsCRP inflammation — omega-3, turmeric, cut sugar and processed food
 5. Control blood sugar — low GI diet, intermittent fasting (7PM–7AM minimum)
 6. Reduce stress — chronic cortisol destroys telomeres and accelerates ageing
-7. Fix Vitamin D deficiency — affects 200+ genes. Most Indians are deficient.
-8. Quit smoking — most impactful single habit change (+5-7 years BioAge improvement)
+7. Check Vitamin D — get a blood test first, then discuss supplementation with your doctor if deficient
+8. Quit smoking — most impactful single habit change (+5–7 years BioAge improvement)
 
-Your HealthOS Protocol screen has a personalised version of all of this based on your actual biomarkers. Tap Protocol in the bottom nav.`,
+⚕️ For supplement or medication decisions, always consult your doctor. The above are general lifestyle guidelines, not medical prescriptions.
+
+Your HealthOS Protocol screen has the full habit checklist. Tap Protocol in the bottom nav.`,
   },
 
   {
@@ -80,7 +82,7 @@ Upload your lab report for the most accurate BioAge reading.`,
 5. Your BioAge updates based on the real data
 
 Supported formats: PDF files and phone photos of your report
-Works with any lab: Dr Lal PathLabs, SRL, Thyrocare, Apollo, Metropolis, AIIMS, and any international lab.
+Works with any lab: NABL-certified diagnostic centers, government hospitals (AIIMS, civil hospitals), and any international lab.
 
 Tip: Make sure the photo is clear with no glare — the AI needs to read the printed values.`,
   },
@@ -91,14 +93,11 @@ Tip: Make sure the photo is clear with no glare — the AI needs to read the pri
     keys: ['lab','lal path','thyrocare','srl','apollo diagnostic','metropolis'],
     r: `HealthOS works with reports from ANY lab — there's no restriction.
 
-Popular Indian labs that work perfectly:
-• Dr Lal PathLabs
-• SRL Diagnostics
-• Thyrocare
-• Apollo Diagnostics
-• Metropolis Healthcare
-• AIIMS / government hospitals
+What works perfectly:
+• Any NABL-certified diagnostic lab in your city
+• Government hospitals (AIIMS, civil hospitals, medical colleges)
 • Any local diagnostic center
+• Home collection services
 
 International labs also supported:
 • NHS (UK)
@@ -125,15 +124,17 @@ RANGES:
 
 Why it matters for BioAge: Chronic inflammation is the #1 silent driver of biological ageing. High hsCRP accelerates damage to blood vessels, brain, and every organ.
 
-How to lower it:
-• Omega-3 fish oil (2-3g/day EPA+DHA) — most effective
-• Turmeric + black pepper (piperine boosts absorption 20x)
+General lifestyle steps that support healthy inflammation levels:
+• Eat omega-3 rich foods — fatty fish, flaxseeds, walnuts (food-first approach)
+• Turmeric with black pepper added to meals
 • Cut sugar, refined carbs, and ultra-processed food
-• Sleep 7-8 hours — poor sleep spikes inflammation overnight
-• Zone 2 cardio 4-5x/week
-• Reduce stress (cortisol drives inflammation)
+• Sleep 7–8 hours — poor sleep spikes inflammation overnight
+• Zone 2 cardio 4–5x/week
+• Reduce chronic stress
 
-Re-test after 90 days of consistent habits to see improvement.`,
+⚕️ If your hsCRP is persistently above 3.0 mg/L, consult your doctor to rule out an underlying cause before making any supplement or treatment decisions.
+
+Re-test after 90 days of consistent lifestyle changes.`,
   },
 
   // ══════════════════════════════════════
@@ -213,8 +214,8 @@ How to lower HbA1c:
 • Intermittent fasting (7PM–7AM minimum) — gives insulin a rest
 • Walk 10-15 mins after every meal — dramatically lowers post-meal glucose spikes
 • Strength training — muscles absorb glucose directly, reducing blood sugar
-• Berberine supplement (500mg 2x/day with meals) — clinical studies show it rivals metformin
-• Cinnamon + chromium — modest but meaningful support
+• Some people discuss berberine with their doctor as a complementary approach — always consult your doctor before any supplement, especially alongside diabetes medication
+• Cinnamon added to food — modest supportive effect
 
 Test again after 90 days — HbA1c responds well to lifestyle changes.`,
   },
@@ -236,13 +237,14 @@ RANGES:
 
 Why it matters: Vitamin D isn't just a vitamin — it's a hormone that regulates 200+ genes. Deficiency is linked to faster ageing, poor immunity, low testosterone, depression, and bone loss.
 
-How to fix it:
-• Supplement: 2000–5000 IU Vitamin D3 daily (with Vitamin K2 to direct calcium correctly)
+How to improve Vitamin D levels:
 • Sunlight: 20 minutes of direct sun on arms and legs daily (before 10am or after 4pm in India)
-• With food: take D3 with your fattiest meal for better absorption
-• Re-test in 90 days to confirm your level is rising
+• Food sources: fatty fish, egg yolks, fortified milk or cereals
+• If supplementing: always get your blood level tested first — the right dose depends on how low your level is
 
-In India, deficiency is nearly universal due to indoor work, sunscreen, and darker skin requiring more sun exposure. Most people need to supplement year-round.`,
+⚕️ Consult your doctor before starting Vitamin D supplements. The correct dose varies significantly by individual and requires a blood test to determine safely.
+
+Re-test in 90 days to confirm your level is improving.`,
   },
 
   // ══════════════════════════════════════
@@ -267,10 +269,10 @@ Who is most at risk:
 Symptoms of deficiency: fatigue, brain fog, tingling in hands/feet, anaemia
 
 How to fix it:
-• Supplement: Methylcobalamin (B12) 1000–2000 mcg daily — methylcobalamin is better absorbed than cyanocobalamin
-• Injection: If severely deficient (below 150), monthly B12 injections work faster
 • Food sources: eggs, fish, paneer, curd (vegetarians), meat and seafood (non-veg)
-• Vegans MUST supplement — there is no plant source of true B12
+• Vegans have no plant source of true B12 and should discuss supplementation with their doctor
+• If your blood test shows deficiency, ask your doctor about the right form and dose — methylcobalamin is generally considered better absorbed than cyanocobalamin
+• Severe deficiency (below 150 pg/mL) may require injections — your doctor will advise
 
 This is one of the most common and most fixable causes of premature ageing in India.`,
   },
@@ -298,12 +300,12 @@ How to raise testosterone naturally:
 • Strength training (2-3x/week) — the most powerful natural stimulus
 • Sleep 8 hours — testosterone is produced during deep sleep; poor sleep drops it 10-15% per night
 • Fix Vitamin D — D3 is a direct precursor to testosterone production
-• Zinc (30-50mg/day) — essential for testosterone synthesis
+• Zinc-rich foods — meat, shellfish, pumpkin seeds, legumes support testosterone synthesis
 • Reduce stress — cortisol and testosterone have an inverse relationship
-• Ashwagandha KSM-66 (600mg/day) — clinically proven to raise testosterone 10-17%
-• Healthy fats — testosterone is made from cholesterol; very low-fat diets suppress it
+• Ashwagandha — studied for cortisol reduction and hormonal support; discuss with your doctor before use
+• Healthy fats — testosterone is made from cholesterol; very low-fat diets can suppress it
 
-If levels are below 250 ng/dL with symptoms, see a doctor for hormone evaluation.`,
+⚕️ If levels are below 300 ng/dL (men) with symptoms like fatigue, low libido, or muscle loss, see a doctor. Testosterone therapy requires medical supervision.`,
   },
 
   // ══════════════════════════════════════
@@ -327,7 +329,7 @@ Why it damages BioAge:
 • Damages telomeres — the literal caps on your DNA
 
 How to lower cortisol:
-• Ashwagandha KSM-66 (300-600mg/day) — the most studied cortisol-lowering supplement
+• Ashwagandha — studied for cortisol reduction; consult your doctor before starting any adaptogen
 • 4-7-8 breathing: inhale 4 counts, hold 7, exhale 8 — activates vagus nerve instantly
 • Meditation 10-20 min/day — reduces cortisol by 20% in 8 weeks
 • Consistent sleep schedule — irregular sleep patterns are a major cortisol driver
@@ -352,13 +354,14 @@ RANGES:
 
 Why it matters: High homocysteine damages the inner lining of blood vessels, increases stroke and heart attack risk, and is strongly linked to Alzheimer's disease and accelerated brain ageing.
 
-How to lower it:
-• Vitamin B12 (1000 mcg/day) — the primary driver of homocysteine clearance
-• Folate/Vitamin B9 (400-800 mcg/day) — works with B12
-• Vitamin B6 (50 mg/day)
-• These three B vitamins work together to convert homocysteine into harmless compounds
+How to lower it (general lifestyle):
+• Eat B12-rich foods — eggs, fish, dairy, or discuss B12 supplementation with your doctor
+• Eat folate-rich foods — leafy greens, legumes, chickpeas, lentils
+• These B vitamins (B12, folate/B9, B6) work together to convert homocysteine into harmless compounds
 
-Common in vegetarians and vegans who are B12 deficient. If your homocysteine is above 15, prioritise B12 + folate supplementation immediately.`,
+⚕️ If your homocysteine is above 15 μmol/L, consult your doctor. High homocysteine can have underlying causes that need medical evaluation — do not self-treat with supplements without professional guidance.
+
+Common in vegetarians and vegans due to B12 deficiency — discuss this with your doctor.`,
   },
 
   // ══════════════════════════════════════
@@ -775,25 +778,23 @@ How to improve sleep quality:
     id: 'supplements_general',
     phrases: ['what supplements','which supplements','supplements for bioage','supplements for longevity','best supplements','longevity supplements','what should i take'],
     keys: ['supplement','what to take','which pill'],
-    r: `The most evidence-backed supplements for biological age reversal:
+    r: `⚕️ Important first: Supplements are not a substitute for medical care. Always get a blood test before supplementing, and consult your doctor — especially if you take any medication.
 
-FOUNDATION (almost everyone benefits):
-• Vitamin D3 + K2 — 2000-5000 IU D3 daily (most people deficient)
-• Omega-3 fish oil — 2-3g EPA+DHA daily (reduces inflammation)
-• Magnesium Glycinate — 400mg before bed (sleep, insulin, cortisol)
-• Vitamin B12 (methylcobalamin) — 1000mcg daily (critical for vegetarians)
+Nutrients with strong research support for healthy ageing (educational reference):
 
-ADVANCED LONGEVITY:
-• NMN or NR — NAD+ precursors for cellular energy and DNA repair (500mg/day)
-• Resveratrol — activates sirtuin longevity genes (500mg/day with food)
-• Berberine — blood sugar regulation (500mg 2x/day with meals)
-• CoQ10 — mitochondrial health, especially if taking statins (200mg/day)
+COMMONLY TESTED & DEFICIENT:
+• Vitamin D — get a blood test first; many Indians are deficient. Ask your doctor about the right dose for your level.
+• Vitamin B12 — especially important for vegetarians, vegans, and people over 50. Get tested, then discuss supplementation with your doctor.
+• Omega-3 — increasing oily fish, walnuts and flaxseeds in your diet is the food-first approach. Discuss supplementation with your doctor if diet alone is insufficient.
+• Magnesium — found in nuts, seeds, legumes, dark greens. Food sources are the safest starting point.
 
-STRESS + HORMONES:
-• Ashwagandha KSM-66 — cortisol reduction, testosterone support (600mg/day)
-• Zinc + Selenium — immunity and testosterone production
+DISCUSSED IN LONGEVITY RESEARCH (emerging science, consult your doctor):
+• NMN / NR — NAD+ precursors being studied for cellular energy
+• Resveratrol — studied for its effect on sirtuin longevity genes
+• CoQ10 — often discussed for mitochondrial health, particularly relevant if taking statins
+• Ashwagandha — studied for cortisol and stress response
 
-IMPORTANT: Only supplement what your labs show you need. Upload your lab report and check your Protocol screen for a personalised recommendation based on your actual deficiencies.`,
+⚕️ Do not self-prescribe specific doses. Upload your lab report to HealthOS first — your actual deficiencies are the only safe guide to what, if anything, you need.`,
   },
 
   // ══════════════════════════════════════
@@ -803,27 +804,22 @@ IMPORTANT: Only supplement what your labs show you need. Upload your lab report 
     id: 'omega3',
     phrases: ['omega 3','omega-3','fish oil','epa dha','omega 3 supplement','fish oil supplement'],
     keys: ['omega 3','omega-3','fish oil','epa','dha'],
-    r: `Omega-3 (EPA+DHA) is one of the most clinically proven supplements for biological age reversal.
+    r: `Omega-3 fatty acids (EPA+DHA) are among the most researched nutrients for inflammation and cardiovascular health.
 
-TARGETS:
-• Therapeutic dose for inflammation: 2-3g EPA+DHA per day
-• Maintenance: 1g EPA+DHA per day
+What research shows (educational):
+• Associated with lower hsCRP (inflammation marker) in multiple studies
+• Linked to telomere length support
+• High doses studied for triglyceride reduction under medical supervision
+• Supports brain, heart, joint, and mood health
 
-Why it's so effective:
-• Directly reduces hsCRP (inflammation) — studies show 20-30% reduction
-• Supports telomere length — longer telomeres = younger biological age
-• Reduces triglycerides by 20-30% at higher doses
-• Protects heart, brain, and joints
-• Supports mood and reduces depression risk
+Best food sources first:
+• Fatty fish 3–4×/week — mackerel, rohu, hilsa, salmon, sardines
+• Walnuts, flaxseeds, chia seeds (provide ALA, a plant-based omega-3)
+• Algae-based sources (good vegan option)
 
-Sources:
-• Fish oil capsules (check label for EPA+DHA content, not total fish oil)
-• Algae-based omega-3 (vegan option, equally effective)
-• Food: Fatty fish 3-4x/week (mackerel, rohu, hilsa, salmon), walnuts, flaxseeds
+⚕️ If you are considering omega-3 supplements — especially at higher doses — consult your doctor first. High-dose omega-3 can interact with blood-thinning medication and is not appropriate for everyone.
 
-Quality matters: Choose triglyceride form over ethyl ester form for better absorption. Store in the fridge to prevent oxidation.
-
-For vegetarians/vegans: Walnuts and flaxseeds provide ALA (converted to EPA/DHA at low efficiency). Algae-based omega-3 supplement is strongly recommended.`,
+For educational purposes only. The right approach for you depends on your individual health status and existing lab values.`,
   },
 
   // ══════════════════════════════════════
@@ -833,23 +829,19 @@ For vegetarians/vegans: Walnuts and flaxseeds provide ALA (converted to EPA/DHA 
     id: 'magnesium',
     phrases: ['magnesium supplement','magnesium glycinate','magnesium for sleep','magnesium deficiency','low magnesium'],
     keys: ['magnesium'],
-    r: `Magnesium is involved in 300+ enzymatic reactions — and most people don't get enough from food.
+    r: `Magnesium is involved in 300+ enzymatic reactions and is important for sleep, blood sugar, muscle recovery, and stress response.
 
-BEST FORM: Magnesium Glycinate (highly absorbed, gentle on stomach)
-DOSE: 300-400mg before bed
+Why magnesium matters for BioAge:
+• Sleep quality — supports the nervous system for deeper sleep
+• Blood sugar — needed for insulin signalling; low levels worsen insulin resistance
+• Cortisol regulation — low magnesium is associated with higher stress hormones
+• Muscle recovery and heart rhythm
 
-Why magnesium is critical for BioAge:
-• Sleep quality — magnesium activates GABA receptors that quiet the nervous system for deep sleep
-• Blood sugar — magnesium is needed for insulin signalling. Deficiency worsens insulin resistance
-• Cortisol regulation — low magnesium raises cortisol and anxiety
-• Muscle recovery — prevents cramps and speeds muscle repair
-• Heart health — regulates heart rhythm and blood pressure
+Signs of possible deficiency: poor sleep, muscle cramps, anxiety, constipation, headaches
 
-Signs of deficiency: poor sleep, muscle cramps, anxiety, constipation, headaches, high blood pressure
+Food sources first: dark chocolate, leafy greens, pumpkin seeds, almonds, avocado, bananas, whole grains
 
-Food sources (but difficult to get therapeutic amounts): dark chocolate, leafy greens, pumpkin seeds, almonds, avocado
-
-Timing: Take at night before bed for best sleep benefits. It noticeably improves deep sleep quality within 1-2 weeks for most people.`,
+⚕️ For educational purposes only. If you think you have a deficiency or want to start magnesium supplements, consult your doctor or a qualified nutritionist — the right form and dose depends on your individual situation.`,
   },
 
   // ══════════════════════════════════════
@@ -859,23 +851,17 @@ Timing: Take at night before bed for best sleep benefits. It noticeably improves
     id: 'ashwagandha',
     phrases: ['ashwagandha','ashwagandha supplement','ashwagandha for stress','ksm 66','ashwagandha benefits'],
     keys: ['ashwagandha','ksm-66','ksm66'],
-    r: `Ashwagandha (KSM-66 extract) is one of the most studied adaptogens for longevity and stress reduction.
+    r: `Ashwagandha is an adaptogen (stress-modulating herb) with a strong research base. It is used in Ayurvedic medicine and increasingly studied in modern trials.
 
-DOSE: KSM-66 extract, 300-600mg daily (morning or split morning/evening)
+What research suggests (educational):
+• Associated with reduced cortisol markers in clinical studies
+• Some studies show modest improvements in testosterone in men
+• May support exercise endurance and sleep quality
+• Studied for anxiety reduction
 
-Clinically proven benefits:
-• Reduces cortisol by 20-30% in 8-12 weeks
-• Raises testosterone by 10-17% in men
-• Improves VO2 max and exercise endurance
-• Reduces anxiety and improves sleep quality
-• Supports thyroid function
+⚕️ For educational purposes only. Ashwagandha is not suitable for everyone — it can interact with thyroid medication, sedatives, and immunosuppressants. Avoid during pregnancy. Always consult your doctor before starting any supplement, particularly if you are on medication.
 
-Why KSM-66 specifically:
-KSM-66 is the most researched, standardised extract. Generic ashwagandha powder has inconsistent withanolide content. Look for KSM-66 on the label.
-
-Takes 4-8 weeks for full effect — this is not a fast-acting supplement, but the effects compound over time.
-
-Best taken with food (fat helps absorption). Some people take the full dose at night as it has mild sedative properties — this can improve sleep while also lowering cortisol the next day.`,
+If interested, discuss with your doctor whether it's appropriate for you before starting.`,
   },
 
   // ══════════════════════════════════════

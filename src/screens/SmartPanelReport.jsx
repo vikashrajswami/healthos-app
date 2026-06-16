@@ -12,10 +12,10 @@ function getConnectedSources() {
 }
 
 const LABS = [
-  { name: 'Dr Lal PathLabs', icon: '🔴', note: 'Home collection', url: 'https://lalpathabs.com' },
-  { name: 'Thyrocare',       icon: '🟠', note: 'Lowest cost · Home collection', url: 'https://thyrocare.com' },
-  { name: 'SRL Diagnostics', icon: '🔵', note: 'Widespread across India', url: 'https://srl.in' },
-  { name: 'Apollo Diagnostics', icon: '⚪', note: 'Premium service', url: '#' },
+  { name: 'Any NABL-Certified Lab',     icon: '🔴', note: 'Search for NABL-accredited labs in your city' },
+  { name: 'Home Collection Service',    icon: '🟠', note: 'Many labs offer home blood draw — ask when booking' },
+  { name: 'Government Hospital Lab',    icon: '🔵', note: 'AIIMS, civil hospital labs are trusted and affordable' },
+  { name: 'Walk-In Diagnostic Centre',  icon: '⚪', note: 'Show them this panel list at the counter' },
 ]
 
 const PRIORITY_META = {
@@ -71,6 +71,11 @@ export default function SmartPanelReport() {
   return (
     <div className="spr-root">
       <Copied show={copied} />
+
+      {/* ── Medical disclaimer ── */}
+      <div className="spr-edu-banner">
+        ⚕️ <strong>Educational purposes only.</strong> This panel is a suggested starting point for a conversation with your doctor — not a medical prescription. Always consult a qualified doctor before ordering any tests or acting on results.
+      </div>
 
       {/* ── Top bar ── */}
       <div className="spr-topbar">
@@ -189,7 +194,7 @@ export default function SmartPanelReport() {
           ₹{report.costMin.toLocaleString('en-IN')} – ₹{report.costMax.toLocaleString('en-IN')}
         </div>
         <div className="spr-cost-note">
-          Cost varies by lab and city. Home collection adds ₹150–300. Thyrocare is typically the most affordable.
+          Cost varies by lab and city. Home collection adds ₹150–300. Compare prices across NABL-certified labs in your city for best rates.
         </div>
         <div className="spr-cost-breakdown">
           {report.panels.map(p => (
@@ -204,7 +209,7 @@ export default function SmartPanelReport() {
       {/* ── Where to get tested ── */}
       <div className="spr-labs-card">
         <div className="spr-labs-title">🏥 Where to Get Tested</div>
-        <div className="spr-labs-note">All these labs accept walk-in and home collection. Show them this panel list at the counter.</div>
+        <div className="spr-labs-note">Visit any NABL-certified diagnostic lab. Show them this panel list at the counter — they will run each test on the list.</div>
         {LABS.map(lab => (
           <div key={lab.name} className="spr-lab-row">
             <span className="spr-lab-icon">{lab.icon}</span>
@@ -212,7 +217,7 @@ export default function SmartPanelReport() {
               <div className="spr-lab-name">{lab.name}</div>
               <div className="spr-lab-note">{lab.note}</div>
             </div>
-            <span className="spr-lab-arrow">→</span>
+            <span className="spr-coming-soon-btn">Book your test<br/><small>Coming soon</small></span>
           </div>
         ))}
       </div>
@@ -288,6 +293,9 @@ function PanelCard({ panel, expanded, onToggle }) {
               </div>
             ))}
           </div>
+          <button className="spr-book-btn" disabled>
+            📅 Book your test &nbsp;·&nbsp; <span className="spr-book-cs">Coming soon</span>
+          </button>
         </div>
       )}
     </div>
