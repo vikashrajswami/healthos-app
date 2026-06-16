@@ -721,6 +721,22 @@ export default function Screen4() {
         </div>
       )}
 
+      {/* ── Generate Smart Panel CTA ── */}
+      <div className="dh-section" style={{marginTop:8}}>
+        <button className="dh-smart-panel-btn" onClick={() => window.location.href = '/smart-panel'}>
+          <div className="dh-spb-left">
+            <span style={{fontSize:28}}>🧾</span>
+            <div>
+              <div className="dh-spb-title">Generate Smart Lab Panel</div>
+              <div className="dh-spb-sub">
+                {allLabRequired.length} missing parameters → auto-organized into a printable test report
+              </div>
+            </div>
+          </div>
+          <span className="dh-spb-arrow">→</span>
+        </button>
+      </div>
+
       {/* ── Bottom note ── */}
       <div style={{padding:'16px 18px 8px',fontSize:12,color:'#94a3b8',textAlign:'center',lineHeight:1.5}}>
         🔒 Your data is encrypted and private. We only read what you explicitly allow. You can disconnect any source anytime.
