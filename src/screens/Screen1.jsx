@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getAIResponse } from '../lib/healthAI'
 
 const INSIGHT_TEXT = 'Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.'
 
@@ -38,8 +39,6 @@ function AIChatModal({ onClose }) {
   const bottomRef  = useRef(null)
   const inputRef   = useRef(null)
 
-  const userContext = buildUserContext(34, 41, INSIGHT_TEXT, null)
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -53,20 +52,11 @@ function AIChatModal({ onClose }) {
     setMessages(nextMessages)
     setLoading(true)
 
-    try {
-      const res  = await fetch('/api/chat', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userContext,
-          messages: nextMessages.map(m => ({ role: m.role, content: m.content })),
-        }),
-      })
-      const data = await res.json()
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.error || 'Sorry, something went wrong.' }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Connection error — please check your internet and try again.' }])
-    }
+    // Simulate a brief thinking delay so it feels natural
+    await new Promise(r => setTimeout(r, 480))
+
+    const reply = getAIResponse(userText)
+    setMessages(prev => [...prev, { role: 'assistant', content: reply }])
     setLoading(false)
     setTimeout(() => inputRef.current?.focus(), 100)
   }
@@ -87,7 +77,7 @@ function AIChatModal({ onClose }) {
             <div className="chat-avatar">🧬</div>
             <div>
               <div className="chat-title">HealthOS AI</div>
-              <div className="chat-status">● Online · Powered by Claude</div>
+              <div className="chat-status">● Online · Built-in AI · Always free</div>
             </div>
           </div>
           <button className="chat-close" onClick={onClose}>✕</button>
