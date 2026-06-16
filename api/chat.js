@@ -237,28 +237,40 @@ export default async function handler(req, res) {
     }))
     const lastMsg = messages[messages.length - 1].content
 
-    const body = {
-      system_instruction: { parts: [{ text: systemWithContext }] },
-      contents: [
-        ...history,
-        { role: 'user', parts: [{ text: lastMsg }] },
-      ],
-      generationConfig: { maxOutputTokens: 700, temperature: 0.7 },
+    /* Try models in order until one works */
+    const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
+    let reply = null
+    let lastError = null
+
+    for (const model of MODELS) {
+      const body = {
+        systemInstruction: { parts: [{ text: systemWithContext }] },
+        contents: [
+          ...history,
+          { role: 'user', parts: [{ text: lastMsg }] },
+        ],
+        generationConfig: { maxOutputTokens: 700, temperature: 0.7 },
+      }
+
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      )
+      const data = await resp.json()
+
+      if (resp.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        reply = data.candidates[0].content.parts[0].text
+        break
+      }
+      lastError = data?.error?.message || `${model} failed`
+      console.error(`${model} error:`, JSON.stringify(data?.error || data))
     }
 
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-    )
-
-    const data = await resp.json()
-
-    if (!resp.ok) {
-      console.error('Gemini error:', JSON.stringify(data))
+    if (!reply) {
+      console.error('All models failed. Last error:', lastError)
       return res.status(500).json({ error: 'AI temporarily unavailable. Please try again.' })
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.'
     return res.json({ reply })
   } catch (err) {
     console.error('Chat error:', err.message)
