@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { routeGrouped, coveragePercent, CATEGORY_META } from '../lib/dataRouter'
 
 /* ─── Simulated live data (will come from real integrations) ─── */
 const LIVE = {
@@ -424,15 +425,23 @@ function GlucoseCurve() {
 }
 
 export default function Screen4() {
-  const [openModal, setOpenModal] = useState(null)
-  const [expanded, setExpanded] = useState({})
+  const [openModal, setOpenModal]     = useState(null)
+  const [expanded, setExpanded]       = useState({})
   const [alertsClosed, setAlertsClosed] = useState(false)
   const [connections, setConnections] = useState({ lab: true, healthkit: true })
+  const [showLabPanel, setShowLabPanel] = useState(false)
+  const [covTab, setCovTab]           = useState('covered')
 
   const ModalComp = openModal ? MODALS[openModal] : null
   const connectedSources = SOURCES.filter(s => connections[s.id])
   const availableSources = SOURCES.filter(s => !connections[s.id])
   const dataWeight = connectedSources.reduce((sum, s) => sum + s.weight, 0)
+
+  // Smart routing — computed from connected sources
+  const connectedIds = Object.keys(connections).filter(k => connections[k])
+  const grouped      = routeGrouped(connectedIds)
+  const coverage     = coveragePercent(connectedIds)
+  const allLabRequired = Object.values(grouped).flatMap(g => g.labRequired)
 
   return (
     <div className="screen" style={{gap:0,padding:'18px 0 90px',background:'#f8fafc'}}>
@@ -599,8 +608,121 @@ export default function Screen4() {
         ))}
       </div>
 
+      {/* ── Coverage Map ── */}
+      <div className="dh-section" style={{marginTop:8}}>
+        <div className="dh-section-head">
+          <span>📊 Biomarker Coverage</span>
+          <span style={{fontSize:12,color:'#0d9488',fontWeight:700}}>{coverage}% covered</span>
+        </div>
+
+        {/* Tab bar */}
+        <div className="dh-cov-tabs">
+          <button className={`dh-cov-tab ${covTab==='covered'?'active':''}`} onClick={()=>setCovTab('covered')}>
+            ✓ Tracking ({Object.values(grouped).flatMap(g=>g.covered).length})
+          </button>
+          <button className={`dh-cov-tab ${covTab==='missing'?'active':''}`} onClick={()=>setCovTab('missing')}>
+            ⚡ Gaps ({allLabRequired.length})
+          </button>
+        </div>
+
+        {Object.entries(grouped).map(([cat, {covered, labRequired}]) => {
+          const meta = CATEGORY_META[cat] || { icon: '•', color: '#64748b' }
+          const list = covTab === 'covered' ? covered : labRequired
+          if (!list.length) return null
+          return (
+            <div key={cat} className="dh-cov-group">
+              <div className="dh-cov-cat" style={{color: meta.color}}>
+                {meta.icon} {cat}
+              </div>
+              {list.map(bm => (
+                <div key={bm.id} className={`dh-cov-row ${covTab==='covered'?'dh-cov-ok':'dh-cov-gap'}`}>
+                  <span className="dh-cov-icon">{bm.icon}</span>
+                  <div className="dh-cov-info">
+                    <span className="dh-cov-name">{bm.name}</span>
+                    {covTab==='covered' && bm.via && (
+                      <span className="dh-cov-via"
+                        style={{background: bm.qualityMeta.color+'22', color: bm.qualityMeta.color}}>
+                        {bm.via.icon} {bm.via.label} · {bm.qualityMeta.label}
+                      </span>
+                    )}
+                    {covTab==='missing' && (
+                      <span className="dh-cov-via" style={{background:'#fee2e2',color:'#dc2626'}}>
+                        Not tracked — add to lab panel below
+                      </span>
+                    )}
+                  </div>
+                  <span style={{fontSize:16}}>{covTab==='covered'?'✅':'➕'}</span>
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── Smart Lab Panel ── */}
+      {allLabRequired.length > 0 && (
+        <div className="dh-section" style={{marginTop:4}}>
+          <div className="dh-lab-panel-card">
+            <div className="dh-lp-header">
+              <div>
+                <div className="dh-lp-title">🧾 Your Smart Lab Panel</div>
+                <div className="dh-lp-sub">Auto-generated from your missing data gaps</div>
+              </div>
+              <button className="dh-lp-toggle" onClick={()=>setShowLabPanel(p=>!p)}>
+                {showLabPanel ? 'Hide ▲' : 'Show ▼'}
+              </button>
+            </div>
+
+            <div className="dh-lp-banner">
+              HealthOS found <strong>{allLabRequired.length} biomarkers</strong> not covered by your connected devices.
+              Add the tests below to your next blood test to fill the gaps.
+            </div>
+
+            {showLabPanel && (
+              <>
+                {allLabRequired.map((bm, i) => (
+                  <div key={bm.id} className="dh-lp-item">
+                    <div className="dh-lp-num">{i+1}</div>
+                    <div className="dh-lp-content">
+                      <div className="dh-lp-test">{bm.icon} {bm.labTest.test}</div>
+                      <div className="dh-lp-why">{bm.labTest.why}</div>
+                      <div className="dh-lp-interval">Every {bm.labTest.interval}</div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="dh-lp-actions">
+                  <button className="dh-lp-copy" onClick={() => {
+                    const text = allLabRequired.map((b,i) => `${i+1}. ${b.labTest.test}`).join('\n')
+                    navigator.clipboard?.writeText(`My HealthOS Lab Panel:\n\n${text}\n\nPlease include in my next blood test. Thank you.`)
+                      .then(() => alert('Copied! Paste this to share with your doctor or lab.'))
+                  }}>
+                    📋 Copy for Doctor / Lab
+                  </button>
+                  <button className="dh-lp-share" onClick={() => {
+                    const text = encodeURIComponent(
+                      `My HealthOS recommended tests:\n\n` +
+                      allLabRequired.slice(0,8).map((b,i) => `${i+1}. ${b.labTest.test}`).join('\n') +
+                      `\n\nTracking my biological age reversal via HealthOS`
+                    )
+                    window.open(`https://wa.me/?text=${text}`, '_blank')
+                  }}>
+                    💬 Send to WhatsApp
+                  </button>
+                </div>
+
+                <div className="dh-lp-note">
+                  Tip: Take this list to Dr Lal PathLabs, SRL, or Thyrocare. Most panels cost ₹1500–4000 and cover all these markers.
+                  Upload your results here and HealthOS fills all the gaps automatically.
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Bottom note ── */}
-      <div style={{padding:'8px 18px',fontSize:12,color:'#94a3b8',textAlign:'center',lineHeight:1.5}}>
+      <div style={{padding:'16px 18px 8px',fontSize:12,color:'#94a3b8',textAlign:'center',lineHeight:1.5}}>
         🔒 Your data is encrypted and private. We only read what you explicitly allow. You can disconnect any source anytime.
       </div>
 
