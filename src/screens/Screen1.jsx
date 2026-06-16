@@ -4,24 +4,41 @@ import { useNavigate } from 'react-router-dom'
 const INSIGHT_TEXT = 'Your hsCRP (inflammation) is improving, but LDL is still high. Sleep consistency is your highest-leverage habit this month.'
 
 const QUICK_QUESTIONS = [
-  'What does high LDL mean?',
-  'How do I lower inflammation?',
-  'Best foods for biological age?',
-  'How does sleep affect BioAge?',
+  { emoji: '🔬', text: 'What does my BioAge score mean?' },
+  { emoji: '📄', text: 'How do I upload a lab report?' },
+  { emoji: '🥗', text: 'Which diet plan is best for me?' },
+  { emoji: '🔥', text: 'What does high LDL or hsCRP mean?' },
+  { emoji: '👨‍👩‍👧', text: 'How does the family tracker work?' },
+  { emoji: '💊', text: 'What supplements should I take?' },
+  { emoji: '😴', text: 'How does sleep affect biological age?' },
+  { emoji: '⌚', text: 'How do I connect my device?' },
 ]
+
+function buildUserContext(bioage, actualAge, insight, dietPref) {
+  const lines = []
+  if (bioage)     lines.push(`User's current BioAge: ${bioage}`)
+  if (actualAge)  lines.push(`User's actual calendar age: ${actualAge}`)
+  if (insight)    lines.push(`Current AI insight shown: "${insight}"`)
+  if (dietPref)   lines.push(`User's selected diet type: ${dietPref}`)
+  lines.push(`App version: HealthOS web app`)
+  return lines.join('\n')
+}
 
 /* ── AI Chat Modal ── */
 function AIChatModal({ onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi! I'm your HealthOS AI health guide. 🧬\n\nI can see your current insight:\n*"${INSIGHT_TEXT}"*\n\nAsk me anything about your biomarkers, biological age, nutrition, sleep, or longevity habits — I'm here to help!`,
+      content: `Hi! I'm HealthOS AI 🧬\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
     },
   ])
-  const [input,   setInput]   = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
-  const inputRef  = useRef(null)
+  const [input,    setInput]    = useState('')
+  const [loading,  setLoading]  = useState(false)
+  const [showAll,  setShowAll]  = useState(false)
+  const bottomRef  = useRef(null)
+  const inputRef   = useRef(null)
+
+  const userContext = buildUserContext(34, 41, INSIGHT_TEXT, null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -41,7 +58,7 @@ function AIChatModal({ onClose }) {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          context:  INSIGHT_TEXT,
+          userContext,
           messages: nextMessages.map(m => ({ role: m.role, content: m.content })),
         }),
       })
@@ -57,6 +74,8 @@ function AIChatModal({ onClose }) {
   function handleKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
+
+  const visibleQs = showAll ? QUICK_QUESTIONS : QUICK_QUESTIONS.slice(0, 4)
 
   return (
     <div className="chat-overlay" onClick={onClose}>
@@ -107,11 +126,16 @@ function AIChatModal({ onClose }) {
         {/* Quick questions (only show at start) */}
         {messages.length === 1 && !loading && (
           <div className="chat-quick-list">
-            {QUICK_QUESTIONS.map(q => (
-              <button key={q} className="chat-quick-btn" onClick={() => sendMessage(q)}>
-                {q}
+            {visibleQs.map(q => (
+              <button key={q.text} className="chat-quick-btn" onClick={() => sendMessage(q.text)}>
+                <span className="cqb-emoji">{q.emoji}</span> {q.text}
               </button>
             ))}
+            {!showAll && (
+              <button className="chat-quick-more" onClick={() => setShowAll(true)}>
+                More questions ↓
+              </button>
+            )}
           </div>
         )}
 

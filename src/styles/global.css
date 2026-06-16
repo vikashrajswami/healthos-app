@@ -692,6 +692,18 @@ html, body {
   transition: background .15s;
 }
 .chat-quick-btn:hover { background: #cff0ec; }
+.cqb-emoji { font-size: 13px; }
+.chat-quick-more {
+  padding: 7px 14px;
+  background: none;
+  border: 1.5px dashed #d6dce8;
+  border-radius: 100px;
+  font-size: 12px;
+  color: #8993a8;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chat-quick-more:hover { border-color: var(--accent, #14b8a6); color: var(--accent, #14b8a6); }
 
 /* Input row */
 .chat-input-row {
