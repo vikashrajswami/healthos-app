@@ -383,12 +383,23 @@ export default function Screen3() {
     setHasReport(true)
 
     try {
-      const form = new FormData()
-      form.append('file', file)
       setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Reading with AI…' } : u))
 
-      const res  = await fetch('/api/upload', { method: 'POST', body: form })
-      const data = await res.json()
+      // Read file as base64 (works for both text and scanned PDFs)
+      const pdfBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload  = () => resolve(reader.result.split(',')[1])
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      const res  = await fetch('/api/chat', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ pdfBase64, fileName: file.name }),
+      })
+      const text = await res.text()
+      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error' } } })()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
 
       addReport({ name: file.name, source: 'Upload', biomarkers: data.biomarkers, summary: data.summary })
