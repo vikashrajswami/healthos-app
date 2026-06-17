@@ -16,7 +16,8 @@ import SignupScreen from './screens/SignupScreen'
 // Redirect new users (no uid) to signup before showing home
 function HomeGuard() {
   if (!localStorage.getItem('healthos_uid')) {
-    return <Navigate to="/signup" replace />
+    window.location.replace('/signup')
+    return null
   }
   return <Screen1 />
 }
