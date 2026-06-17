@@ -361,14 +361,9 @@ function familyInsight(members) {
   return "Your family is ageing right on track — keep building healthy habits together."
 }
 
-/* ── getUserId: stable UUID stored in localStorage ── */
+/* ── getUserId: read-only — uid is created only at signup ── */
 function getUserId() {
-  let uid = localStorage.getItem('healthos_uid')
-  if (!uid) {
-    uid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)
-    localStorage.setItem('healthos_uid', uid)
-  }
-  return uid
+  return localStorage.getItem('healthos_uid') || ''
 }
 
 function getUserName() {

@@ -45,12 +45,7 @@ function loadScript(src) {
 }
 
 function getUid() {
-  let uid = localStorage.getItem('healthos_uid')
-  if (!uid) {
-    uid = crypto.randomUUID()
-    localStorage.setItem('healthos_uid', uid)
-  }
-  return uid
+  return localStorage.getItem('healthos_uid') || ''
 }
 
 export default function PaymentScreen() {
