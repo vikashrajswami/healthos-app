@@ -1,4 +1,4 @@
-const CACHE = 'arogyos-v4'
+const CACHE = 'arogyos-v5'
 const STATIC = ['/']
 
 self.addEventListener('install', e => {
