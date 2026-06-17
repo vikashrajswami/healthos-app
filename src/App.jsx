@@ -1,5 +1,5 @@
 import { useState, lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import './styles/global.css'
 import Logo from './components/Logo'
 import { LangProvider, useT } from './lib/i18n'
@@ -15,11 +15,9 @@ import SignupScreen from './screens/SignupScreen'
 
 // Redirect new users (no uid) to signup before showing home
 function HomeGuard() {
-  const nav = useNavigate()
-  useEffect(() => {
-    if (!localStorage.getItem('healthos_uid')) nav('/signup', { replace: true })
-  }, [])
-  if (!localStorage.getItem('healthos_uid')) return null
+  if (!localStorage.getItem('healthos_uid')) {
+    return <Navigate to="/signup" replace />
+  }
   return <Screen1 />
 }
 
