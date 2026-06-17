@@ -115,7 +115,8 @@ export default function SignupScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contact: contactValue, type: tab === 'mobile' ? 'sms' : 'email' }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
       setSt('otp')
     } catch (e) {
@@ -147,7 +148,8 @@ export default function SignupScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contact: contactValue, code: otp.join('') }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok || !data.valid) throw new Error(data.error || 'Incorrect OTP. Please try again.')
       setSt('done')
     } catch (e) {

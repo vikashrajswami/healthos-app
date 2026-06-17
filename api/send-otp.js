@@ -103,33 +103,39 @@ async function sendSMSOTP(phone, otp) {
 // ── Main handler ─────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
+  // Always return JSON — never let Vercel send plain-text 500
+  res.setHeader('Content-Type', 'application/json')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
+  try {
   const { contact, type } = req.body || {}
   if (!contact || !type) return res.status(400).json({ error: 'Missing contact or type' })
   if (!['email', 'sms'].includes(type)) return res.status(400).json({ error: 'Invalid type' })
 
-  // Rate limit: max 3 OTP requests per contact per hour
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-  const { count } = await supabase
-    .from('otp_codes')
-    .select('id', { count: 'exact', head: true })
-    .eq('contact', contact)
-    .gte('created_at', oneHourAgo)
-
-  if (count >= 3) {
-    return res.status(429).json({ error: 'Too many OTP requests. Try again in 1 hour.' })
-  }
+  // Rate limit: max 3 OTP requests per contact per hour (silently skip if table error)
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count } = await supabase
+      .from('otp_codes')
+      .select('id', { count: 'exact', head: true })
+      .eq('contact', contact)
+      .gte('created_at', oneHourAgo)
+    if (count >= 3) {
+      return res.status(429).json({ error: 'Too many OTP requests. Try again in 1 hour.' })
+    }
+  } catch {}
 
   const otp       = generate6Digit()
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-  // Delete old unused OTPs for this contact
-  await supabase.from('otp_codes').delete().eq('contact', contact).eq('used', false)
+  // Delete old unused OTPs for this contact (silently skip errors)
+  try {
+    await supabase.from('otp_codes').delete().eq('contact', contact).eq('used', false)
+  } catch {}
 
   // Store new OTP
   const { error: dbErr } = await supabase.from('otp_codes').insert({
@@ -138,7 +144,10 @@ export default async function handler(req, res) {
     expires_at: expiresAt,
     type,
   })
-  if (dbErr) return res.status(500).json({ error: 'Database error. Try again.' })
+  if (dbErr) {
+    console.error('Supabase insert error:', JSON.stringify(dbErr))
+    return res.status(500).json({ error: `Database error: ${dbErr.message || dbErr.code || 'unknown'}` })
+  }
 
   try {
     if (type === 'email') {
@@ -149,7 +158,12 @@ export default async function handler(req, res) {
     res.json({ ok: true, message: type === 'email' ? 'OTP sent to your email' : 'OTP sent via SMS' })
   } catch (e) {
     // Clean up stored OTP if send failed
-    await supabase.from('otp_codes').delete().eq('contact', contact).eq('code', otp)
+    try { await supabase.from('otp_codes').delete().eq('contact', contact).eq('code', otp) } catch {}
     res.status(500).json({ error: e.message || 'Failed to send OTP. Try again.' })
+  }
+
+  } catch (outerErr) {
+    console.error('Unhandled send-otp error:', outerErr)
+    res.status(500).json({ error: 'Server error. Please try again.' })
   }
 }

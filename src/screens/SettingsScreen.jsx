@@ -27,7 +27,8 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contact: val, type: type === 'email' ? 'email' : 'sms' }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
       setStep('otp')
     } catch (e) {
@@ -46,7 +47,8 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contact: val, code: otp.join('') }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok || !data.valid) throw new Error(data.error || 'Incorrect OTP. Please try again.')
       onDone(val)
       setStep('done')
