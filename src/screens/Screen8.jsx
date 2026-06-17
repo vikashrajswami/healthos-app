@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const BIOAGE = 34
 const REAL_AGE = 41
@@ -29,7 +29,7 @@ function drawTransformCard(canvas) {
   ctx.fillStyle = '#9fd9cf'
   ctx.font = '700 58px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('HEALTHOS', cx, 196)
+  ctx.fillText('AROGYOS', cx, 196)
 
   ctx.fillStyle = 'rgba(159,217,207,0.55)'
   ctx.font = '400 38px Arial'
@@ -216,10 +216,37 @@ function ShareModal({ imgUrl, blob, onClose }) {
   )
 }
 
+function genReferralCode(uid) {
+  const base = (uid || '').slice(-6).toUpperCase().replace(/[^A-Z0-9]/g, 'X')
+  return 'ARG-' + base.padEnd(6, 'X')
+}
+
 /* ── Screen ── */
 export default function Screen8() {
-  const [loading, setLoading] = useState(false)
-  const [modal, setModal]   = useState(null)   // { imgUrl, blob }
+  const [loading,  setLoading]  = useState(false)
+  const [modal,    setModal]    = useState(null)
+  const [refCopied, setRefCopied] = useState(false)
+
+  const uid     = localStorage.getItem('healthos_uid') || ''
+  const refCode = genReferralCode(uid)
+  const refLink = `https://arogyos.app/join?ref=${refCode}`
+
+  function copyRef() {
+    navigator.clipboard.writeText(refLink).then(() => {
+      setRefCopied(true)
+      setTimeout(() => setRefCopied(false), 2500)
+    })
+  }
+
+  function shareRef() {
+    const text = encodeURIComponent(
+      `🧬 I've been tracking my Biological Age on AROGYOS — it's changed how I think about my health.\n\n` +
+      `My BioAge is ${BIOAGE} (actual age: ${REAL_AGE}) — ${REAL_AGE - BIOAGE} years younger!\n\n` +
+      `Join me and find YOUR BioAge: ${refLink}\n\n` +
+      `It takes 2 minutes. Free to start. 🌿`
+    )
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
 
   async function handleInstagram() {
     setLoading(true)
@@ -246,7 +273,7 @@ export default function Screen8() {
       <button className="nav-back">← Share Your Transformation</button>
 
       <div className="share-hero">
-        <div className="brand">HEALTHOS</div>
+        <div className="brand">AROGYOS</div>
         <div className="lbl">My Biological Age</div>
         <div className="num">{BIOAGE}</div>
         <div className="sub">vs actual age {REAL_AGE} · {GAP} years younger</div>
@@ -306,6 +333,33 @@ export default function Screen8() {
       }}>
         ↓ Save Transformation Image
       </button>
+
+      {/* Referral section */}
+      <div className="card-title" style={{ marginTop: 16 }}>Refer a Friend</div>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
+          🎁 Give a friend 1 free month
+        </div>
+        <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 14 }}>
+          Share your referral link. When they sign up, they get 1 extra free month — and so do you.
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: '#f8fafb', border: '1.5px solid #e2e8f0', borderRadius: 12, padding: '10px 14px', marginBottom: 12, overflow: 'hidden' }}>
+          <span style={{ fontSize: 11, color: '#64748b', flex: 1, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</span>
+          <button onClick={copyRef} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#14b8a6', fontWeight: 700, fontSize: 12, flexShrink: 0, padding: 0 }}>
+            {refCopied ? '✅ Copied' : '📋 Copy'}
+          </button>
+        </div>
+        <button onClick={shareRef} style={{
+          width: '100%', padding: '12px 0', background: 'linear-gradient(90deg,#25d366,#1aa754)',
+          color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          📱 Share via WhatsApp
+        </button>
+        <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'center', marginTop: 8 }}>
+          Your referral code: <b style={{ color: '#0f172a' }}>{refCode}</b>
+        </div>
+      </div>
 
       {modal && (
         <ShareModal

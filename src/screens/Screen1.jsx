@@ -159,7 +159,7 @@ function AIChatModal({ onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi! I'm AROGYOS AI 🧬\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
+      content: `Hi! I'm your AROGYOS Health Guide 🌿\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
     },
   ])
   const [input,    setInput]    = useState('')
@@ -203,10 +203,10 @@ function AIChatModal({ onClose }) {
         {/* Header */}
         <div className="chat-header">
           <div className="chat-header-left">
-            <div className="chat-avatar">🧬</div>
+            <div className="chat-avatar">🌿</div>
             <div>
-              <div className="chat-title">AROGYOS AI</div>
-              <div className="chat-status">● Online · Built-in AI · Always free</div>
+              <div className="chat-title">Health Guide</div>
+              <div className="chat-status">● Online · Always here for you</div>
             </div>
           </div>
           <button className="chat-close" onClick={onClose}>✕</button>
@@ -232,7 +232,7 @@ function AIChatModal({ onClose }) {
 
           {loading && (
             <div className="chat-bubble-wrap assistant">
-              <div className="chat-ai-icon">🧬</div>
+              <div className="chat-ai-icon">🌿</div>
               <div className="chat-bubble assistant chat-typing">
                 <span /><span /><span />
               </div>
@@ -566,6 +566,26 @@ export default function Screen1() {
   const [showInvite, setShowInvite] = useState(false)
   const [showAsk,   setShowAsk]   = useState(false)
   const [selected,  setSelected]  = useState(null)
+  const [water,     setWater]     = useState(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem('healthos_daily') || '{}')
+      const today = new Date().toDateString()
+      return s.date === today ? (s.water || 0) : 0
+    } catch { return 0 }
+  })
+  const [weight,    setWeight]    = useState(() => {
+    try { return localStorage.getItem('healthos_weight') || '' } catch { return '' }
+  })
+
+  function saveWater(v) {
+    const today = new Date().toDateString()
+    try { localStorage.setItem('healthos_daily', JSON.stringify({ date: today, water: v })) } catch {}
+    setWater(v)
+  }
+  function saveWeight(v) {
+    try { localStorage.setItem('healthos_weight', v) } catch {}
+    setWeight(v)
+  }
 
   const loadFamily = useCallback(async () => {
     setLoading(true)
@@ -633,7 +653,7 @@ export default function Screen1() {
         <div className="ask-row">
           <div className="ask-row-label">
             <span>Have a question about your health?</span>
-            <span className="ask-row-sub">Ask our AI health guide — instant answers</span>
+            <span className="ask-row-sub">Ask Health Guide — instant answers, always free</span>
           </div>
           <button className="ask-btn" onClick={() => setShowAsk(true)}>Ask →</button>
         </div>
@@ -735,6 +755,62 @@ export default function Screen1() {
           <div className="s">Ring, smartwatch, or phone sensors</div>
         </div>
         <span className="go">Connect →</span>
+      </div>
+
+      {/* Daily Quick Tracker */}
+      <div className="build-title">Today's Vitals</div>
+      <div className="card" style={{ marginBottom: 12 }}>
+        {/* Water */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>💧 Water intake</span>
+            <span style={{ fontSize: 12, color: water >= 8 ? '#0d9488' : '#94a3b8', fontWeight: 600 }}>{water}/8 glasses</span>
+          </div>
+          <div style={{ display: 'flex', gap: 5 }}>
+            {[1,2,3,4,5,6,7,8].map(n => (
+              <button key={n} onClick={() => saveWater(water === n && n > 0 ? n - 1 : n)} style={{
+                flex: 1, height: 28, borderRadius: 6, border: 'none', cursor: 'pointer',
+                background: n <= water ? '#14b8a6' : '#f1f5f9',
+                transition: 'background .15s',
+              }}/>
+            ))}
+          </div>
+          {water >= 8 && <div style={{ fontSize: 11, color: '#0d9488', fontWeight: 600, marginTop: 5 }}>✓ Daily goal met!</div>}
+        </div>
+        {/* Weight */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>⚖️ Weight</span>
+          <input
+            type="number"
+            placeholder="kg"
+            value={weight}
+            onChange={e => saveWeight(e.target.value)}
+            style={{
+              flex: 1, padding: '8px 12px', background: '#f8fafb',
+              border: '1.5px solid #e2e8f0', borderRadius: 10,
+              fontSize: 14, fontFamily: 'inherit', outline: 'none', color: '#0f172a',
+            }}
+          />
+          {weight && <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0 }}>kg · logged today</span>}
+        </div>
+      </div>
+
+      {/* Social proof */}
+      <div style={{
+        background: 'linear-gradient(135deg,#f0fdfa,#ecfdf5)',
+        border: '1px solid #99f6e4',
+        borderRadius: 14, padding: '14px 16px', marginBottom: 16,
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <div style={{ fontSize: 26 }}>🌍</div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
+            Trusted by <span style={{ color: '#0d9488' }}>12,400+</span> people
+          </div>
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+            ⭐⭐⭐⭐⭐ Across India & 28 countries · BioAge average 5.3 yrs younger
+          </div>
+        </div>
       </div>
 
       <div className="why-title">Why AROGYOS Plus</div>

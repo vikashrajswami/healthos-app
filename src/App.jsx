@@ -1,30 +1,42 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import './styles/global.css'
 import Logo from './components/Logo'
 import { LangProvider, useT } from './lib/i18n'
+
+// Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'
-import Screen2 from './screens/Screen2'
-import Screen3 from './screens/Screen3'
-import Screen4 from './screens/Screen4'
-import Screen5 from './screens/Screen5'
-import Screen6 from './screens/Screen6'
-import Screen7 from './screens/Screen7'
-import Screen8 from './screens/Screen8'
-import Screen9 from './screens/Screen9'
-import JoinScreen from './screens/JoinScreen'
-import SmartPanelReport from './screens/SmartPanelReport'
-import LabDoorstepScreen from './screens/LabDoorstepScreen'
-import HealthVaultScreen from './screens/HealthVaultScreen'
-import SignupDesignsPreview from './screens/SignupDesignsPreview'
-import SignupDesignsPreview2 from './screens/SignupDesignsPreview2'
-import SignupDesignsPreview3 from './screens/SignupDesignsPreview3'
 import SignupScreen from './screens/SignupScreen'
-import TermsScreen from './screens/TermsScreen'
-import PaymentScreen from './screens/PaymentScreen'
-import SettingsScreen from './screens/SettingsScreen'
-import LogoPreviewScreen from './screens/LogoPreviewScreen'
-import NameDesignPreview from './screens/NameDesignPreview'
+
+// Secondary screens — lazy loaded (loaded on first navigation)
+const Screen2    = lazy(() => import('./screens/Screen2'))
+const Screen3    = lazy(() => import('./screens/Screen3'))
+const Screen4    = lazy(() => import('./screens/Screen4'))
+const Screen5    = lazy(() => import('./screens/Screen5'))
+const Screen6    = lazy(() => import('./screens/Screen6'))
+const Screen7    = lazy(() => import('./screens/Screen7'))
+const Screen8    = lazy(() => import('./screens/Screen8'))
+const Screen9    = lazy(() => import('./screens/Screen9'))
+const JoinScreen = lazy(() => import('./screens/JoinScreen'))
+const SmartPanelReport    = lazy(() => import('./screens/SmartPanelReport'))
+const LabDoorstepScreen   = lazy(() => import('./screens/LabDoorstepScreen'))
+const HealthVaultScreen   = lazy(() => import('./screens/HealthVaultScreen'))
+const SignupDesignsPreview  = lazy(() => import('./screens/SignupDesignsPreview'))
+const SignupDesignsPreview2 = lazy(() => import('./screens/SignupDesignsPreview2'))
+const SignupDesignsPreview3 = lazy(() => import('./screens/SignupDesignsPreview3'))
+const TermsScreen          = lazy(() => import('./screens/TermsScreen'))
+const PaymentScreen        = lazy(() => import('./screens/PaymentScreen'))
+const SettingsScreen       = lazy(() => import('./screens/SettingsScreen'))
+const LogoPreviewScreen    = lazy(() => import('./screens/LogoPreviewScreen'))
+const NameDesignPreview    = lazy(() => import('./screens/NameDesignPreview'))
+
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#94a3b8', fontSize: 13 }}>
+      Loading…
+    </div>
+  )
+}
 
 const THEMES = [
   { id: 'teal',  label: '1', dot: '#14b8a6' },
@@ -175,30 +187,32 @@ function AppShell({ theme, setTheme }) {
       <TopBar theme={theme} setTheme={setTheme}/>
       <MedicalDisclaimer/>
       <div style={{ paddingBottom: 70 }}>
-        <Routes>
-          <Route path="/"               element={<Screen1 />} />
-          <Route path="/trends"         element={<Screen2 />} />
-          <Route path="/upload"         element={<Screen3 />} />
-          <Route path="/devices"        element={<Screen4 />} />
-          <Route path="/protocol"       element={<Screen5 />} />
-          <Route path="/diet"           element={<Screen6 />} />
-          <Route path="/progress"       element={<Screen7 />} />
-          <Route path="/share"          element={<Screen8 />} />
-          <Route path="/subscribe"      element={<Screen9 />} />
-          <Route path="/join/:code"     element={<JoinScreen />} />
-          <Route path="/smart-panel"    element={<SmartPanelReport />} />
-          <Route path="/lab-doorstep"   element={<LabDoorstepScreen />} />
-          <Route path="/vault"          element={<HealthVaultScreen />} />
-          <Route path="/signup-preview"   element={<SignupDesignsPreview />} />
-          <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
-          <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
-          <Route path="/signup"         element={<SignupScreen />} />
-          <Route path="/terms"          element={<TermsScreen />} />
-          <Route path="/payment"        element={<PaymentScreen />} />
-          <Route path="/settings"       element={<SettingsScreen />} />
-          <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
-          <Route path="/name-preview"   element={<NameDesignPreview />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/"               element={<Screen1 />} />
+            <Route path="/trends"         element={<Screen2 />} />
+            <Route path="/upload"         element={<Screen3 />} />
+            <Route path="/devices"        element={<Screen4 />} />
+            <Route path="/protocol"       element={<Screen5 />} />
+            <Route path="/diet"           element={<Screen6 />} />
+            <Route path="/progress"       element={<Screen7 />} />
+            <Route path="/share"          element={<Screen8 />} />
+            <Route path="/subscribe"      element={<Screen9 />} />
+            <Route path="/join/:code"     element={<JoinScreen />} />
+            <Route path="/smart-panel"    element={<SmartPanelReport />} />
+            <Route path="/lab-doorstep"   element={<LabDoorstepScreen />} />
+            <Route path="/vault"          element={<HealthVaultScreen />} />
+            <Route path="/signup-preview"   element={<SignupDesignsPreview />} />
+            <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
+            <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
+            <Route path="/signup"         element={<SignupScreen />} />
+            <Route path="/terms"          element={<TermsScreen />} />
+            <Route path="/payment"        element={<PaymentScreen />} />
+            <Route path="/settings"       element={<SettingsScreen />} />
+            <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
+            <Route path="/name-preview"   element={<NameDesignPreview />} />
+          </Routes>
+        </Suspense>
       </div>
       <BottomNav/>
     </div>

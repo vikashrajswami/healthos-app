@@ -44,23 +44,67 @@ const HABITS = [
   },
 ]
 
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function calcStreak(dates) {
+  if (!dates.length) return 0
+  const sorted = [...new Set(dates)].sort().reverse()
+  let streak = 0
+  let d = new Date()
+  for (let i = 0; i < 365; i++) {
+    const s = d.toISOString().slice(0, 10)
+    if (sorted.includes(s)) {
+      streak++
+      d.setDate(d.getDate() - 1)
+    } else if (i === 0) {
+      // Today not yet done — check from yesterday
+      d.setDate(d.getDate() - 1)
+    } else {
+      break
+    }
+  }
+  return streak
+}
+
 export default function Screen5() {
   const nav     = useNavigate()
   const profile = getProfile()
   const [checked, setChecked] = useState(() => {
     try { return JSON.parse(localStorage.getItem('healthos_habits') || '{}') } catch { return {} }
   })
+  const [streakDates, setStreakDates] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('healthos_streak_dates') || '[]') } catch { return [] }
+  })
+
+  const totalHabits = HABITS.reduce((s, h) => s + h.items.length, 0)
+  const doneCount   = Object.values(checked).filter(Boolean).length
+  const streak      = calcStreak(streakDates)
+  const bestStreak  = parseInt(localStorage.getItem('healthos_best_streak') || '0')
 
   function toggle(key) {
     setChecked(prev => {
       const next = { ...prev, [key]: !prev[key] }
       try { localStorage.setItem('healthos_habits', JSON.stringify(next)) } catch {}
+
+      // Update streak dates if >50% done
+      const done = Object.values(next).filter(Boolean).length
+      const today = todayStr()
+      if (done / totalHabits >= 0.5) {
+        const newDates = [...new Set([...streakDates, today])]
+        setStreakDates(newDates)
+        try { localStorage.setItem('healthos_streak_dates', JSON.stringify(newDates)) } catch {}
+        const newStreak = calcStreak(newDates)
+        const best = parseInt(localStorage.getItem('healthos_best_streak') || '0')
+        if (newStreak > best) {
+          try { localStorage.setItem('healthos_best_streak', String(newStreak)) } catch {}
+        }
+      }
+
       return next
     })
   }
-
-  const totalHabits = HABITS.reduce((s, h) => s + h.items.length, 0)
-  const doneCount   = Object.values(checked).filter(Boolean).length
 
   return (
     <div className="screen">
@@ -87,6 +131,40 @@ export default function Screen5() {
       <div className="proto-progress-bar">
         <div className="proto-progress-fill" style={{ width: `${Math.round((doneCount / totalHabits) * 100)}%` }} />
       </div>
+
+      {/* Streak display */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+        <div style={{
+          flex: 1, background: streak > 0 ? 'linear-gradient(135deg,#ff8c00,#ff5f00)' : '#f1f5f9',
+          borderRadius: 14, padding: '14px 16px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 2 }}>{streak > 0 ? '🔥' : '💤'}</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: streak > 0 ? '#fff' : '#94a3b8' }}>{streak}</div>
+          <div style={{ fontSize: 11, color: streak > 0 ? 'rgba(255,255,255,0.8)' : '#94a3b8', fontWeight: 600 }}>day streak</div>
+        </div>
+        <div style={{
+          flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0',
+          borderRadius: 14, padding: '14px 16px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 2 }}>🏆</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>{Math.max(streak, bestStreak)}</div>
+          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>best streak</div>
+        </div>
+        <div style={{
+          flex: 1, background: doneCount === totalHabits ? 'linear-gradient(135deg,#14b8a6,#059669)' : '#f8fafc',
+          border: doneCount === totalHabits ? 'none' : '1px solid #e2e8f0',
+          borderRadius: 14, padding: '14px 16px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 26, marginBottom: 2 }}>{doneCount === totalHabits ? '✅' : '⭕'}</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: doneCount === totalHabits ? '#fff' : '#0f172a' }}>{doneCount}</div>
+          <div style={{ fontSize: 11, color: doneCount === totalHabits ? 'rgba(255,255,255,0.8)' : '#94a3b8', fontWeight: 600 }}>today</div>
+        </div>
+      </div>
+      {streak >= 7 && (
+        <div style={{ background: 'linear-gradient(90deg,#fff7ed,#fef3c7)', border: '1px solid #fcd34d', borderRadius: 12, padding: '10px 14px', marginBottom: 14, fontSize: 13, color: '#92400e', fontWeight: 600 }}>
+          🔥 {streak}-day streak! You're in the top 8% of AROGYOS users this month.
+        </div>
+      )}
 
       {/* Diet plan link */}
       <div className="card diet-link">

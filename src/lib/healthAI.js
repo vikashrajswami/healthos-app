@@ -1010,10 +1010,13 @@ Why share? Sharing your BioAge publicly creates accountability and inspires othe
     keys: ['price','cost','subscription','free trial','how much','paid','subscribe'],
     r: `AROGYOS pricing is simple and transparent:
 
-INDIA: ₹399/year (~₹33/month)
-INTERNATIONAL: $9.99/year (~$0.83/month)
+INDIA:
+• ₹99/month  |  ₹299/6 months (save ₹295)  |  ₹399/year (save ₹789)
 
-FREE TRIAL: 30 days free — no credit card required to start
+INTERNATIONAL:
+• $20/month  |  $49/6 months (save $71)  |  $99/year (save $141)
+
+FREE TRIAL: 30 days free — no charge until trial ends
 
 What you get with AROGYOS Plus:
 • Unlimited lab report uploads (AI biomarker extraction)
@@ -1022,10 +1025,10 @@ What you get with AROGYOS Plus:
 • Family BioAge tracker (up to 6 members)
 • Complete diet plans with allergy customisation
 • Device integration for continuous tracking
-• BioAge history — even if you cancel, your data stays
+• BioAge history — your data stays even if you cancel
 
 Our promises:
-• No surprise renewals — we remind you 7 days before any charge
+• No surprise renewals — reminder 7 days before any charge
 • Your data is always yours — history never deleted even if you cancel
 • Cancel anytime — no long-term commitment
 
@@ -1073,7 +1076,7 @@ AROGYOS focuses on the proven fundamentals — because most people haven't optim
     id: 'hindi_greeting',
     phrases: ['namaste','namaskar','mera bioage','meri health','kya hai bioage','diet plan batao','kya khana chahiye'],
     keys: ['namaste','mera','meri','batao','chahiye','hindi'],
-    r: `Namaste! Main aapka AROGYOS AI health guide hun. 🧬
+    r: `Namaste! Main aapka AROGYOS Health Guide hun. 🌿
 
 Main aapki madad kar sakta hun:
 • Aapke BioAge score ko samajhne mein
@@ -1123,7 +1126,7 @@ function matchIntent(message) {
 }
 
 const FALLBACKS = [
-  `Great question! I'm still learning the answer to that specific one.
+  `Great question! Your Health Guide is still learning that specific topic.
 
 Here's what I CAN help you with right now:
 • BioAge — what it is, how it's calculated, how to lower it
