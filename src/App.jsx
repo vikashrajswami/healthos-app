@@ -23,6 +23,7 @@ import SignupScreen from './screens/SignupScreen'
 import TermsScreen from './screens/TermsScreen'
 import PaymentScreen from './screens/PaymentScreen'
 import SettingsScreen from './screens/SettingsScreen'
+import LogoPreviewScreen from './screens/LogoPreviewScreen'
 
 const THEMES = [
   { id: 'teal',  label: '1', dot: '#14b8a6' },
@@ -47,6 +48,7 @@ const MAIN_PATHS = ['/', '/trends', '/upload', '/devices', '/protocol']
 const NO_TOPBAR = new Set([
   '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
+  '/logo-preview',
 ])
 
 // Screens that should also hide the bottom nav
@@ -192,6 +194,7 @@ function AppShell({ theme, setTheme }) {
           <Route path="/terms"          element={<TermsScreen />} />
           <Route path="/payment"        element={<PaymentScreen />} />
           <Route path="/settings"       element={<SettingsScreen />} />
+          <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
         </Routes>
       </div>
       <BottomNav/>
