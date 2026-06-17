@@ -21,6 +21,12 @@ function HomeGuard() {
   return <Screen1 />
 }
 
+// Test helper — clear all data and go to signup
+function ResetAndSignup() {
+  Object.keys(localStorage).filter(k => k.startsWith('healthos_')).forEach(k => localStorage.removeItem(k))
+  return <Navigate to="/signup" replace />
+}
+
 // Secondary screens — lazy loaded (loaded on first navigation)
 const Screen2    = lazy(() => import('./screens/Screen2'))
 const Screen3    = lazy(() => import('./screens/Screen3'))
@@ -247,6 +253,7 @@ function AppShell({ theme, setTheme }) {
             <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
             <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
             <Route path="/signup"         element={<SignupScreen />} />
+            <Route path="/reset"          element={<ResetAndSignup />} />
             <Route path="/terms"          element={<TermsScreen />} />
             <Route path="/payment"        element={<PaymentScreen />} />
             <Route path="/settings"       element={<SettingsScreen />} />
