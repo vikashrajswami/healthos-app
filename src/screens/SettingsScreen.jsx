@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { LANGUAGES, useLang, useT } from '../lib/i18n'
 import Logo from '../components/Logo'
 import { requestNotificationPermission, getNotificationPermission, subscribeToPush } from '../lib/notifications'
+import { pushToCloud } from '../lib/sync'
 
 const validateEmail = e => /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(e)
 const validatePhone = p => /^[+]?[\d\s\-()]{7,15}$/.test(p)
@@ -242,6 +243,7 @@ export default function SettingsScreen() {
     setProfile(updated)
     localStorage.setItem('healthos_profile', JSON.stringify(updated))
     setModal(null)
+    pushToCloud()
   }
   function handleDelete() {
     const keys = Object.keys(localStorage).filter(k => k.startsWith('healthos_'))

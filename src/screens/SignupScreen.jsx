@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sanitizeName, isSuspiciousInput, recordOtpAttempt, isOtpBlocked } from '../lib/security'
+import { pushToCloud, pullFromCloud } from '../lib/sync'
 
 const APP_THEMES = [
   { id: 'teal',  label: 'Clinical Teal',    dot: '#14b8a6', accent: '#14b8a6', dark: '#0d9488' },
@@ -151,6 +152,27 @@ export default function SignupScreen() {
       const text = await res.text()
       const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok || !data.valid) throw new Error(data.error || 'Incorrect OTP. Please try again.')
+
+      // Persist user identity
+      let uid = localStorage.getItem('healthos_uid')
+      if (!uid) {
+        uid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)
+        localStorage.setItem('healthos_uid', uid)
+      }
+      const cleanName = sanitizeName(nm)
+      const existing  = JSON.parse(localStorage.getItem('healthos_profile') || '{}')
+      localStorage.setItem('healthos_profile', JSON.stringify({
+        ...existing,
+        name:  cleanName,
+        phone: tab === 'mobile' ? contactValue : (existing.phone || ''),
+        email: tab === 'email'  ? em           : (existing.email || ''),
+      }))
+      localStorage.setItem('healthos_username', cleanName)
+
+      // Restore any previous cloud data for this user, then push current state
+      await pullFromCloud(uid)
+      pushToCloud()
+
       setSt('done')
     } catch (e) {
       setErr(e.message)

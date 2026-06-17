@@ -78,6 +78,15 @@ create index if not exists idx_lab_reports_uid      on public.lab_reports(uid);
 create index if not exists idx_family_inviter        on public.family_members(inviter_id);
 create index if not exists idx_invites_inviter        on public.invites(inviter_id);
 
+-- ── Extra profile columns for full data sync ─────────────────────────────────
+alter table public.profiles add column if not exists weight_kg      numeric;
+alter table public.profiles add column if not exists theme          text    default 'teal';
+alter table public.profiles add column if not exists lang           text    default 'en';
+alter table public.profiles add column if not exists habits         jsonb   default '{}';
+alter table public.profiles add column if not exists streak_dates   jsonb   default '[]';
+alter table public.profiles add column if not exists best_streak    integer default 0;
+alter table public.profiles add column if not exists first_open     bigint;
+
 -- ── Row-Level Security (disable for now — using service key only) ──
 -- All access goes through the backend with service role key.
 -- Enable RLS only when you add Supabase Auth later.

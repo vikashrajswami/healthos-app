@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getProfile } from '../lib/userProfile'
+import { pushToCloud } from '../lib/sync'
 
 const HABITS = [
   {
@@ -102,6 +103,7 @@ export default function Screen5() {
         }
       }
 
+      pushToCloud()
       return next
     })
   }

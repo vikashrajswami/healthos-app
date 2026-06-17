@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildReport } from '../lib/reportGenerator'
 import { addReport, getAllReports } from '../lib/reportStore'
+import { pushToCloud } from '../lib/sync'
 import { extractRowsFromText, parseLabReport, parseBiomarkerRow } from '../lib/labNormalizer'
 import UpgradeModal from '../components/UpgradeModal'
 import { isPlusMember, getMonthlyUploads, recordUpload } from '../lib/planStatus'
@@ -437,6 +438,7 @@ export default function Screen3() {
     }
 
     addReport({ name: file.name, source: 'Upload', biomarkers })
+    pushToCloud()
     setUploads(prev => prev.map(u => u.id === id
       ? { ...u, status: 'done', info: `${biomarkers.length} biomarkers extracted`, biomarkers }
       : u

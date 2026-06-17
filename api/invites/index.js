@@ -8,7 +8,7 @@ function randCode() {
   return Math.random().toString(36).substring(2, 9).toUpperCase()
 }
 
-const BASE = process.env.APP_URL || 'https://healthos-app-two.vercel.app'
+const BASE = process.env.APP_URL || 'https://arogyos.com'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')

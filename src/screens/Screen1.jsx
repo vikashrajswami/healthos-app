@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAIResponse } from '../lib/healthAI'
+import { pushToCloud } from '../lib/sync'
 import { getProfile, saveProfile, calcBioAge } from '../lib/userProfile'
 import UpgradeModal from '../components/UpgradeModal'
 import DailyInsightCard from '../components/DailyInsightCard'
@@ -88,22 +89,7 @@ function BioAgeQuizModal({ onDone }) {
     saveProfile(profile)
     localStorage.setItem('healthos_username', profile.name)
 
-    // Fire-and-forget: sync profile to Supabase (non-blocking)
-    const uid = localStorage.getItem('healthos_uid')
-    if (uid) {
-      fetch('/api/sync-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid,
-          name:         profile.name,
-          bioage:       profile.bioage,
-          actual_age:   profile.actualAge,
-          quiz_done:    true,
-          quiz_answers: profile.answers,
-        }),
-      }).catch(() => {}) // silently ignore network errors
-    }
+    pushToCloud() // fire-and-forget backup
 
     onDone(profile)
   }

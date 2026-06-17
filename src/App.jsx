@@ -7,6 +7,7 @@ import { isPlusMember } from './lib/planStatus'
 import RatingPrompt from './components/RatingPrompt'
 import { recordAppOpen, daysSinceFirstOpen, hasRatingPromptBeenShown } from './lib/insights'
 import { registerDailySync } from './lib/notifications'
+import { pushToCloud } from './lib/sync'
 
 // Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'
@@ -202,6 +203,7 @@ function AppShell({ theme, setTheme }) {
   useEffect(() => {
     recordAppOpen()
     registerDailySync()
+    if (localStorage.getItem('healthos_uid')) pushToCloud()
     // Show rating prompt after 7 days if quiz done and not yet shown
     const quizDone = !!localStorage.getItem('healthos_profile') &&
       JSON.parse(localStorage.getItem('healthos_profile') || '{}').quizDone

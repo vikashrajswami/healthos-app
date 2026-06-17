@@ -30,7 +30,7 @@ function bioAgeFrom(actual, quiz) {
   return Math.max(1, Math.round(bio))
 }
 
-const BASE = process.env.APP_URL || 'https://healthos-app-two.vercel.app'
+const BASE = process.env.APP_URL || 'https://arogyos.com'
 
 /* ────────────────────────────────────────────────
    POST /api/invites   — create invite
