@@ -3,16 +3,24 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 const PRICING = {
   india: {
-    monthly:  { price: '₹99',  amount: 99,  period: '/month',    billingLabel: 'Billed monthly',        save: null        },
-    halfyear: { price: '₹299', amount: 299, period: '/6 months', billingLabel: 'Billed every 6 months', save: 'Save ₹295' },
-    annual:   { price: '₹399', amount: 399, period: '/year',     billingLabel: 'Billed annually',       save: 'Save ₹789' },
+    monthly:  { price: '₹99',  amount: 9900,  period: '/month',    billingLabel: 'Billed monthly',        save: null        },
+    halfyear: { price: '₹299', amount: 29900, period: '/6 months', billingLabel: 'Billed every 6 months', save: 'Save ₹295' },
+    annual:   { price: '₹399', amount: 39900, period: '/year',     billingLabel: 'Billed annually',       save: 'Save ₹789' },
   },
   intl: {
-    monthly:  { price: '$20', amount: 20,  period: '/month',    billingLabel: 'Billed monthly',        save: null       },
-    halfyear: { price: '$49', amount: 49,  period: '/6 months', billingLabel: 'Billed every 6 months', save: 'Save $71' },
-    annual:   { price: '$99', amount: 99,  period: '/year',     billingLabel: 'Billed annually',       save: 'Save $141'},
+    monthly:  { price: '$20', amount: 2000,  period: '/month',    billingLabel: 'Billed monthly',        save: null       },
+    halfyear: { price: '$49', amount: 4900,  period: '/6 months', billingLabel: 'Billed every 6 months', save: 'Save $71' },
+    annual:   { price: '$99', amount: 9900,  period: '/year',     billingLabel: 'Billed annually',       save: 'Save $141'},
   },
 }
+
+const PADDLE_PRODUCTS = {
+  monthly:  import.meta.env.VITE_PADDLE_PRODUCT_ID_MONTHLY,
+  halfyear: import.meta.env.VITE_PADDLE_PRODUCT_ID_HALFYEAR,
+  annual:   import.meta.env.VITE_PADDLE_PRODUCT_ID_ANNUAL,
+}
+const PADDLE_VENDOR   = import.meta.env.VITE_PADDLE_VENDOR_ID
+const PADDLE_SANDBOX  = import.meta.env.VITE_PADDLE_SANDBOX === 'true'
 
 const FEATURES = [
   'Unlimited lab report uploads & AI biomarker extraction',
@@ -24,12 +32,24 @@ const FEATURES = [
   'Cancel anytime during trial — pay nothing',
 ]
 
-function fmtCard(v) {
-  return v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return }
+    const s = document.createElement('script')
+    s.src = src
+    s.onload = resolve
+    s.onerror = reject
+    document.head.appendChild(s)
+  })
 }
-function fmtExp(v) {
-  const d = v.replace(/\D/g, '').slice(0, 4)
-  return d.length >= 3 ? `${d.slice(0,2)}/${d.slice(2)}` : d
+
+function getUid() {
+  let uid = localStorage.getItem('healthos_uid')
+  if (!uid) {
+    uid = crypto.randomUUID()
+    localStorage.setItem('healthos_uid', uid)
+  }
+  return uid
 }
 
 export default function PaymentScreen() {
@@ -44,43 +64,96 @@ export default function PaymentScreen() {
   const isIN = region === 'india'
 
   const [step,    setStep]    = useState('form')
-  const [method,  setMethod]  = useState(isIN ? 'upi' : 'card')
-  const [upi,     setUpi]     = useState('')
-  const [card,    setCard]    = useState({ num: '', exp: '', cvv: '', name: '' })
   const [err,     setErr]     = useState('')
   const [loading, setLoading] = useState(false)
 
-  function validate() {
-    if (method === 'upi') {
-      if (!/^[\w.\-]+@[\w]+$/.test(upi)) return 'Enter a valid UPI ID (e.g. name@upi)'
-    } else {
-      const raw = card.num.replace(/\s/g, '')
-      if (raw.length < 16) return 'Enter a valid 16-digit card number'
-      if (!/^\d{2}\/\d{2}$/.test(card.exp)) return 'Enter expiry as MM/YY'
-      const [m, y] = card.exp.split('/').map(Number)
-      const now = new Date()
-      if (m < 1 || m > 12 || (y + 2000) < now.getFullYear() || ((y + 2000) === now.getFullYear() && m < now.getMonth() + 1)) return 'Card has expired'
-      if (card.cvv.length < 3) return 'Enter a valid CVV'
-      if (card.name.trim().length < 2) return 'Enter the name on card'
-    }
-    return null
-  }
-
-  function pay() {
-    const e = validate()
-    if (e) return setErr(e)
+  // ── India: Razorpay checkout ────────────────────────────────────────────────
+  async function payWithRazorpay() {
     setErr('')
     setLoading(true)
-    // Simulated payment — replace with Razorpay (India) or Stripe (International) SDK call
-    setTimeout(() => { setLoading(false); setStep('success') }, 1800)
+    try {
+      const uid = getUid()
+
+      // 1. Create order on server
+      const orderRes = await fetch('/api/payment-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, billing, region }),
+      })
+      const { orderId, amount, currency, keyId, error: orderErr } = await orderRes.json()
+      if (orderErr) throw new Error(orderErr)
+
+      // 2. Load Razorpay SDK
+      await loadScript('https://checkout.razorpay.com/v1/checkout.js')
+
+      // 3. Open Razorpay checkout modal
+      const rzp = new window.Razorpay({
+        key:         keyId,
+        order_id:    orderId,
+        amount,
+        currency,
+        name:        'AROGYOS',
+        description: 'AROGYOS Plus — 30-day free trial',
+        image:       '/logo192.png',
+        handler: async (resp) => {
+          // 4. Verify on server + store subscription
+          const verifyRes = await fetch('/api/payment-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id:   resp.razorpay_order_id,
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_signature:  resp.razorpay_signature,
+              uid, billing, region, amount, currency,
+            }),
+          })
+          const { success, error: verifyErr } = await verifyRes.json()
+          if (!success) { setErr(verifyErr || 'Verification failed'); setLoading(false); return }
+          setStep('success')
+        },
+        modal: {
+          ondismiss: () => { setLoading(false) },
+        },
+        theme: { color: '#14b8a6' },
+      })
+      rzp.on('payment.failed', (resp) => {
+        setErr(resp.error?.description || 'Payment failed. Please try again.')
+        setLoading(false)
+      })
+      rzp.open()
+    } catch (e) {
+      setErr(e.message || 'Could not initiate payment. Please try again.')
+      setLoading(false)
+    }
   }
 
-  const inp = {
-    width: '100%', padding: '13px 14px',
-    background: '#f8fafb', border: '1.5px solid #e2e8f0',
-    borderRadius: 12, fontSize: 14, fontFamily: 'inherit',
-    outline: 'none', boxSizing: 'border-box', color: '#0f172a',
+  // ── International: Paddle overlay ──────────────────────────────────────────
+  async function payWithPaddle() {
+    setErr('')
+    setLoading(true)
+    try {
+      const uid       = getUid()
+      const productId = PADDLE_PRODUCTS[billing]
+      if (!productId || !PADDLE_VENDOR) throw new Error('Payment not configured yet')
+
+      await loadScript('https://cdn.paddle.com/paddle/paddle.js')
+
+      if (PADDLE_SANDBOX) window.Paddle.Environment.set('sandbox')
+      window.Paddle.Setup({ vendor: Number(PADDLE_VENDOR) })
+
+      window.Paddle.Checkout.open({
+        product:     productId,
+        passthrough: JSON.stringify({ uid, billing, region }),
+        successCallback: () => { setStep('success') },
+        closeCallback:   () => { setLoading(false) },
+      })
+    } catch (e) {
+      setErr(e.message || 'Could not initiate payment. Please try again.')
+      setLoading(false)
+    }
   }
+
+  const handlePay = isIN ? payWithRazorpay : payWithPaddle
 
   if (step === 'success') return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
@@ -90,7 +163,7 @@ export default function PaymentScreen() {
         <strong>AROGYOS Plus</strong> trial is now active.<br/>
         A confirmation will be sent to your registered contact.
       </div>
-      <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 32 }}>Powered by {isIN ? 'Razorpay' : 'Stripe'} · PCI DSS compliant</div>
+      <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 32 }}>Powered by {isIN ? 'Razorpay' : 'Paddle'} · PCI DSS compliant</div>
       <button onClick={() => nav('/')} style={{ padding: '15px 36px', background: 'linear-gradient(90deg,#14b8a6,#0d9488)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
         Open AROGYOS →
       </button>
@@ -112,7 +185,7 @@ export default function PaymentScreen() {
         <div style={{ marginTop: 16 }}>
           <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: 3, border: '1px solid rgba(255,255,255,0.1)' }}>
             {[['india','🇮🇳 INR'],['intl','🌍 USD']].map(([id, label]) => (
-              <button key={id} onClick={() => { setRegion(id); setMethod(id === 'india' ? 'upi' : 'card'); setErr('') }} style={{
+              <button key={id} onClick={() => { setRegion(id); setErr('') }} style={{
                 padding: '6px 14px', border: 'none', borderRadius: 18, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                 background: region === id ? '#fff' : 'none',
                 color: region === id ? '#0f172a' : 'rgba(255,255,255,0.45)',
@@ -153,7 +226,7 @@ export default function PaymentScreen() {
               <div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>AROGYOS Plus</div>
                 <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>30-day free trial included</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{plan.billingLabel}{isIN ? ' · 18% GST inclusive' : ''}</div>
+                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{plan.billingLabel}{isIN ? ' · GST inclusive' : ''}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 26, fontWeight: 900, color: '#14b8a6' }}>{plan.price}</div>
@@ -178,84 +251,45 @@ export default function PaymentScreen() {
           </div>
         </div>
 
-        {/* Payment form */}
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 18 }}>
-          <div style={{ padding: '18px 18px 22px' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Payment Method</div>
-
-            {isIN && (
-              <div style={{ display: 'flex', gap: 6, marginBottom: 18, background: '#f1f5f9', borderRadius: 12, padding: 4 }}>
-                {[['upi','⚡ UPI'],['card','💳 Card']].map(([id, label]) => (
-                  <button key={id} onClick={() => { setMethod(id); setErr('') }} style={{
-                    flex: 1, padding: '10px 0', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                    background: method === id ? '#fff' : 'none',
-                    color: method === id ? '#0f172a' : '#94a3b8',
-                    boxShadow: method === id ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-                    transition: 'all .15s',
-                  }}>{label}</button>
+        {/* Pay button */}
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', padding: '22px 18px', marginBottom: 18 }}>
+          {isIN ? (
+            <>
+              <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
+                Pay securely via <strong>Razorpay</strong> — UPI, Cards, Net Banking, Wallets all supported
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+                {['PhonePe', 'GPay', 'Paytm', 'UPI', 'Visa', 'Mastercard'].map(b => (
+                  <span key={b} style={{ fontSize: 11, color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: '3px 8px', fontWeight: 600 }}>{b}</span>
                 ))}
               </div>
-            )}
-            {!isIN && (
-              <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginBottom: 16 }}>💳 Credit / Debit Card</div>
-            )}
-
-            {method === 'upi' && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6 }}>UPI ID</div>
-                <input style={inp} placeholder="yourname@upi / @paytm / @ybl"
-                  value={upi} onChange={e => setUpi(e.target.value.toLowerCase())}/>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>PhonePe · Google Pay · Paytm · BHIM · All UPI apps</div>
-              </div>
-            )}
-
-            {method === 'card' && (
-              <>
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6 }}>Card Number</div>
-                  <input style={inp} placeholder="1234 5678 9012 3456" inputMode="numeric"
-                    value={card.num} onChange={e => setCard(c => ({ ...c, num: fmtCard(e.target.value) }))}/>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6 }}>Expiry (MM/YY)</div>
-                    <input style={inp} placeholder="MM/YY" inputMode="numeric"
-                      value={card.exp} onChange={e => setCard(c => ({ ...c, exp: fmtExp(e.target.value) }))}/>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6 }}>CVV</div>
-                    <input style={{ ...inp }} placeholder="•••" inputMode="numeric" maxLength={4} type="password"
-                      value={card.cvv} onChange={e => setCard(c => ({ ...c, cvv: e.target.value.replace(/\D/g,'').slice(0,4) }))}/>
-                  </div>
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6 }}>Name on Card</div>
-                  <input style={inp} placeholder="As printed on card"
-                    value={card.name} onChange={e => setCard(c => ({ ...c, name: e.target.value }))}/>
-                </div>
-              </>
-            )}
-
-            {err && (
-              <div style={{ fontSize: 13, color: '#ef4444', marginBottom: 14, fontWeight: 600 }}>⚠ {err}</div>
-            )}
-
-            <button onClick={pay} disabled={loading} style={{
-              width: '100%', padding: 17,
-              background: 'linear-gradient(90deg,#14b8a6,#059669)',
-              color: '#fff', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800,
-              cursor: loading ? 'wait' : 'pointer',
-              boxShadow: '0 6px 24px rgba(20,184,166,0.35)',
-              opacity: loading ? .7 : 1, transition: 'opacity .15s',
-            }}>
-              {loading ? 'Processing…' : 'Start 30-Day Free Trial →'}
-            </button>
-
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-              {['🔒 SSL Encrypted', '✅ PCI DSS', isIN ? '⚡ Razorpay' : '💳 Stripe', '↩️ 30-day Refund'].map(b => (
-                <span key={b} style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{b}</span>
-              ))}
+            </>
+          ) : (
+            <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
+              Pay securely via <strong>Paddle</strong> — all major cards, PayPal, local methods.<br/>
+              <span style={{ fontSize: 11, color: '#94a3b8' }}>All taxes handled automatically for your country</span>
             </div>
+          )}
+
+          {err && (
+            <div style={{ fontSize: 13, color: '#ef4444', marginBottom: 14, fontWeight: 600, textAlign: 'center' }}>⚠ {err}</div>
+          )}
+
+          <button onClick={handlePay} disabled={loading} style={{
+            width: '100%', padding: 17,
+            background: 'linear-gradient(90deg,#14b8a6,#059669)',
+            color: '#fff', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800,
+            cursor: loading ? 'wait' : 'pointer',
+            boxShadow: '0 6px 24px rgba(20,184,166,0.35)',
+            opacity: loading ? .7 : 1, transition: 'opacity .15s',
+          }}>
+            {loading ? 'Opening payment…' : `Start 30-Day Free Trial · ${plan.price}${plan.period}`}
+          </button>
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+            {['🔒 SSL Encrypted', '✅ PCI DSS', isIN ? '⚡ Razorpay' : '🌍 Paddle MoR', '↩️ 30-day Refund'].map(b => (
+              <span key={b} style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{b}</span>
+            ))}
           </div>
         </div>
 

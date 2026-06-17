@@ -80,6 +80,24 @@ function BioAgeQuizModal({ onDone }) {
     const profile   = { name: name.trim() || 'You', actualAge, bioage, answers: ans, quizDone: true, doneAt: Date.now() }
     saveProfile(profile)
     localStorage.setItem('healthos_username', profile.name)
+
+    // Fire-and-forget: sync profile to Supabase (non-blocking)
+    const uid = localStorage.getItem('healthos_uid')
+    if (uid) {
+      fetch('/api/sync-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid,
+          name:         profile.name,
+          bioage:       profile.bioage,
+          actual_age:   profile.actualAge,
+          quiz_done:    true,
+          quiz_answers: profile.answers,
+        }),
+      }).catch(() => {}) // silently ignore network errors
+    }
+
     onDone(profile)
   }
 
