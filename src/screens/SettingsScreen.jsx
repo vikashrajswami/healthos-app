@@ -9,21 +9,51 @@ const validatePhone = p => /^[+]?[\d\s\-()]{7,15}$/.test(p)
 
 // ── OTP mini-flow ─────────────────────────────────────────────────────────────
 function OtpFlow({ title, current, type, accent, onDone, onClose }) {
-  const [step, setStep]   = useState('input')  // input | otp | done
-  const [val,  setVal]    = useState('')
-  const [otp,  setOtp]    = useState(Array(6).fill(''))
-  const [err,  setErr]    = useState('')
+  const [step,    setStep]    = useState('input')  // input | otp | done
+  const [val,     setVal]     = useState('')
+  const [otp,     setOtp]     = useState(Array(6).fill(''))
+  const [err,     setErr]     = useState('')
+  const [loading, setLoading] = useState(false)
   const refs = useRef([])
 
-  function submit() {
+  async function submit() {
     const ok = type === 'email' ? validateEmail(val) : validatePhone(val)
     if (!ok) return setErr(type === 'email' ? 'Enter a valid email' : 'Enter a valid phone number')
-    setErr(''); setStep('otp')
+    setErr('')
+    setLoading(true)
+    try {
+      const res  = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: val, type: type === 'email' ? 'email' : 'sms' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
+      setStep('otp')
+    } catch (e) {
+      setErr(e.message)
+    }
+    setLoading(false)
   }
-  function verify() {
+
+  async function verify() {
     if (otp.join('').length < 6) return setErr('Enter all 6 digits')
-    if (otp.join('') !== '000000') return setErr('Incorrect OTP. Please check and try again.')
-    onDone(val); setStep('done')
+    setLoading(true)
+    setErr('')
+    try {
+      const res  = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: val, code: otp.join('') }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.valid) throw new Error(data.error || 'Incorrect OTP. Please try again.')
+      onDone(val)
+      setStep('done')
+    } catch (e) {
+      setErr(e.message)
+    }
+    setLoading(false)
   }
   function onInput(i, e) {
     const v = e.target.value.replace(/\D/g,'').slice(-1)
@@ -46,7 +76,7 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
             {err && <div style={{ color:'#ef4444', fontSize:12, marginTop:6 }}>{err}</div>}
             <div style={{ display:'flex', gap:10, marginTop:16 }}>
               <button onClick={onClose} style={{ flex:1, padding:13, border:'1.5px solid #e2e8f0', borderRadius:12, background:'#fff', fontWeight:700, cursor:'pointer', fontSize:14 }}>Cancel</button>
-              <button onClick={submit} style={{ flex:2, padding:13, background:`linear-gradient(90deg,${accent},${accent}bb)`, border:'none', borderRadius:12, color:'#fff', fontWeight:800, cursor:'pointer', fontSize:14 }}>Send OTP</button>
+              <button onClick={submit} disabled={loading} style={{ flex:2, padding:13, background:`linear-gradient(90deg,${accent},${accent}bb)`, border:'none', borderRadius:12, color:'#fff', fontWeight:800, cursor: loading ? 'wait' : 'pointer', fontSize:14, opacity: loading ? 0.75 : 1 }}>{loading ? 'Sending…' : 'Send OTP'}</button>
             </div>
           </>
         )}
@@ -64,7 +94,7 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
               ))}
             </div>
             {err && <div style={{ color:'#ef4444', fontSize:12, marginBottom:10, textAlign:'center' }}>{err}</div>}
-            <button onClick={verify} style={{ width:'100%', padding:13, background:`linear-gradient(90deg,${accent},${accent}bb)`, border:'none', borderRadius:12, color:'#fff', fontWeight:800, cursor:'pointer', fontSize:14 }}>Verify →</button>
+            <button onClick={verify} disabled={loading} style={{ width:'100%', padding:13, background:`linear-gradient(90deg,${accent},${accent}bb)`, border:'none', borderRadius:12, color:'#fff', fontWeight:800, cursor: loading ? 'wait' : 'pointer', fontSize:14, opacity: loading ? 0.75 : 1 }}>{loading ? 'Verifying…' : 'Verify →'}</button>
             <button onClick={() => setStep('input')} style={{ width:'100%', marginTop:8, padding:10, border:'none', background:'none', color:'#94a3b8', fontSize:12, cursor:'pointer' }}>← Change {type}</button>
           </>
         )}

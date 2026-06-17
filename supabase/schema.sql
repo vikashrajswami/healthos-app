@@ -112,3 +112,32 @@ left join public.subscriptions s
   on s.uid = p.uid
   and s.status in ('trialing', 'active')
 order by p.created_at desc;
+
+-- ── OTP codes (real verification) ─────────────────────────────────────────────
+create table if not exists public.otp_codes (
+  id          uuid default gen_random_uuid() primary key,
+  contact     text not null,            -- email address or phone with country code
+  code        text not null,            -- 6-digit OTP
+  type        text not null,            -- 'email' | 'sms'
+  expires_at  timestamptz not null,     -- 10 minutes from creation
+  used        boolean default false,
+  used_at     timestamptz,
+  created_at  timestamptz default now()
+);
+
+-- Index for fast lookup by contact
+create index if not exists idx_otp_contact on public.otp_codes(contact, used);
+
+-- Auto-delete OTPs older than 24 hours (run via Supabase cron or pg_cron)
+-- select cron.schedule('cleanup-otps', '0 * * * *', $$
+--   delete from public.otp_codes where created_at < now() - interval '24 hours';
+-- $$);
+
+-- ── Push notification subscriptions ───────────────────────────────────────────
+create table if not exists public.push_subscriptions (
+  uid        text primary key references public.profiles(uid) on delete cascade,
+  endpoint   text not null,
+  p256dh     text,
+  auth       text,
+  updated_at timestamptz default now()
+);

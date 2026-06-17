@@ -60,30 +60,37 @@ function OtpBoxes({ value, onChange, A }) {
   )
 }
 
-function Timer({ secs, A }) {
+function Timer({ secs, A, onResend }) {
   const [s, setS] = useState(secs)
   useEffect(() => {
     if (s <= 0) return
     const t = setTimeout(() => setS(s - 1), 1000)
     return () => clearTimeout(t)
   }, [s])
+
+  async function handleResend() {
+    if (onResend) await onResend()
+    setS(secs)
+  }
+
   return s > 0
     ? <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Resend in <b style={{ color: 'rgba(255,255,255,0.6)' }}>{Math.floor(s / 60)}:{String(s % 60).padStart(2, '0')}</b></span>
-    : <button onClick={() => setS(secs)} style={{ background: 'none', border: 'none', color: A, cursor: 'pointer', fontWeight: 700, fontSize: 13, textDecoration: 'underline', padding: 0 }}>Resend OTP</button>
+    : <button onClick={handleResend} style={{ background: 'none', border: 'none', color: A, cursor: 'pointer', fontWeight: 700, fontSize: 13, textDecoration: 'underline', padding: 0 }}>Resend OTP</button>
 }
 
 export default function SignupScreen() {
   const nav = useNavigate()
-  const [tid,    setTid]    = useState('teal')
-  const [tab,    setTab]    = useState('mobile')
-  const [cc,     setCc]     = useState(COUNTRIES[0])
-  const [ph,     setPh]     = useState('')
-  const [em,     setEm]     = useState('')
-  const [nm,     setNm]     = useState('')
-  const [st,     setSt]     = useState('form')
-  const [otp,    setOtp]    = useState(Array(6).fill(''))
-  const [err,    setErr]    = useState('')
-  const [showCC, setShowCC] = useState(false)
+  const [tid,     setTid]     = useState('teal')
+  const [tab,     setTab]     = useState('mobile')
+  const [cc,      setCc]      = useState(COUNTRIES[0])
+  const [ph,      setPh]      = useState('')
+  const [em,      setEm]      = useState('')
+  const [nm,      setNm]      = useState('')
+  const [st,      setSt]      = useState('form')
+  const [otp,     setOtp]     = useState(Array(6).fill(''))
+  const [err,     setErr]     = useState('')
+  const [sending, setSending] = useState(false)
+  const [showCC,  setShowCC]  = useState(false)
   const [consent, setConsent] = useState({ terms: false, privacy: false, health: false, marketing: false })
 
   const theme = APP_THEMES.find(t => t.id === tid)
@@ -96,22 +103,57 @@ export default function SignupScreen() {
   }
   const allRequired = consent.terms && consent.privacy && consent.health
 
-  function go() {
+  // Derived contact value used for OTP API calls
+  const contactValue = tab === 'mobile' ? `${cc.dial}${ph.replace(/\D/g, '')}` : em
+
+  async function sendOTP() {
+    setSending(true)
+    setErr('')
+    try {
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: contactValue, type: tab === 'mobile' ? 'sms' : 'email' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
+      setSt('otp')
+    } catch (e) {
+      setErr(e.message)
+    }
+    setSending(false)
+  }
+
+  async function go() {
     const cleanName = sanitizeName(nm)
     if (cleanName.length < 2) return setErr('Full name is required')
     if (isSuspiciousInput(cleanName)) return setErr('Invalid characters in name')
     if (tab === 'mobile' && !validatePhone(ph, cc)) return setErr(`Invalid ${cc.name} number`)
     if (tab === 'email'  && !validateEmail(em))     return setErr('Enter a valid email address')
     if (!allRequired) return setErr('Please accept all required agreements to continue')
-    setErr(''); setSt('otp')
+    setErr('')
+    await sendOTP()
   }
-  function verify() {
-    const otpKey = tab === 'mobile' ? `${cc.dial}${ph}` : em
-    if (isOtpBlocked(otpKey)) return setErr('Too many attempts. Try again in 15 minutes.')
-    recordOtpAttempt(otpKey)
+
+  async function verify() {
+    if (isOtpBlocked(contactValue)) return setErr('Too many attempts. Try again in 15 minutes.')
+    recordOtpAttempt(contactValue)
     if (otp.join('').length < 6) return setErr('Enter all 6 digits')
-    if (otp.join('') !== '000000') return setErr('Incorrect OTP. Please check and try again.')
-    setErr(''); setSt('done')
+    setSending(true)
+    setErr('')
+    try {
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: contactValue, code: otp.join('') }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.valid) throw new Error(data.error || 'Incorrect OTP. Please try again.')
+      setSt('done')
+    } catch (e) {
+      setErr(e.message)
+    }
+    setSending(false)
   }
 
   // ── Success ───────────────────────────────────────────────────────────────────
@@ -284,8 +326,8 @@ export default function SignupScreen() {
 
             {err && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14, marginTop: 10, fontWeight: 600 }}>⚠ {err}</div>}
 
-            <button onClick={go} disabled={!allRequired} style={{ width: '100%', padding: 17, background: allRequired ? `linear-gradient(90deg,${A},${theme.dark})` : '#2a2a2a', color: allRequired ? '#000' : '#555', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800, cursor: allRequired ? 'pointer' : 'default', marginTop: 14, boxShadow: allRequired ? `0 6px 24px ${A}36` : 'none', transition: 'all .2s' }}>
-              Continue →
+            <button onClick={go} disabled={!allRequired || sending} style={{ width: '100%', padding: 17, background: allRequired ? `linear-gradient(90deg,${A},${theme.dark})` : '#2a2a2a', color: allRequired ? '#000' : '#555', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800, cursor: allRequired && !sending ? 'pointer' : 'default', marginTop: 14, boxShadow: allRequired ? `0 6px 24px ${A}36` : 'none', transition: 'all .2s', opacity: sending ? 0.75 : 1 }}>
+              {sending ? 'Sending OTP…' : 'Continue →'}
             </button>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', textAlign: 'center', marginTop: 14, lineHeight: 1.8 }}>
               🔒 256-bit AES encrypted · DPDP Act 2023 · GDPR compliant
@@ -321,10 +363,10 @@ export default function SignupScreen() {
 
             {err && <div style={{ fontSize: 13, color: '#f87171', marginTop: 16, fontWeight: 600, textAlign: 'center' }}>⚠ {err}</div>}
 
-            <button onClick={verify} style={{ width: '100%', padding: 17, background: `linear-gradient(90deg,${A},${theme.dark})`, color: '#000', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800, cursor: 'pointer', margin: '26px 0 16px', boxShadow: `0 6px 24px ${A}36` }}>
-              Verify →
+            <button onClick={verify} disabled={sending} style={{ width: '100%', padding: 17, background: `linear-gradient(90deg,${A},${theme.dark})`, color: '#000', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800, cursor: sending ? 'wait' : 'pointer', margin: '26px 0 16px', boxShadow: `0 6px 24px ${A}36`, opacity: sending ? 0.75 : 1 }}>
+              {sending ? 'Verifying…' : 'Verify →'}
             </button>
-            <div style={{ textAlign: 'center' }}><Timer secs={55} A={A}/></div>
+            <div style={{ textAlign: 'center' }}><Timer secs={55} A={A} onResend={sendOTP}/></div>
 
             <button onClick={() => setSt('form')} style={{ display: 'block', margin: '20px auto 0', background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'pointer' }}>
               ← Change number / email
