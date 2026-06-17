@@ -1,13 +1,5 @@
-// HealthOS icon: teal gradient rounded-square + 6-petal lotus chakra bloom + ECG pulse line
-// Based on "K — LOTUS PULSE" brand: lotus petals (chakra bloom) + pulse, grounding + vitality
+// HealthOS logo — Double-Layer Lotus (6 petals: 3 inner + 3 outer) + ECG pulse line
 export default function Logo({ size = 36, style }) {
-  // Lotus bloom: 6 almond/vesica-piscis petals rotated 60° each around bloom center
-  // Each petal points outward from (50,54), shaped as a leaf from center to tip
-  const bloomCx = 50
-  const bloomCy = 54
-  const petalPath = 'M 50,54 C 43,48 43,37 50,33 C 57,37 57,48 50,54 Z'
-  const petals = [0, 60, 120, 180, 240, 300]
-
   return (
     <svg
       width={size} height={size}
@@ -15,45 +7,40 @@ export default function Logo({ size = 36, style }) {
       style={{ display: 'block', flexShrink: 0, ...style }}
     >
       <defs>
-        <linearGradient id="hos-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor="#52ddb5" />
-          <stop offset="100%" stopColor="#16a87c" />
-        </linearGradient>
-        <linearGradient id="hos-g2" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stopColor="#5fe3bb" />
-          <stop offset="100%" stopColor="#0e9a6e" />
+        <linearGradient id="hos-grad" x1="10%" y1="0%" x2="90%" y2="100%">
+          <stop offset="0%"  stopColor="#60e6bf" />
+          <stop offset="100%" stopColor="#0e9263" />
         </linearGradient>
       </defs>
 
       {/* Rounded-square background */}
-      <rect width="100" height="100" rx="20" fill="url(#hos-g)" />
-      <rect width="100" height="100" rx="20" fill="url(#hos-g2)" opacity="0.45" />
+      <rect width="100" height="100" rx="22" fill="url(#hos-grad)" />
 
-      {/* 6-petal lotus bloom — each petal is an almond shape rotated around bloom center */}
-      <g opacity="1">
-        {petals.map(deg => (
-          <path
-            key={deg}
-            d={petalPath}
-            fill="rgba(255,255,255,0.22)"
-            stroke="rgba(255,255,255,0.18)"
-            strokeWidth="0.5"
-            transform={`rotate(${deg}, ${bloomCx}, ${bloomCy})`}
-          />
-        ))}
-        {/* Bloom center circle */}
-        <circle cx={bloomCx} cy={bloomCy} r="4.5" fill="rgba(255,255,255,0.28)" />
-      </g>
+      {/* 3 back petals (offset 60°) */}
+      {[60, 180, 300].map(d => (
+        <ellipse key={d} cx="50" cy="38" rx="7" ry="13"
+          fill="rgba(255,255,255,0.20)"
+          transform={`rotate(${d}, 50, 53)`} />
+      ))}
 
-      {/* ECG / heartbeat pulse line — runs horizontally through icon center */}
+      {/* 3 front petals — brighter, larger */}
+      {[0, 120, 240].map(d => (
+        <ellipse key={d} cx="50" cy="38" rx="8.5" ry="15"
+          fill="rgba(255,255,255,0.32)"
+          transform={`rotate(${d}, 50, 53)`} />
+      ))}
+
+      {/* Bloom centre dot */}
+      <circle cx="50" cy="53" r="5.5" fill="rgba(255,255,255,0.40)" />
+
+      {/* ECG / heartbeat pulse line */}
       <polyline
-        points="8,48 22,48 28,33 36,64 43,36 50,60 57,48 92,48"
+        points="8,50 20,50 26,34 34,66 41,37 48,61 55,50 92,50"
         fill="none"
         stroke="white"
         strokeWidth="5.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity="0.96"
       />
     </svg>
   )
