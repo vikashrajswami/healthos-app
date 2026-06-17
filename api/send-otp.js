@@ -60,7 +60,6 @@ async function sendSMSOTP(phone, otp) {
   // MSG91 — best for India
   if (process.env.MSG91_AUTH_KEY) {
     const cleanPhone = phone.replace(/\D/g, '')
-    // MSG91 OTP Send API
     const res = await fetch('https://api.msg91.com/api/v5/otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -68,11 +67,16 @@ async function sendSMSOTP(phone, otp) {
         authkey:     process.env.MSG91_AUTH_KEY,
         mobile:      cleanPhone,
         template_id: process.env.MSG91_TEMPLATE_ID,
+        sender:      process.env.MSG91_SENDER_ID || 'ARGYOS',
         otp,
-        otp_expiry: 10,
+        otp_expiry:  10,
       }),
     })
-    if (!res.ok) throw new Error('Failed to send SMS via MSG91')
+    const body = await res.text()
+    if (!res.ok) {
+      console.error('MSG91 error:', body)
+      throw new Error('Failed to send SMS. Check MSG91 credentials.')
+    }
     return
   }
 
