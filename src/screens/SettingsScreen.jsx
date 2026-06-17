@@ -345,7 +345,7 @@ export default function SettingsScreen() {
 
         {/* Help */}
         <Section title={t('help')}>
-          <Row icon="💬" label="Contact Support"     value="support@arogyos.in"   onClick={() => alert('Email: support@arogyos.in')}/>
+          <Row icon="💬" label="Contact Support"     value="support@arogyos.com"   onClick={() => alert('Email: support@arogyos.com')}/>
           <Row icon="ℹ️" label="About AROGYOS"      value="Version 1.0.0 · Build 2026.06" onClick={() => {}} last/>
         </Section>
 

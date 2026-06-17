@@ -57,7 +57,7 @@ export default function PrivacyScreen() {
         <Section title="1. Who We Are">
           AROGYOS is a health intelligence platform developed and operated by AROGYOS Intelligence. We help individuals understand and improve their biological age using lab reports, lifestyle data, and AI analysis.
           <br/><br/>
-          <strong>Contact:</strong> support@arogyos.in
+          <strong>Contact:</strong> support@arogyos.com
         </Section>
 
         <Section title="2. What Data We Collect">
@@ -116,7 +116,7 @@ export default function PrivacyScreen() {
           <Bullet><strong>Export:</strong> Request an export of your health data in machine-readable format</Bullet>
           <Bullet><strong>Opt-out:</strong> Disable marketing communications, push notifications, and emails from the Settings → Notifications section at any time</Bullet>
           <Bullet><strong>Withdraw consent:</strong> Stop using the app at any time. Your locally-stored data can be cleared by uninstalling the app or clearing browser data</Bullet>
-          To exercise these rights, email us at <strong>support@arogyos.in</strong>. We will respond within 30 days.
+          To exercise these rights, email us at <strong>support@arogyos.com</strong>. We will respond within 30 days.
         </Section>
 
         <Section title="7. Children's Privacy">
@@ -153,8 +153,8 @@ export default function PrivacyScreen() {
         <div style={{ background: 'linear-gradient(135deg,#0f3a3a,#0a2424)', borderRadius: 16, padding: '20px 22px', textAlign: 'center' }}>
           <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 6 }}>Questions about your privacy?</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>We are here to help and will respond within 30 days.</div>
-          <a href="mailto:support@arogyos.in" style={{ display: 'inline-block', padding: '12px 28px', background: 'linear-gradient(90deg,#14b8a6,#059669)', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-            Email: support@arogyos.in →
+          <a href="mailto:support@arogyos.com" style={{ display: 'inline-block', padding: '12px 28px', background: 'linear-gradient(90deg,#14b8a6,#059669)', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+            Email: support@arogyos.com →
           </a>
         </div>
 

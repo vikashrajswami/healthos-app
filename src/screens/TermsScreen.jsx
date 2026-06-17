@@ -114,7 +114,7 @@ BILLING: Subscriptions are billed in advance for the chosen period (monthly or a
 
 PAYMENT PROCESSING: Indian users may pay via UPI, credit card, or debit card through Razorpay (a PCI DSS Level 1 certified payment processor). International users may pay via credit or debit card through Stripe (PCI DSS Level 1 certified). AROGYOS does not store full card numbers or CVV/CVC at any point — payment data is processed solely by the payment processor.
 
-REFUND POLICY: Subscriptions cancelled within 7 days of first purchase (and before consuming any doorstep lab service or downloading a report) are eligible for a full refund. No refunds are provided after 7 days or after consumption of included services. Refund requests must be submitted to support@arogyos.in.
+REFUND POLICY: Subscriptions cancelled within 7 days of first purchase (and before consuming any doorstep lab service or downloading a report) are eligible for a full refund. No refunds are provided after 7 days or after consumption of included services. Refund requests must be submitted to support@arogyos.com.
 
 PRICE CHANGES: We may revise subscription prices with 30 days' advance written notice. Continued use after the notice period constitutes acceptance of the new price.`,
   },
@@ -166,7 +166,7 @@ The current version of these Terms is always accessible at arogyos.in/terms. The
     content: `For any queries, complaints, or requests related to your data or these Terms:
 
 Email: privacy@arogyos.in
-Support: support@arogyos.in
+Support: support@arogyos.com
 
 GRIEVANCE OFFICER (India — as required by IT Rules 2011 and DPDP Act 2023):
 Name: [Grievance Officer Name]

@@ -43,7 +43,7 @@ async function sendEmailOTP(email, otp) {
             Do not share this code with anyone — AROGYOS will never ask for it.
           </p>
           <div style="text-align:center;margin-top:24px;font-size:11px;color:#cbd5e1">
-            AROGYOS Intelligence · support@arogyos.in
+            AROGYOS Intelligence · support@arogyos.com
           </div>
         </div>
       `,
@@ -159,10 +159,14 @@ export default async function handler(req, res) {
   try {
     if (type === 'email') {
       await sendEmailOTP(contact, otp)
+      res.json({ ok: true, message: 'OTP sent to your email' })
+    } else if (!process.env.MSG91_TEMPLATE_ID) {
+      // DLT not approved yet — show OTP on screen so testing can continue
+      res.json({ ok: true, dev_otp: otp, message: 'SMS pending DLT approval — OTP shown on screen' })
     } else {
       await sendSMSOTP(contact, otp)
+      res.json({ ok: true, message: 'OTP sent via SMS' })
     }
-    res.json({ ok: true, message: type === 'email' ? 'OTP sent to your email' : 'OTP sent via SMS' })
   } catch (e) {
     // Clean up stored OTP if send failed
     try { await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('code', otp) } catch {}

@@ -13,6 +13,16 @@ import { pushToCloud } from './lib/sync'
 import Screen1 from './screens/Screen1'
 import SignupScreen from './screens/SignupScreen'
 
+// Redirect new users (no uid) to signup before showing home
+function HomeGuard() {
+  const nav = useNavigate()
+  useEffect(() => {
+    if (!localStorage.getItem('healthos_uid')) nav('/signup', { replace: true })
+  }, [])
+  if (!localStorage.getItem('healthos_uid')) return null
+  return <Screen1 />
+}
+
 // Secondary screens — lazy loaded (loaded on first navigation)
 const Screen2    = lazy(() => import('./screens/Screen2'))
 const Screen3    = lazy(() => import('./screens/Screen3'))
@@ -222,7 +232,7 @@ function AppShell({ theme, setTheme }) {
       <div style={{ paddingBottom: 70 }}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/"               element={<Screen1 />} />
+            <Route path="/"               element={<HomeGuard />} />
             <Route path="/trends"         element={<Screen2 />} />
             <Route path="/upload"         element={<Screen3 />} />
             <Route path="/devices"        element={<Screen4 />} />

@@ -36,7 +36,7 @@ export default function RatingPrompt({ onClose }) {
     const body = encodeURIComponent(
       `Rating: ${rating}/5 stars\n\nFeedback:\n${feedback}\n\n---\nSent from AROGYOS app`
     )
-    window.open(`mailto:support@arogyos.in?subject=${subject}&body=${body}`, '_blank')
+    window.open(`mailto:support@arogyos.com?subject=${subject}&body=${body}`, '_blank')
     markRatingPromptShown()
     onClose?.()
   }

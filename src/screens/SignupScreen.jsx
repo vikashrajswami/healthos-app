@@ -93,6 +93,7 @@ export default function SignupScreen() {
   const [sending, setSending] = useState(false)
   const [showCC,  setShowCC]  = useState(false)
   const [consent, setConsent] = useState({ terms: false, privacy: false, health: false, marketing: false })
+  const [devOtp,  setDevOtp]  = useState('')
 
   const theme = APP_THEMES.find(t => t.id === tid)
   const A = theme.accent
@@ -119,6 +120,10 @@ export default function SignupScreen() {
       const text = await res.text()
       const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
+      if (data.dev_otp) {
+        setDevOtp(data.dev_otp)
+        setOtp(data.dev_otp.split(''))
+      }
       setSt('otp')
     } catch (e) {
       setErr(e.message)
@@ -382,6 +387,14 @@ export default function SignupScreen() {
                 Check your {tab === 'mobile' ? 'messages' : 'inbox'} for the code
               </div>
             </div>
+
+            {devOtp && (
+              <div style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '14px 18px', marginBottom: 20, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#92400e', letterSpacing: 1, marginBottom: 6 }}>SMS NOT ACTIVE YET — YOUR OTP IS</div>
+                <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: 10, color: '#92400e' }}>{devOtp}</div>
+                <div style={{ fontSize: 11, color: '#b45309', marginTop: 4 }}>Will switch to SMS automatically after DLT approval</div>
+              </div>
+            )}
 
             <OtpBoxes value={otp} onChange={setOtp} A={A}/>
 
