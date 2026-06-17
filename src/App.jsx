@@ -24,6 +24,7 @@ import TermsScreen from './screens/TermsScreen'
 import PaymentScreen from './screens/PaymentScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import LogoPreviewScreen from './screens/LogoPreviewScreen'
+import NameDesignPreview from './screens/NameDesignPreview'
 
 const THEMES = [
   { id: 'teal',  label: '1', dot: '#14b8a6' },
@@ -48,7 +49,7 @@ const MAIN_PATHS = ['/', '/trends', '/upload', '/devices', '/protocol']
 const NO_TOPBAR = new Set([
   '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
-  '/logo-preview',
+  '/logo-preview', '/name-preview',
 ])
 
 // Screens that should also hide the bottom nav
@@ -87,9 +88,14 @@ function TopBar({ theme, setTheme }) {
       borderBottom: '1px solid rgba(0,0,0,0.06)',
       minHeight: 52,
     }}>
-      {/* Left: back arrow or logo */}
+      {/* Left: logo+name together on main, back arrow on sub-pages */}
       {isMain ? (
-        <Logo size={32}/>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <Logo size={32}/>
+          <span style={{ fontSize:16, fontWeight:800, color:'#0f172a', letterSpacing:-0.3 }}>
+            AROGYO<span style={{ color:'#14b8a6' }}>S</span>
+          </span>
+        </div>
       ) : (
         <button onClick={() => nav(-1)} style={{
           display: 'flex', alignItems: 'center', gap: 6,
@@ -104,13 +110,9 @@ function TopBar({ theme, setTheme }) {
         </button>
       )}
 
-      {/* Center: app name on main, logo on sub */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: isMain ? 'center' : 'center' }}>
-        {isMain ? (
-          <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: -0.3 }}>AROGYOS</span>
-        ) : (
-          <Logo size={28}/>
-        )}
+      {/* Center: empty on main (name is left), logo on sub-pages */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {!isMain && <Logo size={28}/>}
       </div>
 
       {/* Right: theme dots + settings */}
@@ -195,6 +197,7 @@ function AppShell({ theme, setTheme }) {
           <Route path="/payment"        element={<PaymentScreen />} />
           <Route path="/settings"       element={<SettingsScreen />} />
           <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
+          <Route path="/name-preview"   element={<NameDesignPreview />} />
         </Routes>
       </div>
       <BottomNav/>
