@@ -7,7 +7,6 @@ export default function Screen9() {
   const nav = useNavigate()
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <div className="sub-title">Unlock Full BioAge Insights</div>
       <p className="sub-desc">Track your whole family's biological age, get unlimited AI coaching, and a personalized age-reversal meal plan.</p>
 

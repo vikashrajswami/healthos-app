@@ -64,7 +64,6 @@ export default function Screen5() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <button className="nav-back">← Your Longevity Protocol</button>
 
       {/* Header card */}

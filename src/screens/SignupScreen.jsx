@@ -241,23 +241,45 @@ export default function SignupScreen() {
             {/* Consent checkboxes */}
             <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { key: 'terms',     required: true,  label: <>I agree to the <button onClick={() => nav('/terms')} style={{ background:'none', border:'none', color:A, cursor:'pointer', fontWeight:700, padding:0, fontSize:12, textDecoration:'underline' }}>Terms & Conditions</button></> },
-                { key: 'privacy',   required: true,  label: <>I have read the <button onClick={() => nav('/terms')} style={{ background:'none', border:'none', color:A, cursor:'pointer', fontWeight:700, padding:0, fontSize:12, textDecoration:'underline' }}>Privacy Policy</button></> },
-                { key: 'health',    required: true,  label: 'I consent to processing of my health/sensitive data for biological age analysis (GDPR Art. 9 / DPDP Act 2023)' },
-                { key: 'marketing', required: false, label: 'Send me health tips, feature updates, and personalised offers (optional)' },
-              ].map(({ key, required, label }) => (
-                <label key={key} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
-                  <div onClick={() => setConsent(c => ({ ...c, [key]: !c[key] }))} style={{
-                    width: 18, height: 18, borderRadius: 5, border: consent[key] ? 'none' : '1.5px solid #555',
-                    background: consent[key] ? A : 'transparent', flexShrink: 0, marginTop: 1,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s',
-                  }}>
-                    {consent[key] && <span style={{ color: '#000', fontSize: 11, fontWeight: 900 }}>✓</span>}
+                { key: 'terms',     required: true,  text: 'I agree to the ', link: 'Terms & Conditions', plain: null },
+                { key: 'privacy',   required: true,  text: 'I have read the ', link: 'Privacy Policy', plain: null },
+                { key: 'health',    required: true,  text: null, link: null, plain: 'I consent to processing of my health/sensitive data for biological age analysis (GDPR Art. 9 / DPDP Act 2023)' },
+                { key: 'marketing', required: false, text: null, link: null, plain: 'Send me health tips, feature updates, and personalised offers (optional)' },
+              ].map(({ key, required, text, link, plain }) => (
+                <div key={key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  {/* Checkbox box — click only toggles, nothing else */}
+                  <div
+                    onClick={() => setConsent(c => ({ ...c, [key]: !c[key] }))}
+                    style={{
+                      width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 1,
+                      border: consent[key] ? 'none' : '1.5px solid #666',
+                      background: consent[key] ? A : 'rgba(255,255,255,0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', transition: 'all .15s',
+                    }}
+                  >
+                    {consent[key] && <span style={{ color: '#000', fontSize: 12, fontWeight: 900, lineHeight: 1 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>
-                    {label} {required && <span style={{ color: A, fontWeight: 700 }}>*</span>}
+
+                  {/* Text — clicking text also toggles; link opens new tab */}
+                  <span
+                    onClick={() => setConsent(c => ({ ...c, [key]: !c[key] }))}
+                    style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, cursor: 'pointer', userSelect: 'none' }}
+                  >
+                    {plain ?? (
+                      <>
+                        {text}
+                        <span
+                          onClick={e => { e.stopPropagation(); window.open('/terms', '_blank') }}
+                          style={{ color: A, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+                        >
+                          {link}
+                        </span>
+                      </>
+                    )}
+                    {required && <span style={{ color: A, fontWeight: 700 }}> *</span>}
                   </span>
-                </label>
+                </div>
               ))}
             </div>
 

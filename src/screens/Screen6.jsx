@@ -272,7 +272,6 @@ export default function Screen6() {
   if (!submitted) {
     return (
       <div className="screen">
-        <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
         <button className="nav-back">← Your Diet Plan</button>
         <AllergyGate onSubmit={handleSubmit} />
       </div>
@@ -283,7 +282,6 @@ export default function Screen6() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <button className="nav-back">← Your Diet Plan</button>
 
       {/* Allergy summary bar */}

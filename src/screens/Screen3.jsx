@@ -2,6 +2,27 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildReport } from '../lib/reportGenerator'
 import { addReport, getAllReports } from '../lib/reportStore'
+import { extractRowsFromText, parseLabReport, parseBiomarkerRow } from '../lib/labNormalizer'
+
+// Realistic demo biomarkers shown when no API key is configured
+const DEMO_RAW = [
+  { name: 'Glucose',           value: '95',   unit: 'mg/dL'  },
+  { name: 'HbA1c',             value: '5.6',  unit: '%'      },
+  { name: 'Total Cholesterol', value: '198',  unit: 'mg/dL'  },
+  { name: 'LDL Cholesterol',   value: '118',  unit: 'mg/dL'  },
+  { name: 'HDL Cholesterol',   value: '52',   unit: 'mg/dL'  },
+  { name: 'Triglycerides',     value: '142',  unit: 'mg/dL'  },
+  { name: 'Creatinine',        value: '0.9',  unit: 'mg/dL'  },
+  { name: 'eGFR',              value: '88',   unit: 'mL/min/1.73m²' },
+  { name: 'ALT',               value: '28',   unit: 'U/L'    },
+  { name: 'AST',               value: '24',   unit: 'U/L'    },
+  { name: 'Hemoglobin',        value: '13.8', unit: 'g/dL'   },
+  { name: 'TSH',               value: '3.2',  unit: 'µIU/mL' },
+  { name: 'Vitamin D',         value: '22',   unit: 'ng/mL'  },
+  { name: 'Vitamin B12',       value: '380',  unit: 'pg/mL'  },
+  { name: 'Uric Acid',         value: '6.1',  unit: 'mg/dL'  },
+]
+const DEMO_BIOMARKERS = DEMO_RAW.map(r => parseBiomarkerRow(r)).filter(Boolean)
 
 const ACCEPTED = '.pdf,.jpg,.jpeg,.png,.webp'
 
@@ -386,12 +407,39 @@ export default function Screen3() {
       ))
       setExpanded(id)
     } catch {
-      const count = Math.floor(Math.random() * 14) + 8
-      addReport({ name: file.name, source: 'Upload', biomarkers: null })
+      setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Analysing locally…' } : u))
+
+      // Try client-side text extraction (text/csv files; PDFs/images fall back to demo)
+      let biomarkers = null
+      let infoMsg = ''
+      try {
+        const text = await new Promise(resolve => {
+          const r = new FileReader()
+          r.onload  = e => resolve(e.target?.result || '')
+          r.onerror = () => resolve('')
+          r.readAsText(file)
+        })
+        if (text && text.length > 20) {
+          const rows   = extractRowsFromText(text)
+          const parsed = parseLabReport(rows)
+          if (parsed.length > 0) {
+            biomarkers = parsed
+            infoMsg = `${parsed.length} biomarkers extracted`
+          }
+        }
+      } catch {}
+
+      if (!biomarkers) {
+        biomarkers = DEMO_BIOMARKERS
+        infoMsg = `${DEMO_BIOMARKERS.length} biomarkers (demo — connect AI to analyse ${file.name.split('.').pop().toUpperCase()} reports)`
+      }
+
+      addReport({ name: file.name, source: 'Upload', biomarkers })
       setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'demo', info: `${count} biomarkers (demo mode — add API key to activate AI)`, biomarkers: null }
+        ? { ...u, status: 'demo', info: infoMsg, biomarkers }
         : u
       ))
+      setExpanded(id)
     }
   }
 
@@ -418,7 +466,6 @@ export default function Screen3() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <button className="nav-back">← Add Your Lab Report</button>
 
       <p className="desc">
@@ -474,14 +521,21 @@ export default function Screen3() {
 
               {expanded === u.id && u.biomarkers && (
                 <div className="bio-table">
-                  {u.biomarkers.map(b => (
-                    <div key={b.key || b.name} className="bio-row-r">
-                      <div className="bio-name-r">{b.name}</div>
-                      <div className="bio-val-r">{b.value} <span className="bio-unit">{b.unit}</span></div>
-                      <div className="bio-status-r" style={{ color: STATUS_COLOR[b.status] || '#94a3b8' }}>{b.status}</div>
-                      <div className="bio-range-r">{b.normalRange}</div>
-                    </div>
-                  ))}
+                  {u.biomarkers.map(b => {
+                    const displayName  = b.canonical  || b.name        || '—'
+                    const displayValue = b.stdValue    ?? b.value       ?? '—'
+                    const displayUnit  = b.stdUnit     || b.unit        || ''
+                    const displayFlag  = b.flag        || b.status      || ''
+                    const displayRef   = b.ref         || b.normalRange || ''
+                    return (
+                      <div key={b.biomarkerId || b.canonical || b.name} className="bio-row-r">
+                        <div className="bio-name-r">{displayName}</div>
+                        <div className="bio-val-r">{displayValue} <span className="bio-unit">{displayUnit}</span></div>
+                        <div className="bio-status-r" style={{ color: STATUS_COLOR[displayFlag] || '#94a3b8' }}>{displayFlag}</div>
+                        <div className="bio-range-r">{displayRef}</div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

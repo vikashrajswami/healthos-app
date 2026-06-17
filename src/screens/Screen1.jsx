@@ -590,7 +590,6 @@ export default function Screen1() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
 
       {/* Hero */}
       {profile?.quizDone ? (

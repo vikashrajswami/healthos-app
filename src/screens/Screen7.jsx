@@ -7,7 +7,6 @@ export default function Screen7() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <button className="nav-back">← Your Progress</button>
 
       {profile?.quizDone ? (

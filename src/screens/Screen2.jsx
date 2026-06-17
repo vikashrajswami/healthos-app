@@ -8,7 +8,6 @@ export default function Screen2() {
   if (!profile?.quizDone) {
     return (
       <div className="screen">
-        <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
         <button className="nav-back">← Your BioAge Trends</button>
         <div className="empty-state">
           <div className="es-icon">📈</div>
@@ -27,7 +26,6 @@ export default function Screen2() {
 
   return (
     <div className="screen">
-      <div className="status-bar"><span>9:41</span><span>●●●● 100%</span></div>
       <button className="nav-back">← Your BioAge Trends</button>
 
       <div className="ring-wrap">

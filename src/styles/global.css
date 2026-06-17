@@ -84,14 +84,6 @@ html, body {
   background: #fff;
 }
 
-/* ── Status bar ── */
-.status-bar {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a2030;
-}
 
 /* ── Nav row ── */
 .nav-row {
