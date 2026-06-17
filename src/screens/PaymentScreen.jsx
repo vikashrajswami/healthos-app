@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { setPlusMember } from '../lib/planStatus'
 
 const PRICING = {
   india: {
@@ -109,6 +110,7 @@ export default function PaymentScreen() {
           })
           const { success, error: verifyErr } = await verifyRes.json()
           if (!success) { setErr(verifyErr || 'Verification failed'); setLoading(false); return }
+          setPlusMember()
           setStep('success')
         },
         modal: {
@@ -144,7 +146,7 @@ export default function PaymentScreen() {
       window.Paddle.Checkout.open({
         product:     productId,
         passthrough: JSON.stringify({ uid, billing, region }),
-        successCallback: () => { setStep('success') },
+        successCallback: () => { setPlusMember(); setStep('success') },
         closeCallback:   () => { setLoading(false) },
       })
     } catch (e) {

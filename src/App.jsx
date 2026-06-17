@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import './styles/global.css'
 import Logo from './components/Logo'
 import { LangProvider, useT } from './lib/i18n'
+import { isPlusMember } from './lib/planStatus'
 
 // Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'
@@ -140,6 +141,16 @@ function TopBar({ theme, setTheme }) {
             }}/>
           ))}
         </div>
+        {!isPlusMember() && (
+          <button onClick={() => nav('/subscribe')} style={{
+            background: 'linear-gradient(90deg,#14b8a6,#059669)',
+            border: 'none', borderRadius: 20, cursor: 'pointer',
+            color: '#fff', fontSize: 11, fontWeight: 800,
+            padding: '5px 12px', letterSpacing: 0.3,
+          }}>
+            ⭐ Plus
+          </button>
+        )}
         <button onClick={() => nav('/settings')} style={{
           background: 'none', border: 'none', cursor: 'pointer',
           color: '#64748b', display: 'flex', alignItems: 'center',

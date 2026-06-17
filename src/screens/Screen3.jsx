@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { buildReport } from '../lib/reportGenerator'
 import { addReport, getAllReports } from '../lib/reportStore'
 import { extractRowsFromText, parseLabReport, parseBiomarkerRow } from '../lib/labNormalizer'
+import UpgradeModal from '../components/UpgradeModal'
+import { isPlusMember, getMonthlyUploads, recordUpload } from '../lib/planStatus'
 
 
 const ACCEPTED = '.pdf,.jpg,.jpeg,.png,.webp'
@@ -356,15 +358,23 @@ function LabOrderCard({ onOrder }) {
 export default function Screen3() {
   const nav     = useNavigate()
   const inputRef = useRef(null)
-  const [dragging,    setDragging]    = useState(false)
-  const [uploads,     setUploads]     = useState([])
-  const [expanded,    setExpanded]    = useState(null)
-  const [hasReport,   setHasReport]   = useState(
+  const [dragging,     setDragging]     = useState(false)
+  const [uploads,      setUploads]      = useState([])
+  const [expanded,     setExpanded]     = useState(null)
+  const [showGate,     setShowGate]     = useState(false)
+  const [hasReport,    setHasReport]    = useState(
     () => !!localStorage.getItem('healthos_last_report_date')
   )
   const vaultCount = getAllReports().length
 
   async function processFile(file) {
+    // Gate: 1 free upload/month for non-Plus users
+    if (!isPlusMember() && getMonthlyUploads() >= 1) {
+      setShowGate(true)
+      return
+    }
+    recordUpload()
+
     const id = Date.now()
     setUploads(prev => [{ id, name: file.name, status: 'processing', info: 'Uploading…', biomarkers: null }, ...prev])
 
@@ -551,6 +561,8 @@ export default function Screen3() {
 
       {/* Compact lab order card */}
       <LabOrderCard onOrder={() => nav('/lab-doorstep')} />
+
+      {showGate && <UpgradeModal reason="upload" onClose={() => setShowGate(false)} />}
     </div>
   )
 }

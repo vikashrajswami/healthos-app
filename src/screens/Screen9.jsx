@@ -116,13 +116,8 @@ export default function Screen9() {
         <button className="continue-btn" onClick={() => nav('/')}>Continue Free</button>
       </div>
 
-      {/* Social proof */}
-      <div style={{
-        textAlign:'center', padding:'16px 0 8px',
-        fontSize:12, color:'#94a3b8', lineHeight:1.6,
-      }}>
-        ⭐⭐⭐⭐⭐ Trusted by <strong style={{ color:'#0f172a' }}>12,400+</strong> users across India & 28 countries<br/>
-        <span style={{ fontSize:11 }}>30-day money-back guarantee · Cancel anytime</span>
+      <div style={{ textAlign:'center', padding:'16px 0 8px', fontSize:11, color:'#94a3b8' }}>
+        30-day money-back guarantee · Cancel anytime · No hidden charges
       </div>
     </div>
   )

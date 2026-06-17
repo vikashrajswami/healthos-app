@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAIResponse } from '../lib/healthAI'
 import { getProfile, saveProfile, calcBioAge } from '../lib/userProfile'
+import UpgradeModal from '../components/UpgradeModal'
+import {
+  isPlusMember, hasSeenUpgradePrompt, markUpgradePromptSeen,
+  getMonthlyChatCount, recordChat,
+} from '../lib/planStatus'
 
 const QUIZ_STEPS = [
   {
@@ -174,15 +179,17 @@ function buildUserContext(bioage, actualAge, insight, dietPref) {
 
 /* ── AI Chat Modal ── */
 function AIChatModal({ onClose }) {
+  const nav = useNavigate()
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
       content: `Hi! I'm your AROGYOS Health Guide 🌿\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
     },
   ])
-  const [input,    setInput]    = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [showAll,  setShowAll]  = useState(false)
+  const [input,       setInput]       = useState('')
+  const [loading,     setLoading]     = useState(false)
+  const [showAll,     setShowAll]     = useState(false)
+  const [showGate,    setShowGate]    = useState(false)
   const bottomRef  = useRef(null)
   const inputRef   = useRef(null)
 
@@ -193,7 +200,15 @@ function AIChatModal({ onClose }) {
   async function sendMessage(text) {
     const userText = (text || input).trim()
     if (!userText || loading) return
+
+    // Gate: 5 free messages/month for non-Plus users
+    if (!isPlusMember() && getMonthlyChatCount() >= 5) {
+      setShowGate(true)
+      return
+    }
+
     setInput('')
+    recordChat()
 
     const nextMessages = [...messages, { role: 'user', content: userText }]
     setMessages(nextMessages)
@@ -215,6 +230,7 @@ function AIChatModal({ onClose }) {
   const visibleQs = showAll ? QUICK_QUESTIONS : QUICK_QUESTIONS.slice(0, 4)
 
   return (
+    <>
     <div className="chat-overlay" onClick={onClose}>
       <div className="chat-sheet" onClick={e => e.stopPropagation()}>
 
@@ -296,8 +312,15 @@ function AIChatModal({ onClose }) {
           </button>
         </div>
         <div className="chat-disclaimer">AI guidance only · Not a substitute for medical advice</div>
+        {!isPlusMember() && (
+          <div style={{ padding: '4px 16px 8px', textAlign: 'center', fontSize: 11, color: '#94a3b8' }}>
+            {Math.max(0, 5 - getMonthlyChatCount())} free messages remaining this month
+          </div>
+        )}
       </div>
     </div>
+    {showGate && <UpgradeModal reason="chat" onClose={() => setShowGate(false)} />}
+    </>
   )
 }
 
@@ -576,14 +599,16 @@ export default function Screen1() {
   const userId   = getUserId()
   const userName = getUserName()
 
-  const [profile,   setProfile]   = useState(() => getProfile())
-  const [showQuiz,  setShowQuiz]  = useState(false)
-  const [members,   setMembers]   = useState([])
-  const [pending,   setPending]   = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [showInvite, setShowInvite] = useState(false)
-  const [showAsk,   setShowAsk]   = useState(false)
-  const [selected,  setSelected]  = useState(null)
+  const [profile,      setProfile]      = useState(() => getProfile())
+  const [showQuiz,     setShowQuiz]     = useState(false)
+  const [showUpgrade,  setShowUpgrade]  = useState(false)
+  const [upgradeReason,setUpgradeReason]= useState('quiz')
+  const [members,      setMembers]      = useState([])
+  const [pending,      setPending]      = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [showInvite,   setShowInvite]   = useState(false)
+  const [showAsk,      setShowAsk]      = useState(false)
+  const [selected,     setSelected]     = useState(null)
   const [water,     setWater]     = useState(() => {
     try {
       const s = JSON.parse(localStorage.getItem('healthos_daily') || '{}')
@@ -686,7 +711,13 @@ export default function Screen1() {
           </div>
         </div>
         {(members.length > 0 || pending.length > 0) && (
-          <button className="fam-add-mini" onClick={() => setShowInvite(true)}>+ Invite</button>
+          <button className="fam-add-mini" onClick={() => {
+            if (!isPlusMember() && (members.length + pending.length) >= 1) {
+              setUpgradeReason('family'); setShowUpgrade(true)
+            } else {
+              setShowInvite(true)
+            }
+          }}>+ Invite</button>
         )}
       </div>
 
@@ -712,7 +743,13 @@ export default function Screen1() {
 
       {/* Member cards */}
       {!loading && members.length === 0 && pending.length === 0 ? (
-        <div className="fam-empty" onClick={() => setShowInvite(true)}>
+        <div className="fam-empty" onClick={() => {
+          if (!isPlusMember() && !profile?.quizDone) {
+            setUpgradeReason('family'); setShowUpgrade(true)
+          } else {
+            setShowInvite(true)
+          }
+        }}>
           <div className="fe-icon">👨‍👩‍👧‍👦</div>
           <div className="fe-title">Track your whole family's BioAge</div>
           <div className="fe-sub">Send a WhatsApp invite — when they join, their real BioAge appears here automatically. No manual entry.</div>
@@ -821,7 +858,15 @@ export default function Screen1() {
       <div className="why-row"><span className="c">✓</span><span><b>Available worldwide</b> — ₹399/yr in India, $99/yr internationally</span></div>
 
       {showQuiz && (
-        <BioAgeQuizModal onDone={p => { setProfile(p); setShowQuiz(false) }} />
+        <BioAgeQuizModal onDone={p => {
+          setProfile(p)
+          setShowQuiz(false)
+          // Show upgrade prompt once after quiz if not already Plus
+          if (!isPlusMember() && !hasSeenUpgradePrompt()) {
+            setUpgradeReason('quiz')
+            setShowUpgrade(true)
+          }
+        }} />
       )}
 
       {showAsk && <AIChatModal onClose={() => setShowAsk(false)} />}
@@ -832,6 +877,10 @@ export default function Screen1() {
           userName={userName}
           onClose={() => { setShowInvite(false); loadFamily() }}
         />
+      )}
+
+      {showUpgrade && (
+        <UpgradeModal reason={upgradeReason} onClose={() => setShowUpgrade(false)} />
       )}
       {selected && (
         <MemberSheet
