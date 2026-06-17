@@ -4,25 +4,6 @@ import { buildReport } from '../lib/reportGenerator'
 import { addReport, getAllReports } from '../lib/reportStore'
 import { extractRowsFromText, parseLabReport, parseBiomarkerRow } from '../lib/labNormalizer'
 
-// Realistic demo biomarkers shown when no API key is configured
-const DEMO_RAW = [
-  { name: 'Glucose',           value: '95',   unit: 'mg/dL'  },
-  { name: 'HbA1c',             value: '5.6',  unit: '%'      },
-  { name: 'Total Cholesterol', value: '198',  unit: 'mg/dL'  },
-  { name: 'LDL Cholesterol',   value: '118',  unit: 'mg/dL'  },
-  { name: 'HDL Cholesterol',   value: '52',   unit: 'mg/dL'  },
-  { name: 'Triglycerides',     value: '142',  unit: 'mg/dL'  },
-  { name: 'Creatinine',        value: '0.9',  unit: 'mg/dL'  },
-  { name: 'eGFR',              value: '88',   unit: 'mL/min/1.73m²' },
-  { name: 'ALT',               value: '28',   unit: 'U/L'    },
-  { name: 'AST',               value: '24',   unit: 'U/L'    },
-  { name: 'Hemoglobin',        value: '13.8', unit: 'g/dL'   },
-  { name: 'TSH',               value: '3.2',  unit: 'µIU/mL' },
-  { name: 'Vitamin D',         value: '22',   unit: 'ng/mL'  },
-  { name: 'Vitamin B12',       value: '380',  unit: 'pg/mL'  },
-  { name: 'Uric Acid',         value: '6.1',  unit: 'mg/dL'  },
-]
-const DEMO_BIOMARKERS = DEMO_RAW.map(r => parseBiomarkerRow(r)).filter(Boolean)
 
 const ACCEPTED = '.pdf,.jpg,.jpeg,.png,.webp'
 
@@ -430,13 +411,16 @@ export default function Screen3() {
       } catch {}
 
       if (!biomarkers) {
-        biomarkers = DEMO_BIOMARKERS
-        infoMsg = `${DEMO_BIOMARKERS.length} biomarkers (demo — connect AI to analyse ${file.name.split('.').pop().toUpperCase()} reports)`
+        setUploads(prev => prev.map(u => u.id === id
+          ? { ...u, status: 'error', info: 'Could not read this file — please upload a text-based PDF or plain CSV' }
+          : u
+        ))
+        return
       }
 
       addReport({ name: file.name, source: 'Upload', biomarkers })
       setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'demo', info: infoMsg, biomarkers }
+        ? { ...u, status: 'done', info: `${biomarkers.length} biomarkers extracted`, biomarkers }
         : u
       ))
       setExpanded(id)
@@ -458,7 +442,7 @@ export default function Screen3() {
 
   function statusPill(status) {
     if (status === 'done')       return <span className="tag-pill done">Done</span>
-    if (status === 'demo')       return <span className="tag-pill pending">Demo</span>
+    if (status === 'error')      return <span className="tag-pill pending" style={{ background: '#fef2f2', color: '#dc2626' }}>Error</span>
     if (status === 'pending')    return <span className="tag-pill pending">Pending</span>
     if (status === 'processing') return <span className="tag-pill processing">Reading…</span>
     return null

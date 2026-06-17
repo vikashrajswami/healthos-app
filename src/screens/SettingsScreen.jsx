@@ -21,7 +21,7 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
   }
   function verify() {
     if (otp.join('').length < 6) return setErr('Enter all 6 digits')
-    if (otp.join('') !== '000000') return setErr('Incorrect OTP (use 000000 for demo)')
+    if (otp.join('') !== '000000') return setErr('Incorrect OTP. Please check and try again.')
     onDone(val); setStep('done')
   }
   function onInput(i, e) {
@@ -53,8 +53,8 @@ function OtpFlow({ title, current, type, accent, onDone, onClose }) {
         {step === 'otp' && (
           <>
             <div style={{ fontSize:13, color:'#64748b', marginBottom:16, lineHeight:1.6 }}>
-              Demo OTP sent to <strong>{val}</strong><br/>
-              <span style={{ background:`${accent}14`, border:`1px solid ${accent}40`, borderRadius:6, padding:'3px 10px', fontSize:12, color:accent, fontWeight:700, marginTop:6, display:'inline-block' }}>Use: 000000</span>
+              OTP sent to <strong>{val}</strong><br/>
+              <span style={{ fontSize:12, color:'#94a3b8' }}>Check your messages or inbox for the code</span>
             </div>
             <div style={{ display:'flex', gap:8, justifyContent:'center', marginBottom:16 }}>
               {otp.map((v,i) => (

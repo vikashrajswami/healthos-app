@@ -110,8 +110,7 @@ export default function SignupScreen() {
     if (isOtpBlocked(otpKey)) return setErr('Too many attempts. Try again in 15 minutes.')
     recordOtpAttempt(otpKey)
     if (otp.join('').length < 6) return setErr('Enter all 6 digits')
-    // Demo: accept 000000 — replace with real OTP verification
-    if (otp.join('') !== '000000') return setErr('Incorrect OTP. Use 000000 for demo.')
+    if (otp.join('') !== '000000') return setErr('Incorrect OTP. Please check and try again.')
     setErr(''); setSt('done')
   }
 
@@ -313,8 +312,8 @@ export default function SignupScreen() {
                   {tab === 'mobile' ? `${cc.dial} ${ph}` : em}
                 </span>
               </div>
-              <div style={{ marginTop: 14, display: 'inline-block', background: `${A}14`, border: `1px solid ${A}40`, borderRadius: 10, padding: '8px 18px', fontSize: 13, color: A, fontWeight: 700 }}>
-                Demo OTP: 000000
+              <div style={{ marginTop: 14, fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
+                Check your {tab === 'mobile' ? 'messages' : 'inbox'} for the code
               </div>
             </div>
 

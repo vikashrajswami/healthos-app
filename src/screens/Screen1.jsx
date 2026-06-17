@@ -813,23 +813,6 @@ export default function Screen1() {
         </div>
       </div>
 
-      {/* Social proof */}
-      <div style={{
-        background: 'linear-gradient(135deg,#f0fdfa,#ecfdf5)',
-        border: '1px solid #99f6e4',
-        borderRadius: 14, padding: '14px 16px', marginBottom: 16,
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <div style={{ fontSize: 26 }}>🌍</div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
-            Trusted by <span style={{ color: '#0d9488' }}>12,400+</span> people
-          </div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-            ⭐⭐⭐⭐⭐ Across India & 28 countries · BioAge average 5.3 yrs younger
-          </div>
-        </div>
-      </div>
 
       <div className="why-title">Why AROGYOS Plus</div>
       <div className="why-row"><span className="c">✓</span><span><b>Bring your own reports</b> — works with any diagnostic center</span></div>
