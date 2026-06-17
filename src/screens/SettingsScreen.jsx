@@ -253,8 +253,9 @@ export default function SettingsScreen() {
     setTimeout(() => nav('/signup'), 2000)
   }
   function handleLogout() {
+    Object.keys(localStorage).filter(k => k.startsWith('healthos_')).forEach(k => localStorage.removeItem(k))
     sessionStorage.clear()
-    nav('/signup')
+    window.location.replace('/signup')
   }
 
   if (deleted) return (
