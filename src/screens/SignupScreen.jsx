@@ -329,7 +329,7 @@ export default function SignupScreen() {
             {err && <div style={{ fontSize: 13, color: '#f87171', marginBottom: 14, marginTop: 10, fontWeight: 600 }}>⚠ {err}</div>}
 
             <button onClick={go} disabled={!allRequired || sending} style={{ width: '100%', padding: 17, background: allRequired ? `linear-gradient(90deg,${A},${theme.dark})` : '#2a2a2a', color: allRequired ? '#000' : '#555', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800, cursor: allRequired && !sending ? 'pointer' : 'default', marginTop: 14, boxShadow: allRequired ? `0 6px 24px ${A}36` : 'none', transition: 'all .2s', opacity: sending ? 0.75 : 1 }}>
-              {sending ? 'Sending OTP…' : 'Get OTP →'}
+              {sending ? 'Sending OTP…' : 'Continue →'}
             </button>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', textAlign: 'center', marginTop: 14, lineHeight: 1.8 }}>
               🔒 256-bit AES encrypted · DPDP Act 2023 · GDPR compliant

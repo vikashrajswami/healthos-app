@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
+// Lazy — created inside handler so a bad env var returns JSON 500, not a process crash
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  )
+}
 
 function generate6Digit() {
   return Math.floor(100000 + Math.random() * 900000).toString()
@@ -119,7 +122,7 @@ export default async function handler(req, res) {
   // Rate limit: max 3 OTP requests per contact per hour (silently skip if table error)
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    const { count } = await supabase
+    const { count } = await getSupabase()
       .from('otp_codes')
       .select('id', { count: 'exact', head: true })
       .eq('contact', contact)
@@ -134,11 +137,11 @@ export default async function handler(req, res) {
 
   // Delete old unused OTPs for this contact (silently skip errors)
   try {
-    await supabase.from('otp_codes').delete().eq('contact', contact).eq('used', false)
+    await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('used', false)
   } catch {}
 
   // Store new OTP
-  const { error: dbErr } = await supabase.from('otp_codes').insert({
+  const { error: dbErr } = await getSupabase().from('otp_codes').insert({
     contact,
     code:       otp,
     expires_at: expiresAt,
@@ -158,7 +161,7 @@ export default async function handler(req, res) {
     res.json({ ok: true, message: type === 'email' ? 'OTP sent to your email' : 'OTP sent via SMS' })
   } catch (e) {
     // Clean up stored OTP if send failed
-    try { await supabase.from('otp_codes').delete().eq('contact', contact).eq('code', otp) } catch {}
+    try { await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('code', otp) } catch {}
     res.status(500).json({ error: e.message || 'Failed to send OTP. Try again.' })
   }
 

@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  )
+}
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json')
@@ -18,7 +20,7 @@ export default async function handler(req, res) {
     if (!contact || !code) return res.status(400).json({ error: 'Missing contact or code' })
     if (!/^\d{6}$/.test(code)) return res.status(400).json({ error: 'OTP must be 6 digits', valid: false })
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('otp_codes')
       .select('*')
       .eq('contact', contact)
@@ -32,7 +34,7 @@ export default async function handler(req, res) {
     }
 
     if (new Date(data.expires_at) < new Date()) {
-      try { await supabase.from('otp_codes').delete().eq('id', data.id) } catch {}
+      try { await getSupabase().from('otp_codes').delete().eq('id', data.id) } catch {}
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.', valid: false })
     }
 
@@ -41,7 +43,7 @@ export default async function handler(req, res) {
     }
 
     try {
-      await supabase.from('otp_codes').update({ used: true, used_at: new Date().toISOString() }).eq('id', data.id)
+      await getSupabase().from('otp_codes').update({ used: true, used_at: new Date().toISOString() }).eq('id', data.id)
     } catch {}
 
     res.json({ valid: true, type: data.type })
