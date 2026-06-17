@@ -382,70 +382,66 @@ export default function Screen3() {
     localStorage.setItem('healthos_last_report_date', new Date().toISOString())
     setHasReport(true)
 
-    try {
-      setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Reading with AI…' } : u))
+    // ── 100% client-side, no API key needed ──────────────────────────────────
+    const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf'
+    setUploads(prev => prev.map(u => u.id === id ? { ...u, info: isPdf ? 'Reading PDF…' : 'Reading file…' } : u))
 
-      // Read file as base64 (works for both text and scanned PDFs)
-      const pdfBase64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload  = () => resolve(reader.result.split(',')[1])
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-
-      const res  = await fetch('/api/chat', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ pdfBase64, fileName: file.name }),
-      })
-      const text = await res.text()
-      const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error' } } })()
-      if (!res.ok) throw new Error(data.error || 'Upload failed')
-
-      addReport({ name: file.name, source: 'Upload', biomarkers: data.biomarkers, summary: data.summary })
-      setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'done', info: `${data.count} biomarkers extracted`, biomarkers: data.biomarkers, summary: data.summary }
-        : u
-      ))
-      setExpanded(id)
-    } catch {
-      setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Analysing locally…' } : u))
-
-      // Try client-side text extraction (text/csv files; PDFs/images fall back to demo)
-      let biomarkers = null
-      let infoMsg = ''
+    let text = ''
+    if (isPdf) {
       try {
-        const text = await new Promise(resolve => {
-          const r = new FileReader()
-          r.onload  = e => resolve(e.target?.result || '')
-          r.onerror = () => resolve('')
-          r.readAsText(file)
-        })
-        if (text && text.length > 20) {
-          const rows   = extractRowsFromText(text)
-          const parsed = parseLabReport(rows)
-          if (parsed.length > 0) {
-            biomarkers = parsed
-            infoMsg = `${parsed.length} biomarkers extracted`
-          }
+        // PDF.js — Mozilla open-source, loads on demand from CDN, free
+        const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs')
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs'
+        const arrayBuffer = await file.arrayBuffer()
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        const pages = []
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page    = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          pages.push(content.items.map(item => item.str).join(' '))
         }
-      } catch {}
-
-      if (!biomarkers) {
-        setUploads(prev => prev.map(u => u.id === id
-          ? { ...u, status: 'error', info: 'Could not read this file — please upload a text-based PDF or plain CSV' }
-          : u
-        ))
-        return
+        text = pages.join('\n')
+      } catch (e) {
+        console.error('PDF.js error:', e)
       }
+    } else {
+      text = await new Promise(resolve => {
+        const r = new FileReader()
+        r.onload  = e => resolve(e.target?.result || '')
+        r.onerror = () => resolve('')
+        r.readAsText(file)
+      })
+    }
 
-      addReport({ name: file.name, source: 'Upload', biomarkers })
+    if (!text || text.trim().length < 20) {
       setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'done', info: `${biomarkers.length} biomarkers extracted`, biomarkers }
+        ? { ...u, status: 'error', info: isPdf
+            ? 'This PDF is a scanned image — text cannot be extracted. Ask your lab for a digital PDF.'
+            : 'Could not read this file — please upload a PDF or CSV' }
         : u
       ))
-      setExpanded(id)
+      return
     }
+
+    setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Finding biomarkers…' } : u))
+    const rows      = extractRowsFromText(text)
+    const biomarkers = parseLabReport(rows)
+
+    if (!biomarkers || biomarkers.length === 0) {
+      setUploads(prev => prev.map(u => u.id === id
+        ? { ...u, status: 'error', info: 'No biomarkers found. Is this a lab report PDF?' }
+        : u
+      ))
+      return
+    }
+
+    addReport({ name: file.name, source: 'Upload', biomarkers })
+    setUploads(prev => prev.map(u => u.id === id
+      ? { ...u, status: 'done', info: `${biomarkers.length} biomarkers extracted`, biomarkers }
+      : u
+    ))
+    setExpanded(id)
   }
 
   function onFileChange(e) {
