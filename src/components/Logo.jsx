@@ -1,4 +1,4 @@
-// HealthOS logo — Double-Layer Lotus (6 petals: 3 inner + 3 outer) + ECG pulse line
+// AROGYOS logo — Double-Layer Lotus (6 petals: 3 inner + 3 outer) + ECG pulse line
 export default function Logo({ size = 36, style }) {
   return (
     <svg

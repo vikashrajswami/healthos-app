@@ -238,7 +238,7 @@ export default function SettingsScreen() {
           <Logo size={44}/>
           <div>
             <div style={{ fontSize:20, fontWeight:800, color:'#fff' }}>{t('settings')}</div>
-            <div style={{ fontSize:13, color:'rgba(255,255,255,0.4)' }}>HealthOS Intelligence</div>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,0.4)' }}>AROGYOS Intelligence</div>
           </div>
         </div>
 
@@ -289,8 +289,8 @@ export default function SettingsScreen() {
 
         {/* Help */}
         <Section title={t('help')}>
-          <Row icon="💬" label="Contact Support"     value="support@healthos.in"   onClick={() => alert('Email: support@healthos.in')}/>
-          <Row icon="ℹ️" label="About HealthOS"      value="Version 1.0.0 · Build 2026.06" onClick={() => {}} last/>
+          <Row icon="💬" label="Contact Support"     value="support@arogyos.in"   onClick={() => alert('Email: support@arogyos.in')}/>
+          <Row icon="ℹ️" label="About AROGYOS"      value="Version 1.0.0 · Build 2026.06" onClick={() => {}} last/>
         </Section>
 
         {/* Account actions */}
@@ -300,7 +300,7 @@ export default function SettingsScreen() {
         </Section>
 
         <div style={{ textAlign:'center', fontSize:11, color:'#cbd5e1', marginTop:8, lineHeight:1.8 }}>
-          HealthOS Intelligence Pvt. Ltd.<br/>
+          AROGYOS Intelligence Pvt. Ltd.<br/>
           DPDP Act 2023 · GDPR · v1.0.0
         </div>
       </div>

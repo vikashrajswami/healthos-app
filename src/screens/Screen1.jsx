@@ -150,7 +150,7 @@ function buildUserContext(bioage, actualAge, insight, dietPref) {
   if (actualAge)  lines.push(`User's actual calendar age: ${actualAge}`)
   if (insight)    lines.push(`Current AI insight shown: "${insight}"`)
   if (dietPref)   lines.push(`User's selected diet type: ${dietPref}`)
-  lines.push(`App version: HealthOS web app`)
+  lines.push(`App version: AROGYOS web app`)
   return lines.join('\n')
 }
 
@@ -159,7 +159,7 @@ function AIChatModal({ onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi! I'm HealthOS AI 🧬\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
+      content: `Hi! I'm AROGYOS AI 🧬\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
     },
   ])
   const [input,    setInput]    = useState('')
@@ -205,7 +205,7 @@ function AIChatModal({ onClose }) {
           <div className="chat-header-left">
             <div className="chat-avatar">🧬</div>
             <div>
-              <div className="chat-title">HealthOS AI</div>
+              <div className="chat-title">AROGYOS AI</div>
               <div className="chat-status">● Online · Built-in AI · Always free</div>
             </div>
           </div>
@@ -376,8 +376,8 @@ function InviteModal({ onClose, userId, userName }) {
 
   function openWhatsApp() {
     const msg = encodeURIComponent(
-      `👋 ${userName} wants to track your Biological Age together on HealthOS!\n\n` +
-      `HealthOS tracks how old your body *actually* is — not just your birth year.\n\n` +
+      `👋 ${userName} wants to track your Biological Age together on AROGYOS!\n\n` +
+      `AROGYOS tracks how old your body *actually* is — not just your birth year.\n\n` +
       `Click to find your BioAge & join ${userName}'s family tracker:\n${link}\n\n` +
       `Takes 2 minutes. Free, no app download needed. 🧬`
     )
@@ -628,7 +628,7 @@ export default function Screen1() {
         <div className="insight-text">
           {profile?.quizDone
             ? `Hi ${profile.name}! Your BioAge estimate is ${profile.bioage}. Upload a blood panel to get biomarker-level insights — we'll analyse hsCRP, HbA1c, cholesterol, vitamins, hormones, and more.`
-            : 'Complete your BioAge quiz above, then upload a lab report. HealthOS reads every biomarker automatically and shows exactly what is ageing you faster — and what to do about it.'}
+            : 'Complete your BioAge quiz above, then upload a lab report. AROGYOS reads every biomarker automatically and shows exactly what is ageing you faster — and what to do about it.'}
         </div>
         <div className="ask-row">
           <div className="ask-row-label">
@@ -737,7 +737,7 @@ export default function Screen1() {
         <span className="go">Connect →</span>
       </div>
 
-      <div className="why-title">Why HealthOS Plus</div>
+      <div className="why-title">Why AROGYOS Plus</div>
       <div className="why-row"><span className="c">✓</span><span><b>Bring your own reports</b> — works with any diagnostic center</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>Your data is always yours</b> — BioAge history stays even if you cancel</span></div>
       <div className="why-row"><span className="c">✓</span><span><b>No surprise renewals</b> — reminder 7 days before any charge, 30 days free first</span></div>

@@ -1,4 +1,4 @@
-// ── HealthOS Universal Lab Report Normalizer ─────────────────────────────────
+// ── AROGYOS Universal Lab Report Normalizer ─────────────────────────────────
 // Handles biomarker names in 20+ languages, unit conversions, and reference ranges.
 // Research basis: WHO reference values, IFCC/AACC standards, Indian ICMR guidelines,
 // European lab standards, Japanese/Korean lab norms.

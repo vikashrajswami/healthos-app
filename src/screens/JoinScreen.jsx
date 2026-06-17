@@ -267,7 +267,7 @@ export default function JoinScreen() {
         </div>
 
         <button className="join-btn-primary" onClick={() => window.location.href = '/'}>
-          Open My HealthOS Dashboard →
+          Open My AROGYOS Dashboard →
         </button>
 
         <div className="join-footer">

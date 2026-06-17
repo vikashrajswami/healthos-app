@@ -1,5 +1,5 @@
 /*
-  HealthOS AI — fully in-app, zero external API
+  AROGYOS AI — fully in-app, zero external API
   Intent-based engine: phrase match → keyword score → category fallback → default
 */
 
@@ -22,7 +22,7 @@ It's calculated from:
 BioAge lower than actual age → your body is biologically younger 🎉
 BioAge higher than actual age → lifestyle is accelerating ageing
 
-The powerful truth: BioAge is reversible. Every healthy habit you build lowers it. HealthOS tracks your progress so you see the impact in real numbers — not guesswork.`,
+The powerful truth: BioAge is reversible. Every healthy habit you build lowers it. AROGYOS tracks your progress so you see the impact in real numbers — not guesswork.`,
   },
 
   {
@@ -42,14 +42,14 @@ The powerful truth: BioAge is reversible. Every healthy habit you build lowers i
 
 ⚕️ For supplement or medication decisions, always consult your doctor. The above are general lifestyle guidelines, not medical prescriptions.
 
-Your HealthOS Protocol screen has the full habit checklist. Tap Protocol in the bottom nav.`,
+Your AROGYOS Protocol screen has the full habit checklist. Tap Protocol in the bottom nav.`,
   },
 
   {
     id: 'bioage_calculate',
     phrases: ['how is bioage calculated','how bioage is calculated','how do you calculate bioage','bioage calculation','how is biological age measured'],
     keys: ['calculate bioage','bioage calculated','measure biological'],
-    r: `HealthOS calculates your BioAge in two ways:
+    r: `AROGYOS calculates your BioAge in two ways:
 
 QUIZ-BASED (instant estimate):
 • Exercise: Very active = -3 yrs | Moderate = -1 yr | Sedentary = +3 yrs
@@ -78,7 +78,7 @@ Upload your lab report for the most accurate BioAge reading.`,
 1. Tap the Reports tab (document icon) in the bottom navigation
 2. You'll see a drag-and-drop area — tap it or drag your file onto it
 3. Select your PDF or photo (JPG/PNG) of the lab report
-4. HealthOS AI reads all the biomarkers automatically
+4. AROGYOS AI reads all the biomarkers automatically
 5. Your BioAge updates based on the real data
 
 Supported formats: PDF files and phone photos of your report
@@ -91,7 +91,7 @@ Tip: Make sure the photo is clear with no glare — the AI needs to read the pri
     id: 'upload_which_labs',
     phrases: ['which lab','what labs work','does it work with','lal pathlabs','thyrocare','srl labs','apollo lab'],
     keys: ['lab','lal path','thyrocare','srl','apollo diagnostic','metropolis'],
-    r: `HealthOS works with reports from ANY lab — there's no restriction.
+    r: `AROGYOS works with reports from ANY lab — there's no restriction.
 
 What works perfectly:
 • Any NABL-certified diagnostic lab in your city
@@ -626,7 +626,7 @@ Target: 3 eggs/day provides ~18g protein + all the micronutrients above.`,
     keys: ['intermittent fasting','fasting','autophagy','eating window'],
     r: `Intermittent Fasting (IF) is one of the most powerful biological age reversal tools available.
 
-The HealthOS approach: Eat between 7AM–7PM (12-hour fast minimum). Advanced: 7AM–5PM for a 14-hour fast.
+The AROGYOS approach: Eat between 7AM–7PM (12-hour fast minimum). Advanced: 7AM–5PM for a 14-hour fast.
 
 What happens during your fast:
 • Hour 12: Insulin drops, body switches to fat burning
@@ -794,7 +794,7 @@ DISCUSSED IN LONGEVITY RESEARCH (emerging science, consult your doctor):
 • CoQ10 — often discussed for mitochondrial health, particularly relevant if taking statins
 • Ashwagandha — studied for cortisol and stress response
 
-⚕️ Do not self-prescribe specific doses. Upload your lab report to HealthOS first — your actual deficiencies are the only safe guide to what, if anything, you need.`,
+⚕️ Do not self-prescribe specific doses. Upload your lab report to AROGYOS first — your actual deficiencies are the only safe guide to what, if anything, you need.`,
   },
 
   // ══════════════════════════════════════
@@ -918,7 +918,7 @@ For the best trends data: Upload lab reports every 90 days and connect a wearabl
     id: 'devices_screen',
     phrases: ['how to connect device','connect wearable','connect smartwatch','connect ring','device screen','which device','connect fitbit','connect apple watch','connect garmin','smart ring'],
     keys: ['connect device','wearable','smartwatch','smart ring','fitness band'],
-    r: `The Devices screen lets you connect any health wearable to HealthOS for continuous BioAge data.
+    r: `The Devices screen lets you connect any health wearable to AROGYOS for continuous BioAge data.
 
 How to access: Tap the Devices tab (watch icon) in the bottom navigation.
 
@@ -928,7 +928,7 @@ Supported device types (not locked to any brand):
 • Fitness Band — any fitness tracker
 • Phone Sensors — uses your phone's built-in sensors (no hardware needed)
 
-Data HealthOS collects from devices:
+Data AROGYOS collects from devices:
 • HRV (Heart Rate Variability) — best indicator of recovery and stress
 • Resting heart rate — lower = better cardiovascular health
 • Sleep stages — deep sleep, REM, light sleep duration
@@ -998,7 +998,7 @@ The transformation card shows:
 • How many years younger you are biologically
 • Your key improving biomarkers
 
-Why share? Sharing your BioAge publicly creates accountability and inspires others to take their health seriously. It also starts conversations about longevity with people who might benefit from HealthOS.`,
+Why share? Sharing your BioAge publicly creates accountability and inspires others to take their health seriously. It also starts conversations about longevity with people who might benefit from AROGYOS.`,
   },
 
   // ══════════════════════════════════════
@@ -1008,14 +1008,14 @@ Why share? Sharing your BioAge publicly creates accountability and inspires othe
     id: 'pricing',
     phrases: ['how much does it cost','price of healthos','subscription cost','how much is it','paid features','free trial','what do i get','healthos price','subscribe','cost of app'],
     keys: ['price','cost','subscription','free trial','how much','paid','subscribe'],
-    r: `HealthOS pricing is simple and transparent:
+    r: `AROGYOS pricing is simple and transparent:
 
 INDIA: ₹399/year (~₹33/month)
 INTERNATIONAL: $9.99/year (~$0.83/month)
 
 FREE TRIAL: 30 days free — no credit card required to start
 
-What you get with HealthOS Plus:
+What you get with AROGYOS Plus:
 • Unlimited lab report uploads (AI biomarker extraction)
 • Full biological age analysis and tracking
 • Personalised longevity protocol
@@ -1063,7 +1063,7 @@ The emerging interventions with strong early evidence:
 • Rapamycin (prescription only) — mTOR inhibition
 • Metformin for longevity (prescription only)
 
-HealthOS focuses on the proven fundamentals — because most people haven't optimised the basics yet, and the basics move the needle most.`,
+AROGYOS focuses on the proven fundamentals — because most people haven't optimised the basics yet, and the basics move the needle most.`,
   },
 
   // ══════════════════════════════════════
@@ -1073,7 +1073,7 @@ HealthOS focuses on the proven fundamentals — because most people haven't opti
     id: 'hindi_greeting',
     phrases: ['namaste','namaskar','mera bioage','meri health','kya hai bioage','diet plan batao','kya khana chahiye'],
     keys: ['namaste','mera','meri','batao','chahiye','hindi'],
-    r: `Namaste! Main aapka HealthOS AI health guide hun. 🧬
+    r: `Namaste! Main aapka AROGYOS AI health guide hun. 🧬
 
 Main aapki madad kar sakta hun:
 • Aapke BioAge score ko samajhne mein

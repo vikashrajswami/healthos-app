@@ -17,7 +17,7 @@ export default function Screen9() {
 
       <div className="plus-card">
         <div className="days-badge">30 DAYS FREE</div>
-        <div className="pname">HealthOS Plus</div>
+        <div className="pname">AROGYOS Plus</div>
         <div className="price">{region==='india'?'₹399':'$99'} <small>/ year</small></div>
         <div className="feat">
           ✓ Full family BioAge dashboard<br/>

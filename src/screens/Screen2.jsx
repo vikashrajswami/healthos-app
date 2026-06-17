@@ -14,7 +14,7 @@ export default function Screen2() {
           <div className="es-title">No trend data yet</div>
           <div className="es-body">
             Complete your BioAge quiz on the Home screen to get your baseline score.
-            Upload lab reports over time and HealthOS will automatically track how your biological age changes.
+            Upload lab reports over time and AROGYOS will automatically track how your biological age changes.
           </div>
           <button className="es-cta" onClick={() => nav('/')}>Go to Home →</button>
         </div>

@@ -52,7 +52,7 @@ export default function Screen7() {
         <div className="bm-empty-icon">🩸</div>
         <div className="bm-empty-title">No biomarker data yet</div>
         <div className="bm-empty-body">
-          Upload two lab reports (before and after) and HealthOS will automatically show how your key markers changed — hsCRP, HbA1c, LDL, testosterone, vitamins, and more.
+          Upload two lab reports (before and after) and AROGYOS will automatically show how your key markers changed — hsCRP, HbA1c, LDL, testosterone, vitamins, and more.
         </div>
         <button className="bm-empty-btn" onClick={() => nav('/upload')}>Upload First Report →</button>
       </div>

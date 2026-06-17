@@ -4,24 +4,24 @@ import { useNavigate } from 'react-router-dom'
 const SECTIONS = [
   {
     id: 'about',
-    title: '1. About HealthOS',
-    content: `HealthOS (operated by HealthOS Intelligence Pvt. Ltd.) is a health-technology platform that enables users to upload, analyse, and track biological and clinical data including blood test reports, biomarkers, and related health parameters. HealthOS is not a medical device, not a diagnostic laboratory, and does not provide medical diagnoses or prescriptions.
+    title: '1. About AROGYOS',
+    content: `AROGYOS (operated by AROGYOS Intelligence Pvt. Ltd.) is a health-technology platform that enables users to upload, analyse, and track biological and clinical data including blood test reports, biomarkers, and related health parameters. AROGYOS is not a medical device, not a diagnostic laboratory, and does not provide medical diagnoses or prescriptions.
 
-HealthOS partners with NABL/CAP-accredited laboratories for doorstep sample collection services available in select cities in India. All laboratory tests are conducted by partner labs under applicable regulatory frameworks.
+AROGYOS partners with NABL/CAP-accredited laboratories for doorstep sample collection services available in select cities in India. All laboratory tests are conducted by partner labs under applicable regulatory frameworks.
 
 By creating an account, you confirm that you have read, understood, and agree to be bound by these Terms and all policies incorporated by reference.`,
   },
   {
     id: 'eligibility',
     title: '2. Eligibility',
-    content: `You must be at least 18 years of age to create an account and use HealthOS independently. Persons between 13 and 17 years may use the platform only with explicit, verifiable parental or guardian consent. Persons under 13 years are not permitted to use this platform.
+    content: `You must be at least 18 years of age to create an account and use AROGYOS independently. Persons between 13 and 17 years may use the platform only with explicit, verifiable parental or guardian consent. Persons under 13 years are not permitted to use this platform.
 
 By accepting these Terms, you confirm that: (a) you are at least 18 years old, or have obtained verifiable parental consent; (b) you have the legal capacity to enter into a binding agreement; (c) you are not a resident of any jurisdiction where use of this service is prohibited by applicable law.`,
   },
   {
     id: 'health-data',
     title: '3. Health Data — Collection & Processing',
-    content: `HealthOS collects and processes the following categories of personal data:
+    content: `AROGYOS collects and processes the following categories of personal data:
 
 IDENTITY DATA: Name, date of birth, gender, contact details (mobile number and/or email address).
 
@@ -38,13 +38,13 @@ DATA MINIMISATION: We collect only what is strictly necessary for the stated pur
   {
     id: 'laws',
     title: '4. Applicable Laws & Your Rights',
-    content: `HealthOS complies with, and you are protected under, the following frameworks:
+    content: `AROGYOS complies with, and you are protected under, the following frameworks:
 
 🇮🇳 INDIA — Digital Personal Data Protection (DPDP) Act, 2023; Information Technology Act, 2000; IT (Amendment) Act, 2008; IT (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011; Consumer Protection Act, 2019; Telemedicine Practice Guidelines, 2020 (MoHFW).
 
-🇪🇺 EUROPEAN UNION / 🇬🇧 UK — General Data Protection Regulation (GDPR) (EU) 2016/679; UK GDPR; UK Data Protection Act 2018. For EU/UK users, HealthOS acts as a Data Controller. You have the right to: access, rectify, erase ("right to be forgotten"), restrict processing, data portability, and object to processing. You may lodge a complaint with your local Data Protection Authority (DPA).
+🇪🇺 EUROPEAN UNION / 🇬🇧 UK — General Data Protection Regulation (GDPR) (EU) 2016/679; UK GDPR; UK Data Protection Act 2018. For EU/UK users, AROGYOS acts as a Data Controller. You have the right to: access, rectify, erase ("right to be forgotten"), restrict processing, data portability, and object to processing. You may lodge a complaint with your local Data Protection Authority (DPA).
 
-🇺🇸 USA — California Consumer Privacy Act (CCPA) / California Privacy Rights Act (CPRA) for California residents. We do not "sell" personal data as defined under CCPA. You may opt out of any data sharing for cross-context behavioural advertising. For US users, HealthOS is not a HIPAA Covered Entity; however, we apply equivalent safeguards to your health data voluntarily.
+🇺🇸 USA — California Consumer Privacy Act (CCPA) / California Privacy Rights Act (CPRA) for California residents. We do not "sell" personal data as defined under CCPA. You may opt out of any data sharing for cross-context behavioural advertising. For US users, AROGYOS is not a HIPAA Covered Entity; however, we apply equivalent safeguards to your health data voluntarily.
 
 🇸🇬 SINGAPORE — Personal Data Protection Act (PDPA) 2012. You may withdraw consent or request access/correction at any time.
 
@@ -54,7 +54,7 @@ DATA MINIMISATION: We collect only what is strictly necessary for the stated pur
 
 🇨🇦 CANADA — Personal Information Protection and Electronic Documents Act (PIPEDA). You may withdraw consent subject to legal or contractual restrictions.
 
-TO EXERCISE ANY RIGHT: Email privacy@healthos.in with your registered email and request type. We respond within 30 days (GDPR: 1 month).`,
+TO EXERCISE ANY RIGHT: Email privacy@arogyos.in with your registered email and request type. We respond within 30 days (GDPR: 1 month).`,
   },
   {
     id: 'retention',
@@ -77,12 +77,12 @@ Upon verified account deletion request, all personal and health data is purged w
 • Adequacy decisions or equivalent safeguards under applicable law.
 • Data Processing Agreements (DPAs) with all sub-processors binding them to GDPR-equivalent obligations.
 
-Sub-processors include: cloud storage providers, email delivery services (for OTP), and analytics tools (all configured for data minimisation). A current list of sub-processors is available at healthos.in/sub-processors.`,
+Sub-processors include: cloud storage providers, email delivery services (for OTP), and analytics tools (all configured for data minimisation). A current list of sub-processors is available at arogyos.in/sub-processors.`,
   },
   {
     id: 'security',
     title: '7. Security',
-    content: `HealthOS implements the following technical and organisational security measures:
+    content: `AROGYOS implements the following technical and organisational security measures:
 
 TECHNICAL: 256-bit AES encryption for data at rest; TLS 1.3 for data in transit; session-based encryption for locally cached data; Content Security Policy (CSP) headers; HTTP Strict Transport Security (HSTS); anti-clickjacking controls; input sanitisation and validation; OTP rate limiting (5 attempts per 15 minutes); automatic session expiry.
 
@@ -90,51 +90,51 @@ ORGANISATIONAL: Access controls on a need-to-know basis; employee data handling 
 
 INCIDENT NOTIFICATION: In the event of a data breach affecting your rights and freedoms, we will notify you within 72 hours of becoming aware (as required by GDPR Article 33) and within the timeframe prescribed by applicable local law.
 
-LIMITATION: No digital system is completely impenetrable. While we implement industry-standard measures, HealthOS cannot guarantee absolute security. You are responsible for maintaining the security of your account credentials and device.`,
+LIMITATION: No digital system is completely impenetrable. While we implement industry-standard measures, AROGYOS cannot guarantee absolute security. You are responsible for maintaining the security of your account credentials and device.`,
   },
   {
     id: 'disclaimer',
     title: '8. Medical Disclaimer',
     content: `HEALTHOS IS A HEALTH-EDUCATION AND DATA-TRACKING PLATFORM. IT IS NOT A LICENSED MEDICAL DEVICE, DIAGNOSTIC LABORATORY, OR HEALTHCARE PROVIDER.
 
-The biological age score, biomarker analysis, and AI-generated insights provided by HealthOS are for informational and educational purposes only. They do not constitute medical advice, diagnosis, treatment recommendations, or prescriptions.
+The biological age score, biomarker analysis, and AI-generated insights provided by AROGYOS are for informational and educational purposes only. They do not constitute medical advice, diagnosis, treatment recommendations, or prescriptions.
 
-Always consult a qualified, licensed healthcare professional before making any changes to your diet, medication, supplementation, or lifestyle based on information from HealthOS. HealthOS explicitly disclaims liability for any health decisions made based solely on information provided by the platform.
+Always consult a qualified, licensed healthcare professional before making any changes to your diet, medication, supplementation, or lifestyle based on information from AROGYOS. AROGYOS explicitly disclaims liability for any health decisions made based solely on information provided by the platform.
 
-Laboratory tests booked through HealthOS are conducted by independent, NABL/CAP-accredited partner laboratories. HealthOS is not responsible for the accuracy of laboratory results — queries regarding test results should be directed to the testing laboratory.
+Laboratory tests booked through AROGYOS are conducted by independent, NABL/CAP-accredited partner laboratories. AROGYOS is not responsible for the accuracy of laboratory results — queries regarding test results should be directed to the testing laboratory.
 
-In an emergency, call your local emergency services (India: 112; USA: 911; UK: 999; EU: 112) immediately. Do not rely on HealthOS in emergency situations.`,
+In an emergency, call your local emergency services (India: 112; USA: 911; UK: 999; EU: 112) immediately. Do not rely on AROGYOS in emergency situations.`,
   },
   {
     id: 'payment',
     title: '9. Subscription & Payment',
-    content: `SUBSCRIPTION PLANS: HealthOS offers monthly and annual subscription plans. Pricing is displayed in INR for users selecting India as their country, and in USD for all other users. All prices are inclusive of applicable taxes for Indian users (GST at applicable rate); international prices exclude local taxes for which you are responsible.
+    content: `SUBSCRIPTION PLANS: AROGYOS offers monthly and annual subscription plans. Pricing is displayed in INR for users selecting India as their country, and in USD for all other users. All prices are inclusive of applicable taxes for Indian users (GST at applicable rate); international prices exclude local taxes for which you are responsible.
 
 BILLING: Subscriptions are billed in advance for the chosen period (monthly or annual). Your subscription automatically renews unless cancelled at least 24 hours before the renewal date.
 
-PAYMENT PROCESSING: Indian users may pay via UPI, credit card, or debit card through Razorpay (a PCI DSS Level 1 certified payment processor). International users may pay via credit or debit card through Stripe (PCI DSS Level 1 certified). HealthOS does not store full card numbers or CVV/CVC at any point — payment data is processed solely by the payment processor.
+PAYMENT PROCESSING: Indian users may pay via UPI, credit card, or debit card through Razorpay (a PCI DSS Level 1 certified payment processor). International users may pay via credit or debit card through Stripe (PCI DSS Level 1 certified). AROGYOS does not store full card numbers or CVV/CVC at any point — payment data is processed solely by the payment processor.
 
-REFUND POLICY: Subscriptions cancelled within 7 days of first purchase (and before consuming any doorstep lab service or downloading a report) are eligible for a full refund. No refunds are provided after 7 days or after consumption of included services. Refund requests must be submitted to support@healthos.in.
+REFUND POLICY: Subscriptions cancelled within 7 days of first purchase (and before consuming any doorstep lab service or downloading a report) are eligible for a full refund. No refunds are provided after 7 days or after consumption of included services. Refund requests must be submitted to support@arogyos.in.
 
 PRICE CHANGES: We may revise subscription prices with 30 days' advance written notice. Continued use after the notice period constitutes acceptance of the new price.`,
   },
   {
     id: 'ip',
     title: '10. Intellectual Property',
-    content: `All content, software, AI models, algorithms, designs, trademarks, and brand elements of HealthOS are the exclusive intellectual property of HealthOS Intelligence Pvt. Ltd. and are protected under the Copyright Act, 1957 (India), and equivalent international copyright laws.
+    content: `All content, software, AI models, algorithms, designs, trademarks, and brand elements of AROGYOS are the exclusive intellectual property of AROGYOS Intelligence Pvt. Ltd. and are protected under the Copyright Act, 1957 (India), and equivalent international copyright laws.
 
-Your health data belongs to you. HealthOS claims no ownership over your personal health records. You grant HealthOS a limited, non-exclusive, revocable licence to process your data solely for the purposes described in these Terms.
+Your health data belongs to you. AROGYOS claims no ownership over your personal health records. You grant AROGYOS a limited, non-exclusive, revocable licence to process your data solely for the purposes described in these Terms.
 
-You may not reproduce, reverse-engineer, decompile, scrape, or create derivative works from any part of the HealthOS platform without prior written consent.`,
+You may not reproduce, reverse-engineer, decompile, scrape, or create derivative works from any part of the AROGYOS platform without prior written consent.`,
   },
   {
     id: 'liability',
     title: '11. Limitation of Liability',
     content: `TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
 
-HealthOS shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of data, loss of revenue, bodily harm, or adverse health outcomes arising from your use of or reliance on the platform.
+AROGYOS shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of data, loss of revenue, bodily harm, or adverse health outcomes arising from your use of or reliance on the platform.
 
-HealthOS's total cumulative liability for any claim arising out of or related to these Terms shall not exceed the total subscription fees paid by you in the 12 months preceding the claim.
+AROGYOS's total cumulative liability for any claim arising out of or related to these Terms shall not exceed the total subscription fees paid by you in the 12 months preceding the claim.
 
 These limitations do not apply to: (a) death or personal injury caused by our negligence; (b) fraud or fraudulent misrepresentation; (c) any liability that cannot be excluded by applicable law (including consumer protection laws in your jurisdiction).`,
   },
@@ -149,35 +149,35 @@ USA USERS: For California residents, this agreement does not limit rights under 
 
 ALL OTHER USERS: Disputes shall be governed by the laws of India, with the courts of Bengaluru having non-exclusive jurisdiction.
 
-CLASS ACTION WAIVER: To the extent permitted by law, you waive any right to participate in a class action lawsuit or class-wide arbitration against HealthOS.`,
+CLASS ACTION WAIVER: To the extent permitted by law, you waive any right to participate in a class action lawsuit or class-wide arbitration against AROGYOS.`,
   },
   {
     id: 'changes',
     title: '13. Changes to These Terms',
     content: `We may update these Terms from time to time to reflect changes in law, technology, or our services. We will notify you of material changes by email (to your registered address) and/or by a prominent notice within the app at least 30 days before the change takes effect.
 
-Your continued use of HealthOS after the effective date of the revised Terms constitutes acceptance. If you do not agree to the revised Terms, you must close your account before the effective date.
+Your continued use of AROGYOS after the effective date of the revised Terms constitutes acceptance. If you do not agree to the revised Terms, you must close your account before the effective date.
 
-The current version of these Terms is always accessible at healthos.in/terms. The version date is shown at the bottom of this document.`,
+The current version of these Terms is always accessible at arogyos.in/terms. The version date is shown at the bottom of this document.`,
   },
   {
     id: 'contact',
     title: '14. Contact & Grievance Officer',
     content: `For any queries, complaints, or requests related to your data or these Terms:
 
-Email: privacy@healthos.in
-Support: support@healthos.in
+Email: privacy@arogyos.in
+Support: support@arogyos.in
 
 GRIEVANCE OFFICER (India — as required by IT Rules 2011 and DPDP Act 2023):
 Name: [Grievance Officer Name]
-Email: grievance@healthos.in
+Email: grievance@arogyos.in
 Response time: Acknowledgement within 48 hours; resolution within 30 days.
 
 DATA PROTECTION OFFICER (EU/UK — GDPR Article 37):
-Email: dpo@healthos.in
+Email: dpo@arogyos.in
 
 REGISTERED OFFICE:
-HealthOS Intelligence Pvt. Ltd.
+AROGYOS Intelligence Pvt. Ltd.
 [Registered Address], Bengaluru, Karnataka — 560001, India
 CIN: [Company Identification Number]`,
   },
@@ -225,7 +225,7 @@ export default function TermsScreen() {
         {/* Intro */}
         <div style={{ background: '#fff', borderRadius: 14, padding: '18px 20px', marginBottom: 16, border: '1px solid #e2e8f0' }}>
           <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.75 }}>
-            These Terms govern your use of HealthOS across all features including health report analysis, biological age tracking, Health Vault, Lab-at-Doorstep, and subscription services. HealthOS operates globally and this document incorporates applicable data protection and consumer rights laws for users in India, the EU/UK, USA, Singapore, UAE, Australia, and Canada.
+            These Terms govern your use of AROGYOS across all features including health report analysis, biological age tracking, Health Vault, Lab-at-Doorstep, and subscription services. AROGYOS operates globally and this document incorporates applicable data protection and consumer rights laws for users in India, the EU/UK, USA, Singapore, UAE, Australia, and Canada.
           </div>
         </div>
 
@@ -267,12 +267,12 @@ export default function TermsScreen() {
             </div>
           ))}
           <div style={{ marginTop: 14, fontSize: 12, color: '#14b8a6', fontWeight: 600 }}>
-            Exercise any right: privacy@healthos.in · Response within 30 days
+            Exercise any right: privacy@arogyos.in · Response within 30 days
           </div>
         </div>
 
         <div style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', marginTop: 24, lineHeight: 1.7 }}>
-          HealthOS Intelligence Pvt. Ltd. · CIN: [Pending] · Bengaluru, Karnataka, India<br/>
+          AROGYOS Intelligence Pvt. Ltd. · CIN: [Pending] · Bengaluru, Karnataka, India<br/>
           Registered under Companies Act 2013 · DPDP Act 2023 compliant<br/>
           These Terms were last updated on 17 June 2026
         </div>

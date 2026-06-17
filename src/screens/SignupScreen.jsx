@@ -157,7 +157,7 @@ export default function SignupScreen() {
               <circle cx="17" cy="17" r="7"  fill="none" stroke={A} strokeWidth="1.5" strokeOpacity=".3"/>
             </svg>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 300, color: '#fff', letterSpacing: 3 }}>HealthOS</div>
+              <div style={{ fontSize: 16, fontWeight: 300, color: '#fff', letterSpacing: 3 }}>AROGYOS</div>
               <div style={{ fontSize: 9, color: A, fontWeight: 700, letterSpacing: 2 }}>INTELLIGENCE</div>
             </div>
           </div>

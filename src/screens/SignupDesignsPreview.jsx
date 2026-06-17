@@ -122,7 +122,7 @@ function DesignA() {
     <div style={{ minHeight: 660, background: '#f0fdfa', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
       <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
       <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Welcome, {name.split(' ')[0]}!</div>
-      <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>Your HealthOS account is ready. Let's find your biological age.</div>
+      <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>Your AROGYOS account is ready. Let's find your biological age.</div>
       <div style={{ marginTop: 24, background: ACCENT, color: '#fff', borderRadius: 14, padding: '14px 28px', fontWeight: 800, fontSize: 15 }}>Start My BioAge Quiz →</div>
     </div>
   )
@@ -131,7 +131,7 @@ function DesignA() {
     <div style={{ minHeight: 660, background: 'linear-gradient(160deg,#0f3a3a 0%,#134e4a 50%,#0f3a3a 100%)', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ padding: '32px 24px 20px', color: '#fff' }}>
-        <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5 }}>🧬 HealthOS</div>
+        <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5 }}>🧬 AROGYOS</div>
         <div style={{ fontSize: 13, color: '#9fd9cf', marginTop: 4 }}>Your biological age reversal companion</div>
       </div>
 
@@ -307,7 +307,7 @@ function DesignB() {
       <div style={{ marginBottom: 28, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 24 }}>🧬</span>
-          <span style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }}>HealthOS</span>
+          <span style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }}>AROGYOS</span>
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>Reverse your biological age</div>
       </div>
@@ -505,7 +505,7 @@ function DesignC() {
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ fontSize: 20 }}>🧬</span>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>HealthOS</span>
+            <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>AROGYOS</span>
           </div>
           {stage === 'form' && <>
             <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>Create your health account</div>
@@ -666,7 +666,7 @@ function DesignD() {
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
           <span style={{ fontSize: 22 }}>🧬</span>
-          <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>HealthOS</span>
+          <span style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>AROGYOS</span>
         </div>
 
         {/* STEP: Choose method */}

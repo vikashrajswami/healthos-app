@@ -127,7 +127,7 @@ function drawTransformCard(canvas) {
 
   ctx.fillStyle = 'rgba(255,255,255,0.28)'
   ctx.font = '400 36px Arial'
-  ctx.fillText('Start your reversal →  healthos.app', cx, H * 0.932)
+  ctx.fillText('Start your reversal →  arogyos.app', cx, H * 0.932)
 }
 
 /* ── Build blob URL ── */
@@ -144,7 +144,7 @@ function buildBlobUrl() {
 /* ── WhatsApp ── */
 function openWhatsApp() {
   const text = encodeURIComponent(
-    `🧬 *My HealthOS Transformation*\n\n` +
+    `🧬 *My AROGYOS Transformation*\n\n` +
     `Biological Age: *${BIOAGE} yrs* ✅  (actual: ${REAL_AGE})\n` +
     `Result: *${GAP} YEARS YOUNGER* 🔥\n\n` +
     `📊 *Before → Now:*\n` +
@@ -154,7 +154,7 @@ function openWhatsApp() {
     `• Diet Adherence: — → 94% ✓\n\n` +
     `🌱 Personalised anti-inflammatory diet\n` +
     `💪 Strength + Zone 2 cardio protocol\n\n` +
-    `Start your age reversal 👉 *healthos.app*`
+    `Start your age reversal 👉 *arogyos.app*`
   )
   window.open(`https://wa.me/?text=${text}`, '_blank')
 }
@@ -163,17 +163,17 @@ function openWhatsApp() {
 function ShareModal({ imgUrl, blob, onClose }) {
   function saveImage() {
     const a = document.createElement('a')
-    a.download = 'healthos-transformation.png'
+    a.download = 'arogyos-transformation.png'
     a.href = imgUrl
     a.click()
   }
 
   async function tryNativeShare() {
     if (!blob) return
-    const file = new File([blob], 'healthos-transformation.png', { type: 'image/png' })
+    const file = new File([blob], 'arogyos-transformation.png', { type: 'image/png' })
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: 'My HealthOS Transformation' })
+        await navigator.share({ files: [file], title: 'My AROGYOS Transformation' })
         onClose()
         return
       } catch (e) { /* fall through */ }
@@ -227,10 +227,10 @@ export default function Screen8() {
     setLoading(false)
 
     // On mobile browsers the OS share sheet includes Instagram
-    const file = new File([blob], 'healthos-transformation.png', { type: 'image/png' })
+    const file = new File([blob], 'arogyos-transformation.png', { type: 'image/png' })
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: 'My HealthOS Transformation' })
+        await navigator.share({ files: [file], title: 'My AROGYOS Transformation' })
         return
       } catch (e) {
         if (e.name === 'AbortError') return
@@ -261,7 +261,7 @@ export default function Screen8() {
       </div>
 
       <div className="share-rank">🔥 Top 15% for my age group</div>
-      <div className="share-cta">healthos.app</div>
+      <div className="share-cta">arogyos.app</div>
 
       <div className="card-title">Share to</div>
 
@@ -300,7 +300,7 @@ export default function Screen8() {
       <button className="save-btn" onClick={async () => {
         const { url } = await buildBlobUrl()
         const a = document.createElement('a')
-        a.download = 'healthos-transformation.png'
+        a.download = 'arogyos-transformation.png'
         a.href = url
         a.click()
       }}>

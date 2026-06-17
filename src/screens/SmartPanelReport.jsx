@@ -89,7 +89,7 @@ export default function SmartPanelReport() {
         <div className="spr-logo-row">
           <span className="spr-logo">🧬</span>
           <div>
-            <div className="spr-brand">HealthOS</div>
+            <div className="spr-brand">AROGYOS</div>
             <div className="spr-brand-sub">Smart Lab Panel Report</div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function SmartPanelReport() {
       <div className="spr-why-card">
         <div className="spr-why-title">Why This Panel?</div>
         <div className="spr-why-body">
-          HealthOS analysed your <strong>{report.connectedCount} connected data source{report.connectedCount !== 1 ? 's' : ''}</strong> and
+          AROGYOS analysed your <strong>{report.connectedCount} connected data source{report.connectedCount !== 1 ? 's' : ''}</strong> and
           found <strong>{report.missingCount} biomarkers</strong> not yet being tracked by any device or previous lab report.
           This panel fills every gap so your BioAge score is based on complete, accurate data — not estimates.
         </div>
@@ -123,7 +123,7 @@ export default function SmartPanelReport() {
       <div className="spr-instructions">
         <div className="spr-instr-title">📋 What to Tell Your Lab</div>
         <div className="spr-instr-quote">
-          "Please include all tests from my HealthOS Smart Panel. The list is below."
+          "Please include all tests from my AROGYOS Smart Panel. The list is below."
         </div>
         <div className="spr-instr-grid">
           <div className="spr-instr-item"><span className="spr-ii">⏰</span><div><strong>Fast 10–12 hours</strong><br/>Water, plain tea/coffee (no sugar) allowed</div></div>
@@ -227,7 +227,7 @@ export default function SmartPanelReport() {
         <div className="spr-after-icon">📤</div>
         <div className="spr-after-title">After Your Blood Test</div>
         <div className="spr-after-body">
-          Upload your PDF report to HealthOS.<br/>
+          Upload your PDF report to AROGYOS.<br/>
           Every biomarker is read automatically and all your data gaps fill instantly.
           Your BioAge score updates to full accuracy.
         </div>

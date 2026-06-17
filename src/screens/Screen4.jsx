@@ -175,7 +175,7 @@ function LabModal({ onClose }) {
     <div className="dh-modal-body">
       <div className="dh-modal-icon">🩸</div>
       <div className="dh-modal-title">Lab Report Upload</div>
-      <div className="dh-modal-desc">Upload any blood test PDF or photo. HealthOS AI reads every biomarker automatically — works with any lab in India or worldwide.</div>
+      <div className="dh-modal-desc">Upload any blood test PDF or photo. AROGYOS AI reads every biomarker automatically — works with any lab in India or worldwide.</div>
       <div className="dh-modal-list">
         <div className="dh-ml-item">✓ Any NABL-certified diagnostic lab in India</div>
         <div className="dh-ml-item">✓ Government and private hospital pathology reports</div>
@@ -195,7 +195,7 @@ function HealthKitModal({ onClose }) {
     <div className="dh-modal-body">
       <div className="dh-modal-icon">{isIOS ? '🍎' : '🤖'}</div>
       <div className="dh-modal-title">{isIOS ? 'Apple Health' : 'Google Health Connect'}</div>
-      <div className="dh-modal-desc">One permission gives HealthOS access to all your health data — from any device or app that syncs to {isIOS ? 'Apple Health' : 'Google Health Connect'}.</div>
+      <div className="dh-modal-desc">One permission gives AROGYOS access to all your health data — from any device or app that syncs to {isIOS ? 'Apple Health' : 'Google Health Connect'}.</div>
       <div className="dh-modal-list">
         <div className="dh-ml-item">✓ HRV, resting heart rate, ECG</div>
         <div className="dh-ml-item">✓ Sleep stages (deep, REM, light)</div>
@@ -218,7 +218,7 @@ function CGMModal({ onClose }) {
         <div className="dh-step"><span className="dh-snum">1</span><span>Buy a CGM sensor from any pharmacy or online (typically ₹1,500–2,500 for 14 days)</span></div>
         <div className="dh-step"><span className="dh-snum">2</span><span>Download the companion app that came with your sensor and activate it</span></div>
         <div className="dh-step"><span className="dh-snum">3</span><span>Enable data sharing in the app settings</span></div>
-        <div className="dh-step"><span className="dh-snum">4</span><span>Connect your CGM account to HealthOS below</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>Connect your CGM account to AROGYOS below</span></div>
       </div>
       <button className="dh-modal-cta" style={{ background: '#7c3aed' }}>
         Connect CGM Account
@@ -233,7 +233,7 @@ function RingModal({ onClose }) {
     <div className="dh-modal-body">
       <div className="dh-modal-icon">💍</div>
       <div className="dh-modal-title">Connect Smart Ring</div>
-      <div className="dh-modal-desc">Smart rings are the most accurate continuous health trackers — worn 24/7 including during sleep. Any ring that tracks HRV, sleep, and temperature works with HealthOS.</div>
+      <div className="dh-modal-desc">Smart rings are the most accurate continuous health trackers — worn 24/7 including during sleep. Any ring that tracks HRV, sleep, and temperature works with AROGYOS.</div>
       <div className="dh-modal-list">
         <div className="dh-ml-item">✓ HRV — most accurate measurement of any wearable form factor</div>
         <div className="dh-ml-item">✓ Sleep stages: deep, REM, light, awake — tracked all night</div>
@@ -242,7 +242,7 @@ function RingModal({ onClose }) {
         <div className="dh-ml-item">✓ Daily recovery score — tells you if your body is ready to train</div>
       </div>
       <div className="dh-modal-note" style={{marginBottom:14,color:'#475569'}}>
-        How to connect: Open your ring's companion app → go to Settings → enable Health platform sharing → HealthOS will receive your data automatically.
+        How to connect: Open your ring's companion app → go to Settings → enable Health platform sharing → AROGYOS will receive your data automatically.
       </div>
       <button className="dh-modal-cta" style={{ background: '#b45309' }}>
         Connect via Health App
@@ -304,7 +304,7 @@ function AbhaModal({ onClose }) {
           <div className="dh-modal-desc" style={{textAlign:'center',paddingTop:12}}>
             <div style={{fontSize:48,marginBottom:12}}>📲</div>
             <strong>Consent Request Sent!</strong><br/><br/>
-            Open your <strong>ABDM Health app or Aarogya Setu</strong> and approve the request from HealthOS to share your health records.<br/><br/>
+            Open your <strong>ABDM Health app or Aarogya Setu</strong> and approve the request from AROGYOS to share your health records.<br/><br/>
             Once you approve, your records will import automatically in 2–5 minutes.
           </div>
           <div className="dh-connected-badge" style={{background:'#dcfce7',color:'#15803d',borderColor:'#86efac'}}>
@@ -326,7 +326,7 @@ function ScaleModal({ onClose }) {
         <div className="dh-step"><span className="dh-snum">1</span><span>Get any smart body composition scale with a companion app</span></div>
         <div className="dh-step"><span className="dh-snum">2</span><span>Enable health data sharing in the scale's app settings</span></div>
         <div className="dh-step"><span className="dh-snum">3</span><span>Connect to Apple Health or Google Fit to sync automatically</span></div>
-        <div className="dh-step"><span className="dh-snum">4</span><span>HealthOS reads your body composition data from health sync</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>AROGYOS reads your body composition data from health sync</span></div>
       </div>
       <div className="dh-modal-list" style={{marginTop:12}}>
         <div className="dh-ml-item">✓ Body fat % — ideal for longevity: 10–20% (men), 18–28% (women)</div>
@@ -364,7 +364,7 @@ function EpigeneticModal({ onClose }) {
         <div className="dh-step"><span className="dh-snum">1</span><span>Order test kit (ships to your home)</span></div>
         <div className="dh-step"><span className="dh-snum">2</span><span>Collect blood/saliva sample at home</span></div>
         <div className="dh-step"><span className="dh-snum">3</span><span>Ship the kit back (prepaid label included)</span></div>
-        <div className="dh-step"><span className="dh-snum">4</span><span>Results arrive in ~3 weeks · Import PDF to HealthOS</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>Results arrive in ~3 weeks · Import PDF to AROGYOS</span></div>
       </div>
       <button className="dh-modal-cta" style={{ background:'linear-gradient(90deg,#7c3aed,#9333ea)' }}>
         Order Test Kit →
@@ -514,7 +514,7 @@ export default function Screen4() {
               <div className="dh-ae-icon">🩺</div>
               <div className="dh-ae-title">No health alerts yet</div>
               <div className="dh-ae-body">
-                Upload a lab report and HealthOS will flag any biomarkers outside the healthy range — with educational context and questions to raise with your doctor.
+                Upload a lab report and AROGYOS will flag any biomarkers outside the healthy range — with educational context and questions to raise with your doctor.
               </div>
               <div className="dh-ae-note">⚕️ Alerts are educational, not medical diagnoses</div>
             </div>
@@ -674,7 +674,7 @@ export default function Screen4() {
             </div>
 
             <div className="dh-lp-banner">
-              HealthOS found <strong>{allLabRequired.length} biomarkers</strong> not covered by your connected devices.
+              AROGYOS found <strong>{allLabRequired.length} biomarkers</strong> not covered by your connected devices.
               Add the tests below to your next blood test to fill the gaps.
             </div>
 
@@ -694,16 +694,16 @@ export default function Screen4() {
                 <div className="dh-lp-actions">
                   <button className="dh-lp-copy" onClick={() => {
                     const text = allLabRequired.map((b,i) => `${i+1}. ${b.labTest.test}`).join('\n')
-                    navigator.clipboard?.writeText(`My HealthOS Lab Panel:\n\n${text}\n\nPlease include in my next blood test. Thank you.`)
+                    navigator.clipboard?.writeText(`My AROGYOS Lab Panel:\n\n${text}\n\nPlease include in my next blood test. Thank you.`)
                       .then(() => alert('Copied! Paste this to share with your doctor or lab.'))
                   }}>
                     📋 Copy for Doctor / Lab
                   </button>
                   <button className="dh-lp-share" onClick={() => {
                     const text = encodeURIComponent(
-                      `My HealthOS recommended tests:\n\n` +
+                      `My AROGYOS recommended tests:\n\n` +
                       allLabRequired.slice(0,8).map((b,i) => `${i+1}. ${b.labTest.test}`).join('\n') +
-                      `\n\nTracking my biological age reversal via HealthOS`
+                      `\n\nTracking my biological age reversal via AROGYOS`
                     )
                     window.open(`https://wa.me/?text=${text}`, '_blank')
                   }}>
@@ -713,7 +713,7 @@ export default function Screen4() {
 
                 <div className="dh-lp-note">
                   Tip: Take this list to any NABL-certified diagnostic lab near you. Most panels cost ₹1500–4000 and cover all these markers.
-                  Upload your results here and HealthOS fills all the gaps automatically.
+                  Upload your results here and AROGYOS fills all the gaps automatically.
                 </div>
               </>
             )}

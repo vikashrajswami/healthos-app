@@ -285,7 +285,7 @@ function Design2() {
             <circle cx="14" cy="14" r="11" fill="none" stroke={GOLD} strokeWidth="2.5" />
             <circle cx="14" cy="14" r="5" fill="none" stroke={GOLD} strokeWidth="1.5" strokeOpacity=".5" />
           </svg>
-          <span style={{ fontSize:15, fontWeight:300, color:'#fff', letterSpacing:3, textTransform:'uppercase' }}>HealthOS</span>
+          <span style={{ fontSize:15, fontWeight:300, color:'#fff', letterSpacing:3, textTransform:'uppercase' }}>AROGYOS</span>
         </div>
 
         {stage === 'form' && (
@@ -439,7 +439,7 @@ function Design3() {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:28 }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ width:28, height:28, background:GREEN, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>🧬</div>
-            <span style={{ fontSize:16, fontWeight:800, color:DARK }}>HealthOS</span>
+            <span style={{ fontSize:16, fontWeight:800, color:DARK }}>AROGYOS</span>
           </div>
           <div style={{ fontSize:11, color:'#9ca3af', fontWeight:600 }}>Free account</div>
         </div>
@@ -620,7 +620,7 @@ function Design4() {
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:32 }}>
           <div style={{ width:32, height:32, borderRadius:8, border:`1.5px solid ${CYAN}44`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, background:`${CYAN}12` }}>🧬</div>
           <div>
-            <span style={{ fontSize:15, fontWeight:800, color:'#fff', letterSpacing:0.5 }}>HealthOS</span>
+            <span style={{ fontSize:15, fontWeight:800, color:'#fff', letterSpacing:0.5 }}>AROGYOS</span>
             <div style={{ fontSize:9, color:CYAN, fontWeight:700, letterSpacing:2 }}>INTELLIGENCE</div>
           </div>
         </div>

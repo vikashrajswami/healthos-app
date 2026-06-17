@@ -307,7 +307,7 @@ function Design2({ theme }) {
             <circle cx="14" cy="14" r="11" fill="none" stroke={A} strokeWidth="2.5"/>
             <circle cx="14" cy="14" r="5" fill="none" stroke={A} strokeWidth="1.5" strokeOpacity=".4"/>
           </svg>
-          <span style={{ fontSize:15, fontWeight:300, color:'#fff', letterSpacing:3 }}>HealthOS</span>
+          <span style={{ fontSize:15, fontWeight:300, color:'#fff', letterSpacing:3 }}>AROGYOS</span>
         </div>
 
         {st==='form' && <>
@@ -424,7 +424,7 @@ function Design3({ theme }) {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:26 }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ width:28, height:28, background:A, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>🧬</div>
-            <span style={{ fontSize:16, fontWeight:800, color:DARK }}>HealthOS</span>
+            <span style={{ fontSize:16, fontWeight:800, color:DARK }}>AROGYOS</span>
           </div>
           <div style={{ fontSize:11, color:'#9ca3af', fontWeight:600 }}>Free account</div>
         </div>
@@ -561,7 +561,7 @@ function Design4({ theme }) {
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:30 }}>
           <div style={{ width:32, height:32, borderRadius:8, border:`1.5px solid ${A}44`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, background:`${A}12` }}>🧬</div>
           <div>
-            <span style={{ fontSize:15, fontWeight:800, color:'#fff', letterSpacing:0.5 }}>HealthOS</span>
+            <span style={{ fontSize:15, fontWeight:800, color:'#fff', letterSpacing:0.5 }}>AROGYOS</span>
             <div style={{ fontSize:9, color:A, fontWeight:700, letterSpacing:2 }}>INTELLIGENCE</div>
           </div>
         </div>
@@ -716,7 +716,7 @@ export default function SignupDesignsPreview3() {
           <button onClick={() => nav('/')} style={{ marginLeft:'auto', background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'7px 14px', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600 }}>Back to App</button>
         </div>
         <div style={{ fontSize:20, fontWeight:900, color:'#0f172a', marginBottom:4 }}>Signup Designs V3 — All App Colours</div>
-        <div style={{ fontSize:13, color:'#64748b' }}>Each design adapts to all 3 HealthOS themes · Click the dots below each phone to switch colour</div>
+        <div style={{ fontSize:13, color:'#64748b' }}>Each design adapts to all 3 AROGYOS themes · Click the dots below each phone to switch colour</div>
         <div style={{ display:'flex', gap:8, marginTop:12, flexWrap:'wrap' }}>
           {APP_THEMES.map(t => (
             <div key={t.id} style={{ display:'flex', alignItems:'center', gap:7, background:`${t.dot}14`, border:`1px solid ${t.dot}40`, borderRadius:20, padding:'5px 12px' }}>
@@ -746,7 +746,7 @@ export default function SignupDesignsPreview3() {
       </div>
 
       <div style={{ textAlign:'center', padding:'0 24px 40px', fontSize:13, color:'#94a3b8' }}>
-        Pick a design + colour theme → we'll integrate it as the real HealthOS signup screen with email OTP.
+        Pick a design + colour theme → we'll integrate it as the real AROGYOS signup screen with email OTP.
       </div>
     </div>
   )

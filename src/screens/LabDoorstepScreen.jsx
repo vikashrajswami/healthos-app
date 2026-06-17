@@ -86,7 +86,7 @@ export default function LabDoorstepScreen() {
         <div className="ld-hero-title">Home Sample Collection</div>
         <div className="ld-hero-sub">
           A certified phlebotomist visits your home · collects blood samples ·
-          results uploaded directly to your HealthOS BioAge score
+          results uploaded directly to your AROGYOS BioAge score
         </div>
         <div className="ld-hero-stats">
           <div className="ld-stat"><span className="ld-stat-n">30 min</span><span className="ld-stat-l">Visit time</span></div>
@@ -315,7 +315,7 @@ export default function LabDoorstepScreen() {
           </div>
 
           <div className="ld-confirm-note">
-            While you wait — upload any existing lab reports to HealthOS. Every biomarker you already have fills your BioAge score right now.
+            While you wait — upload any existing lab reports to AROGYOS. Every biomarker you already have fills your BioAge score right now.
           </div>
 
           <button className="ld-confirm-cta" onClick={() => nav('/upload')}>

@@ -107,7 +107,7 @@ function TopBar({ theme, setTheme }) {
       {/* Center: app name on main, logo on sub */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: isMain ? 'center' : 'center' }}>
         {isMain ? (
-          <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: -0.3 }}>HealthOS</span>
+          <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: -0.3 }}>AROGYOS</span>
         ) : (
           <Logo size={28}/>
         )}
@@ -162,7 +162,7 @@ function MedicalDisclaimer() {
   if (noDisclaimer) return null
   return (
     <div className="global-disclaimer">
-      ⚕️ HealthOS is for health education only · Not a substitute for medical advice · Consult your doctor
+      ⚕️ AROGYOS is for health education only · Not a substitute for medical advice · Consult your doctor
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 // Research basis: Whoop ($30/mo), Oura ($6/mo app), InsideTracker ($499/yr),
 // HealthifyMe Pro (₹999-₹2499/mo), SRL/Lal Pathlabs tests (₹2000-₹8000),
 // Thriva UK (£45/mo), Function Health ($499/yr).
-// HealthOS includes AI analysis + lab service + vault — premium positioning.
+// AROGYOS includes AI analysis + lab service + vault — premium positioning.
 
 const PLANS = [
   {
@@ -202,7 +202,7 @@ function PaymentForm({ plan, billing, isIN, onSuccess }) {
           <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>Order summary</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>HealthOS {plan.name} </span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>AROGYOS {plan.name} </span>
               <span style={{ fontSize: 12, color: '#94a3b8' }}>({billing})</span>
             </div>
             <span style={{ fontSize: 18, fontWeight: 900, color: A }}>{curr}{amount}</span>
@@ -297,12 +297,12 @@ export default function PaymentScreen() {
       <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#14b8a6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, marginBottom: 24 }}>✓</div>
       <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 10 }}>You're subscribed!</div>
       <div style={{ fontSize: 14, color: '#64748b', lineHeight: 1.8, maxWidth: 320, marginBottom: 8 }}>
-        <strong>HealthOS {plan.name}</strong> is now active.<br/>
+        <strong>AROGYOS {plan.name}</strong> is now active.<br/>
         A confirmation has been sent to your registered email.
       </div>
       <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 32 }}>Powered by {isIN ? 'Razorpay' : 'Stripe'} · PCI DSS compliant</div>
       <button onClick={() => nav('/')} style={{ padding: '15px 36px', background: 'linear-gradient(90deg,#14b8a6,#0d9488)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
-        Open HealthOS →
+        Open AROGYOS →
       </button>
     </div>
   )

@@ -324,7 +324,7 @@ function LabOrderCard({ onOrder }) {
         <span className="loc-icon">🔬</span>
         <div className="loc-header-text">
           <div className="loc-title">Lab at Your Doorstep</div>
-          <div className="loc-sub">Home sample collection · results auto-uploaded to HealthOS</div>
+          <div className="loc-sub">Home sample collection · results auto-uploaded to AROGYOS</div>
         </div>
         <span className="loc-cs-badge">Coming soon</span>
       </div>
