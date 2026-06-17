@@ -1,20 +1,56 @@
 {
-  "name": "AROGYOS — Your Biological Age",
+  "name": "AROGYOS — Know Your Biological Age",
   "short_name": "AROGYOS",
-  "description": "Know your biological age. Reverse it. Track biomarkers, get personalised plans, and bring your whole family.",
+  "description": "Discover your biological age, upload lab reports for AI analysis, track biomarkers over time, and get a personalised plan to reverse aging. Includes family BioAge tracker and Health Guide.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#14b8a6",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["health", "fitness", "medical"],
-  "lang": "en"
+  "categories": ["health", "fitness", "medical", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Upload Lab Report",
+      "short_name": "Upload",
+      "description": "Upload a lab report for AI biomarker analysis",
+      "url": "/upload",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Health Guide",
+      "short_name": "Ask AI",
+      "description": "Ask your Health Guide a question",
+      "url": "/",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.arogyos.app",
+      "id": "com.arogyos.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/arogyos"
+    }
+  ]
 }

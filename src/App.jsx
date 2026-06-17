@@ -1,9 +1,12 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import './styles/global.css'
 import Logo from './components/Logo'
 import { LangProvider, useT } from './lib/i18n'
 import { isPlusMember } from './lib/planStatus'
+import RatingPrompt from './components/RatingPrompt'
+import { recordAppOpen, daysSinceFirstOpen, hasRatingPromptBeenShown } from './lib/insights'
+import { registerDailySync } from './lib/notifications'
 
 // Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'
@@ -30,6 +33,7 @@ const PaymentScreen        = lazy(() => import('./screens/PaymentScreen'))
 const SettingsScreen       = lazy(() => import('./screens/SettingsScreen'))
 const LogoPreviewScreen    = lazy(() => import('./screens/LogoPreviewScreen'))
 const NameDesignPreview    = lazy(() => import('./screens/NameDesignPreview'))
+const PrivacyScreen        = lazy(() => import('./screens/PrivacyScreen'))
 
 function PageLoader() {
   return (
@@ -62,7 +66,7 @@ const MAIN_PATHS = ['/', '/trends', '/upload', '/devices', '/protocol']
 const NO_TOPBAR = new Set([
   '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
-  '/logo-preview', '/name-preview',
+  '/logo-preview', '/name-preview', '/privacy',
 ])
 
 // Screens that should also hide the bottom nav
@@ -193,10 +197,26 @@ function MedicalDisclaimer() {
 }
 
 function AppShell({ theme, setTheme }) {
+  const [showRating, setShowRating] = useState(false)
+
+  useEffect(() => {
+    recordAppOpen()
+    registerDailySync()
+    // Show rating prompt after 7 days if quiz done and not yet shown
+    const quizDone = !!localStorage.getItem('healthos_profile') &&
+      JSON.parse(localStorage.getItem('healthos_profile') || '{}').quizDone
+    if (quizDone && daysSinceFirstOpen() >= 7 && !hasRatingPromptBeenShown()) {
+      // Delay by 6 seconds so app loads first
+      const t = setTimeout(() => setShowRating(true), 6000)
+      return () => clearTimeout(t)
+    }
+  }, [])
+
   return (
     <div data-theme={theme} className="app-shell">
       <TopBar theme={theme} setTheme={setTheme}/>
       <MedicalDisclaimer/>
+      {showRating && <RatingPrompt onClose={() => setShowRating(false)} />}
       <div style={{ paddingBottom: 70 }}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -222,6 +242,7 @@ function AppShell({ theme, setTheme }) {
             <Route path="/settings"       element={<SettingsScreen />} />
             <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
             <Route path="/name-preview"   element={<NameDesignPreview />} />
+            <Route path="/privacy"        element={<PrivacyScreen />} />
           </Routes>
         </Suspense>
       </div>

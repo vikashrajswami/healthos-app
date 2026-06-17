@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getAIResponse } from '../lib/healthAI'
 import { getProfile, saveProfile, calcBioAge } from '../lib/userProfile'
 import UpgradeModal from '../components/UpgradeModal'
+import DailyInsightCard from '../components/DailyInsightCard'
+import InstallPrompt from '../components/InstallPrompt'
 import {
   isPlusMember, hasSeenUpgradePrompt, markUpgradePromptSeen,
   getMonthlyChatCount, recordChat,
@@ -186,6 +188,16 @@ function AIChatModal({ onClose }) {
       content: `Hi! I'm your AROGYOS Health Guide 🌿\n\nI know everything about this app — biomarkers, diet plans, how to upload reports, the family tracker, protocols, supplement advice, and all the science behind biological age reversal.\n\nWhat would you like to know?`,
     },
   ])
+
+  // Auto-send if opened from DailyInsightCard "Ask about this" button
+  useEffect(() => {
+    const pending = window._pendingAskTopic
+    if (pending) {
+      window._pendingAskTopic = null
+      setTimeout(() => sendMessage(pending), 400)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [input,       setInput]       = useState('')
   const [loading,     setLoading]     = useState(false)
   const [showAll,     setShowAll]     = useState(false)
@@ -654,6 +666,9 @@ export default function Screen1() {
   return (
     <div className="screen">
 
+      {/* Add to home screen banner — shows once on mobile browsers */}
+      <InstallPrompt />
+
       {/* Hero */}
       {profile?.quizDone ? (
         <div className="hero">
@@ -701,6 +716,12 @@ export default function Screen1() {
           <button className="ask-btn" onClick={() => setShowAsk(true)}>Ask →</button>
         </div>
       </div>
+
+      {/* Daily rotating health insight */}
+      <DailyInsightCard
+        quizAnswers={profile?.answers}
+        onAskAbout={topic => { setShowAsk(true); window._pendingAskTopic = topic }}
+      />
 
       {/* ── Family BioAge ── */}
       <div className="fam-section-head">

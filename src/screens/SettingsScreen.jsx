@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LANGUAGES, useLang, useT } from '../lib/i18n'
 import Logo from '../components/Logo'
+import { requestNotificationPermission, getNotificationPermission, subscribeToPush } from '../lib/notifications'
 
 const validateEmail = e => /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(e)
 const validatePhone = p => /^[+]?[\d\s\-()]{7,15}$/.test(p)
@@ -187,7 +188,17 @@ export default function SettingsScreen() {
 
   const [modal,    setModal]    = useState(null)  // 'email' | 'mobile' | 'lang' | 'delete' | 'logout'
   const [deleted,  setDeleted]  = useState(false)
+  const [pushPerm, setPushPerm] = useState(() => getNotificationPermission())
   const accent = '#14b8a6'
+
+  async function handleEnablePush() {
+    const result = await requestNotificationPermission()
+    setPushPerm(result)
+    if (result === 'granted') {
+      const uid = localStorage.getItem('healthos_uid')
+      await subscribeToPush(uid)
+    }
+  }
 
   function saveNotif(key, val) {
     const updated = { ...notif, [key]: val }
@@ -282,9 +293,20 @@ export default function SettingsScreen() {
         {/* Privacy & Security */}
         <Section title={t('privacy')}>
           <Row icon="📋" label="Terms & Conditions"   onClick={() => nav('/terms')}/>
-          <Row icon="🔒" label="Privacy Policy"       onClick={() => nav('/terms')}/>
+          <Row icon="🔒" label="Privacy Policy"       onClick={() => nav('/privacy')}/>
           <Row icon="📦" label="Download My Data"     value="Export all your health records" onClick={() => alert('Data export will be emailed to you within 24 hours.')}/>
           <Row icon="💳" label="Subscription & Billing" value="Manage your plan"            onClick={() => nav('/payment')} last/>
+        </Section>
+
+        {/* Notifications */}
+        <Section title="Push Notifications">
+          {pushPerm === 'granted' ? (
+            <Row icon="🔔" label="Push Notifications Enabled" value="Daily reminders are active" last/>
+          ) : pushPerm === 'denied' ? (
+            <Row icon="🔕" label="Notifications Blocked" value="Enable in your browser settings → Site permissions" last/>
+          ) : (
+            <Row icon="🔔" label="Enable Push Notifications" value="Get daily health reminders" onClick={handleEnablePush} last/>
+          )}
         </Section>
 
         {/* Help */}
