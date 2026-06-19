@@ -358,7 +358,10 @@ function LabOrderCard({ onOrder }) {
 // ── Tesseract OCR (self-hosted ESM, lazy-loaded, cached) ─────────────────────
 let _tsmod = null
 async function getTesseract() {
-  if (!_tsmod) _tsmod = await import(/* @vite-ignore */ '/tesseract.esm.min.js')
+  if (!_tsmod) {
+    const m = await import(/* @vite-ignore */ '/tesseract.esm.min.js')
+    _tsmod = m.default   // ESM build only has a default export
+  }
   return _tsmod
 }
 
@@ -457,7 +460,7 @@ export default function Screen3() {
       }
     } catch (e) {
       console.error('File processing error:', e)
-      err('Could not read this file. Try a clearer image or a different PDF.')
+      err(`Could not read this file: ${e?.message || e}`)
       return
     }
 
