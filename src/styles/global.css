@@ -59,6 +59,63 @@ html, body {
   overflow: hidden;
 }
 
+/* ── Desktop layout (≥ 768px) ── */
+@media (min-width: 768px) {
+  html, body { background: #f0f4f8; }
+
+  #root {
+    background: #f0f4f8;
+    align-items: stretch;
+    justify-content: stretch;
+    min-height: 100vh;
+  }
+
+  .app-shell {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 1fr;
+    overflow: visible;
+  }
+
+  /* Sidebar takes column 1, all rows */
+  .desktop-sidebar {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    display: flex !important;
+  }
+
+  /* Everything else stacks in column 2 */
+  .desktop-main {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f8fafc;
+  }
+
+  .desktop-content {
+    flex: 1;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+  }
+
+  /* Hide mobile bottom nav on desktop */
+  .bottom-nav { display: none !important; }
+
+  /* Fix bottom padding on content (was for mobile nav) */
+  .desktop-main > div { padding-bottom: 0 !important; }
+
+  /* Modals full-width on desktop */
+  .fm-modal { width: 480px; border-radius: 24px; }
+
+  /* Screen padding adjustment */
+  .screen { padding-bottom: 40px; }
+}
+
 /* ── Screen layout ── */
 /* ── Global medical disclaimer ── */
 .global-disclaimer {

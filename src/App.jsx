@@ -195,8 +195,7 @@ function BottomNav() {
 
 function MedicalDisclaimer() {
   const { pathname } = useLocation()
-  const noDisclaimer = NO_TOPBAR.has(pathname)
-  if (noDisclaimer) return null
+  if (NO_TOPBAR.has(pathname)) return null
   return (
     <div className="global-disclaimer">
       ⚕️ AROGYOS is for health education only · Not a substitute for medical advice · Consult your doctor
@@ -204,59 +203,169 @@ function MedicalDisclaimer() {
   )
 }
 
+// ── Desktop sidebar ───────────────────────────────────────────────────────────
+function DesktopSidebar({ theme, setTheme }) {
+  const navigate     = useNavigate()
+  const { pathname } = useLocation()
+  const t            = useT()
+
+  return (
+    <aside style={{
+      display: 'none', // overridden to flex by CSS media query
+      flexDirection: 'column',
+      width: 220,
+      minHeight: '100vh',
+      background: '#fff',
+      borderRight: '1px solid #eef1f6',
+      padding: '28px 16px 24px',
+      position: 'sticky',
+      top: 0,
+      gap: 4,
+    }} className="desktop-sidebar">
+
+      {/* Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, paddingLeft: 8 }}>
+        <Logo size={30}/>
+        <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: -0.3 }}>
+          AROGY<span style={{ color: 'var(--accent)' }}>OS</span>
+        </span>
+      </div>
+
+      {/* Nav items */}
+      {NAV.map(n => {
+        const active = pathname === n.path
+        return (
+          <button key={n.path} onClick={() => navigate(n.path)} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 12px', borderRadius: 12, border: 'none',
+            background: active ? 'var(--tint)' : 'none',
+            color: active ? 'var(--accent-dark)' : '#64748b',
+            fontWeight: active ? 700 : 500, fontSize: 14,
+            cursor: 'pointer', textAlign: 'left', transition: 'all .15s',
+            width: '100%',
+          }}>
+            <span style={{ color: active ? 'var(--accent-dark)' : '#94a3b8' }}>{n.icon}</span>
+            {t(n.labelKey)}
+          </button>
+        )
+      })}
+
+      <div style={{ flex: 1 }}/>
+
+      {/* Theme dots */}
+      <div style={{ display: 'flex', gap: 8, padding: '8px 12px' }}>
+        {THEMES.map(th => (
+          <button key={th.id} onClick={() => setTheme(th.id)} style={{
+            width: 20, height: 20, borderRadius: '50%', background: th.dot, border: 'none',
+            cursor: 'pointer', padding: 0,
+            outline: theme === th.id ? '2.5px solid #0f172a' : '2.5px solid transparent',
+            outlineOffset: 2, transform: theme === th.id ? 'scale(1.2)' : 'scale(1)',
+            transition: 'all .15s',
+          }}/>
+        ))}
+      </div>
+
+      {/* Settings */}
+      <button onClick={() => navigate('/settings')} style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '10px 12px', borderRadius: 12, border: 'none',
+        background: pathname === '/settings' ? 'var(--tint)' : 'none',
+        color: pathname === '/settings' ? 'var(--accent-dark)' : '#64748b',
+        fontWeight: 500, fontSize: 14, cursor: 'pointer', width: '100%',
+      }}>
+        {ICONS.settings} Settings
+      </button>
+
+      {!isPlusMember() && (
+        <button onClick={() => navigate('/subscribe')} style={{
+          margin: '8px 0 0', padding: '11px 0',
+          background: 'linear-gradient(90deg,var(--accent),var(--accent-dark))',
+          border: 'none', borderRadius: 12, cursor: 'pointer',
+          color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
+        }}>
+          ⭐ Upgrade to Plus
+        </button>
+      )}
+    </aside>
+  )
+}
+
+const ROUTES = (
+  <>
+    <Route path="/"               element={<SignupScreen />} />
+    <Route path="/signup"         element={<SignupScreen />} />
+    <Route path="/home"           element={<Screen1 />} />
+    <Route path="/trends"         element={<Screen2 />} />
+    <Route path="/upload"         element={<Screen3 />} />
+    <Route path="/devices"        element={<Screen4 />} />
+    <Route path="/protocol"       element={<Screen5 />} />
+    <Route path="/diet"           element={<Screen6 />} />
+    <Route path="/progress"       element={<Screen7 />} />
+    <Route path="/share"          element={<Screen8 />} />
+    <Route path="/subscribe"      element={<Screen9 />} />
+    <Route path="/join/:code"     element={<JoinScreen />} />
+    <Route path="/smart-panel"    element={<SmartPanelReport />} />
+    <Route path="/lab-doorstep"   element={<LabDoorstepScreen />} />
+    <Route path="/vault"          element={<HealthVaultScreen />} />
+    <Route path="/signup-preview"   element={<SignupDesignsPreview />} />
+    <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
+    <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
+    <Route path="/reset"          element={<ResetAndSignup />} />
+    <Route path="/terms"          element={<TermsScreen />} />
+    <Route path="/payment"        element={<PaymentScreen />} />
+    <Route path="/settings"       element={<SettingsScreen />} />
+    <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
+    <Route path="/name-preview"   element={<NameDesignPreview />} />
+    <Route path="/privacy"        element={<PrivacyScreen />} />
+  </>
+)
+
 function AppShell({ theme, setTheme }) {
   const [showRating, setShowRating] = useState(false)
+  const { pathname } = useLocation()
+  const isAuth = NO_TOPBAR.has(pathname) && (pathname === '/' || pathname === '/signup')
 
   useEffect(() => {
     recordAppOpen()
     registerDailySync()
     if (localStorage.getItem('healthos_uid')) pushToCloud()
-    // Show rating prompt after 7 days if quiz done and not yet shown
     const quizDone = !!localStorage.getItem('healthos_profile') &&
       JSON.parse(localStorage.getItem('healthos_profile') || '{}').quizDone
     if (quizDone && daysSinceFirstOpen() >= 7 && !hasRatingPromptBeenShown()) {
-      // Delay by 6 seconds so app loads first
       const t = setTimeout(() => setShowRating(true), 6000)
       return () => clearTimeout(t)
     }
   }, [])
 
-  return (
-    <div data-theme={theme} className="app-shell">
-      <TopBar theme={theme} setTheme={setTheme}/>
-      <MedicalDisclaimer/>
-      {showRating && <RatingPrompt onClose={() => setShowRating(false)} />}
-      <div style={{ paddingBottom: 70 }}>
+  // Auth screens (signup) — no sidebar, full screen
+  if (isAuth) {
+    return (
+      <div data-theme={theme} className="app-shell">
         <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/"               element={<SignupScreen />} />
-            <Route path="/signup"         element={<SignupScreen />} />
-            <Route path="/home"           element={<Screen1 />} />
-            <Route path="/trends"         element={<Screen2 />} />
-            <Route path="/upload"         element={<Screen3 />} />
-            <Route path="/devices"        element={<Screen4 />} />
-            <Route path="/protocol"       element={<Screen5 />} />
-            <Route path="/diet"           element={<Screen6 />} />
-            <Route path="/progress"       element={<Screen7 />} />
-            <Route path="/share"          element={<Screen8 />} />
-            <Route path="/subscribe"      element={<Screen9 />} />
-            <Route path="/join/:code"     element={<JoinScreen />} />
-            <Route path="/smart-panel"    element={<SmartPanelReport />} />
-            <Route path="/lab-doorstep"   element={<LabDoorstepScreen />} />
-            <Route path="/vault"          element={<HealthVaultScreen />} />
-            <Route path="/signup-preview"   element={<SignupDesignsPreview />} />
-            <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
-            <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
-            <Route path="/reset"          element={<ResetAndSignup />} />
-            <Route path="/terms"          element={<TermsScreen />} />
-            <Route path="/payment"        element={<PaymentScreen />} />
-            <Route path="/settings"       element={<SettingsScreen />} />
-            <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
-            <Route path="/name-preview"   element={<NameDesignPreview />} />
-            <Route path="/privacy"        element={<PrivacyScreen />} />
-          </Routes>
+          <Routes>{ROUTES}</Routes>
         </Suspense>
       </div>
+    )
+  }
+
+  return (
+    <div data-theme={theme} className="app-shell">
+      {/* Desktop sidebar — hidden on mobile via CSS */}
+      <DesktopSidebar theme={theme} setTheme={setTheme}/>
+
+      {/* Main area */}
+      <div className="desktop-main">
+        <TopBar theme={theme} setTheme={setTheme}/>
+        <MedicalDisclaimer/>
+        {showRating && <RatingPrompt onClose={() => setShowRating(false)} />}
+        <div className="desktop-content">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>{ROUTES}</Routes>
+          </Suspense>
+        </div>
+      </div>
+
+      {/* Mobile bottom nav — hidden on desktop via CSS */}
       <BottomNav/>
     </div>
   )
