@@ -355,6 +355,18 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
+// ── Tesseract OCR loader (CDN, lazy) ─────────────────────────────────────────
+async function loadTesseract() {
+  if (window.Tesseract) return window.Tesseract
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
+    s.onload = resolve; s.onerror = reject
+    document.head.appendChild(s)
+  })
+  return window.Tesseract
+}
+
 // ── Main Screen ───────────────────────────────────────────────────────────────
 export default function Screen3() {
   const nav     = useNavigate()
@@ -369,71 +381,97 @@ export default function Screen3() {
   const vaultCount = getAllReports().length
 
   async function processFile(file) {
-    // Gate: 1 free upload/month for non-Plus users
-    if (!isPlusMember() && getMonthlyUploads() >= 1) {
-      setShowGate(true)
-      return
-    }
+    if (!isPlusMember() && getMonthlyUploads() >= 1) { setShowGate(true); return }
     recordUpload()
 
     const id = Date.now()
-    setUploads(prev => [{ id, name: file.name, status: 'processing', info: 'Uploading…', biomarkers: null }, ...prev])
-
-    // Save upload date so RetestCountdown can show
+    setUploads(prev => [{ id, name: file.name, status: 'processing', info: 'Reading file…', biomarkers: null }, ...prev])
     localStorage.setItem('healthos_last_report_date', new Date().toISOString())
     setHasReport(true)
 
-    // ── 100% client-side, no API key needed ──────────────────────────────────
     const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf'
-    setUploads(prev => prev.map(u => u.id === id ? { ...u, info: isPdf ? 'Reading PDF…' : 'Reading file…' } : u))
+    const isImg = /\.(jpe?g|png|webp|bmp|tiff?)$/i.test(file.name) || file.type.startsWith('image/')
+
+    const upd = info => setUploads(prev => prev.map(u => u.id === id ? { ...u, info } : u))
+    const err = info => setUploads(prev => prev.map(u => u.id === id ? { ...u, status: 'error', info } : u))
 
     let text = ''
-    if (isPdf) {
-      try {
-        // PDF.js — Mozilla open-source, loads on demand from CDN, free
+
+    try {
+      if (isPdf) {
+        upd('Loading PDF…')
         const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs')
         pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs'
-        const arrayBuffer = await file.arrayBuffer()
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise
+
+        // Try text layer first (works for digital/typed PDFs)
+        upd('Extracting text…')
         const pages = []
         for (let i = 1; i <= pdf.numPages; i++) {
-          const page    = await pdf.getPage(i)
+          const page = await pdf.getPage(i)
           const content = await page.getTextContent()
-          pages.push(content.items.map(item => item.str).join(' '))
+          pages.push(content.items.map(it => it.str).join(' '))
         }
         text = pages.join('\n')
-      } catch (e) {
-        console.error('PDF.js error:', e)
-      }
-    } else {
-      text = await new Promise(resolve => {
-        const r = new FileReader()
-        r.onload  = e => resolve(e.target?.result || '')
-        r.onerror = () => resolve('')
-        r.readAsText(file)
-      })
-    }
 
-    if (!text || text.trim().length < 20) {
-      setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'error', info: isPdf
-            ? 'This PDF is a scanned image — text cannot be extracted. Ask your lab for a digital PDF.'
-            : 'Could not read this file — please upload a PDF or CSV' }
-        : u
-      ))
+        // Scanned/image PDF → render each page as canvas → OCR
+        if (!text || text.trim().length < 20) {
+          upd('Scanned PDF detected — running OCR (may take ~20s)…')
+          const Tesseract = await loadTesseract()
+          const worker = await Tesseract.createWorker('eng')
+          const ocrPages = []
+          for (let i = 1; i <= pdf.numPages; i++) {
+            upd(`OCR: page ${i} of ${pdf.numPages}…`)
+            const page = await pdf.getPage(i)
+            const viewport = page.getViewport({ scale: 2.5 })
+            const canvas = document.createElement('canvas')
+            canvas.width = viewport.width
+            canvas.height = viewport.height
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+            const { data: { text: t } } = await worker.recognize(canvas)
+            ocrPages.push(t)
+          }
+          await worker.terminate()
+          text = ocrPages.join('\n')
+        }
+
+      } else if (isImg) {
+        // Images always need OCR — readAsText on binary gives garbage
+        upd('Reading image with OCR…')
+        const Tesseract = await loadTesseract()
+        const worker = await Tesseract.createWorker('eng', 1, {
+          logger: m => { if (m.status === 'recognizing text') upd(`OCR ${Math.round(m.progress * 100)}%…`) },
+        })
+        const { data: { text: t } } = await worker.recognize(file)
+        await worker.terminate()
+        text = t
+
+      } else {
+        text = await new Promise(resolve => {
+          const r = new FileReader()
+          r.onload = e => resolve(e.target?.result || '')
+          r.onerror = () => resolve('')
+          r.readAsText(file)
+        })
+      }
+    } catch (e) {
+      console.error('File processing error:', e)
+      err('Could not read this file. Try a clearer image or a different PDF.')
       return
     }
 
-    setUploads(prev => prev.map(u => u.id === id ? { ...u, info: 'Finding biomarkers…' } : u))
-    const rows      = extractRowsFromText(text)
+    if (!text || text.trim().length < 20) {
+      err('No data found. Try uploading a clearer photo or a different file.')
+      return
+    }
+
+    upd('Analyzing biomarkers…')
+    const rows = extractRowsFromText(text)
     const biomarkers = parseLabReport(rows)
 
     if (!biomarkers || biomarkers.length === 0) {
-      setUploads(prev => prev.map(u => u.id === id
-        ? { ...u, status: 'error', info: 'No biomarkers found. Is this a lab report PDF?' }
-        : u
-      ))
+      err('No biomarkers found. Make sure this is a blood test / lab report.')
       return
     }
 
