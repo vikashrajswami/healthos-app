@@ -954,6 +954,19 @@ export default function Screen4() {
 
   const effectiveConnections = { ...connections, lab: hasReports }
 
+  // One-time migration: remove fake default connections set by old code
+  useEffect(() => {
+    const c = loadConnections()
+    const d = loadDeviceData()
+    let changed = false
+    // healthkit was fake-connected by default — remove if no real token or real data
+    if (c.healthkit && !d.healthkit?._ts) {
+      delete c.healthkit
+      changed = true
+    }
+    if (changed) { saveConnections(c); setConnections(c) }
+  }, [])
+
   // Handle OAuth callback when page loads with ?code= in URL
   useEffect(() => {
     if (!window.location.search.includes('code=') && !window.location.search.includes('error=')) return
