@@ -340,10 +340,10 @@ function AppShell({ theme, setTheme }) {
     }
   }, [])
 
-  // Auth screens (signup) — no sidebar, full screen
+  // Auth screens (signup/preview) — no sidebar, full screen (override grid CSS)
   if (isAuth) {
     return (
-      <div data-theme={theme} className="app-shell">
+      <div data-theme={theme} className="app-shell" style={{ display: 'block' }}>
         <Suspense fallback={<PageLoader />}>
           <Routes>{ROUTES}</Routes>
         </Suspense>
