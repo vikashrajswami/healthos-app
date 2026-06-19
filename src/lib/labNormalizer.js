@@ -292,7 +292,7 @@ export const BIOMARKER_REGISTRY = [
     stdUnit: 'mL/min/1.73m²', unitGroup: null,
     ref: { low: 60, high: 999, optLow: 90, optHigh: 999 },
     aliases: [
-      'egfr','estimated gfr','estimated glomerular filtration rate','gfr','gfr (estimated)',
+      'egfr','estimated gfr','gfr estimated','estimated glomerular filtration rate','gfr','gfr (estimated)',
       'geschätzte gfr', // DE
       'अनुमानित जीएफआर', // HI
       'معدل الترشيح الكبيبي المقدر', // AR
@@ -570,8 +570,47 @@ BIOMARKER_REGISTRY.forEach(b => {
 })
 
 export function normaliseBiomarkerName(raw) {
-  const key = raw.toLowerCase().trim().replace(/\s+/g,' ')
-  return aliasIndex.get(key) || aliasIndex.get(key.replace(/[()[\]]/g,'').trim()) || null
+  const key = raw.toLowerCase().trim().replace(/\s+/g, ' ')
+
+  // 1. Exact match
+  let hit = aliasIndex.get(key)
+  if (hit) return hit
+
+  // 2. Remove all brackets: "alt (sgpt)" → "alt sgpt"
+  const noParens = key.replace(/[()[\]]/g, '').replace(/\s+/g, ' ').trim()
+  hit = aliasIndex.get(noParens)
+  if (hit) return hit
+
+  // 3. Before parenthetical only: "alt (sgpt)" → "alt"
+  const beforeParen = key.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()
+  if (beforeParen !== key && beforeParen.length >= 2) {
+    hit = aliasIndex.get(beforeParen)
+    if (hit) return hit
+  }
+
+  // 4. Inside parenthetical only: "alt (sgpt)" → "sgpt"
+  const parenMatch = key.match(/\(([^)]+)\)/)
+  if (parenMatch) {
+    hit = aliasIndex.get(parenMatch[1].trim())
+    if (hit) return hit
+  }
+
+  // 5. Remove commas: "creatinine, serum" → "creatinine serum"
+  if (key.includes(',')) {
+    const noComma = key.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()
+    hit = aliasIndex.get(noComma)
+    if (hit) return hit
+
+    // 6. Each comma-separated segment: try "creatinine", "serum"
+    for (const seg of key.split(',').map(s => s.trim())) {
+      if (seg.length >= 2) {
+        hit = aliasIndex.get(seg)
+        if (hit) return hit
+      }
+    }
+  }
+
+  return null
 }
 
 // ── Convert a value from any unit to the canonical standard unit ──────────────

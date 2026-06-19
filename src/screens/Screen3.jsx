@@ -469,8 +469,11 @@ export default function Screen3() {
     }
 
     upd('Analyzing biomarkers…')
+    console.log('[HealthOS] Extracted text sample:', text.slice(0, 2000))
     const rows = extractRowsFromText(text)
+    console.log('[HealthOS] Rows found:', rows.length, rows.slice(0, 30))
     const biomarkers = parseLabReport(rows)
+    console.log('[HealthOS] Biomarkers matched:', biomarkers.length, biomarkers)
 
     if (!biomarkers || biomarkers.length === 0) {
       err('No biomarkers found. Make sure this is a blood test / lab report.')
