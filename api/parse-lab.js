@@ -1,4 +1,4 @@
-// Server-side lab report parser — runs pdfjs-dist in Node.js (no browser issues)
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { extractRowsFromText, parseLabReport } from '../src/lib/labNormalizer.js'
 
 function pdfItemsToText(items) {
@@ -18,23 +18,25 @@ function pdfItemsToText(items) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-    const { fileBase64 } = req.body
-    if (!fileBase64) return res.status(400).json({ error: 'No file data' })
-
-    // Enforce 6MB base64 limit (~4.5MB raw file)
+    const { fileBase64 } = req.body || {}
+    if (!fileBase64) return res.status(400).json({ error: 'No file data provided' })
     if (fileBase64.length > 8_000_000) {
-      return res.status(413).json({ error: 'File too large for server parsing' })
+      return res.status(413).json({ error: 'File too large (max ~6MB)' })
     }
 
     const buffer = Buffer.from(fileBase64, 'base64')
     const data = new Uint8Array(buffer)
 
-    // pdfjs-dist legacy build — no worker needed in Node.js
-    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
-    const pdf = await pdfjsLib.getDocument({ data }).promise
+    const pdf = await pdfjsLib.getDocument({
+      data,
+      disableFontFace: true,
+      verbosity: 0,
+    }).promise
 
     let fullText = ''
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -46,9 +48,9 @@ export default async function handler(req, res) {
     const rows = extractRowsFromText(fullText)
     const biomarkers = parseLabReport(rows)
 
-    return res.status(200).json({ biomarkers, text: fullText.slice(0, 500) })
-  } catch (e) {
-    console.error('parse-lab error:', e)
-    return res.status(500).json({ error: String(e?.message || e) })
+    return res.status(200).json({ biomarkers, pages: pdf.numPages })
+  } catch (err) {
+    console.error('[parse-lab] Error:', err)
+    return res.status(500).json({ error: err?.message || String(err) })
   }
 }

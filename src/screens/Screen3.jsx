@@ -453,6 +453,7 @@ export default function Screen3() {
 
         // ── Server-side parse (Node.js pdfjs — reliable) ──────────────────
         let serverBiomarkers = null
+        let serverErr = ''
         try {
           const base64 = await new Promise(resolve => {
             const reader = new FileReader()
@@ -465,13 +466,16 @@ export default function Screen3() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fileBase64: base64 }),
           })
-          if (resp.ok) {
-            const json = await resp.json()
-            if (json.biomarkers && json.biomarkers.length > 0) {
-              serverBiomarkers = json.biomarkers
-            }
+          const json = await resp.json()
+          if (resp.ok && json.biomarkers && json.biomarkers.length > 0) {
+            serverBiomarkers = json.biomarkers
+          } else {
+            serverErr = json.error || `Server returned ${json.biomarkers?.length ?? 0} biomarkers`
           }
-        } catch (_) { /* fall through to client-side */ }
+        } catch (e) {
+          serverErr = e?.message || String(e)
+        }
+        console.log('[HealthOS] Server parse:', serverBiomarkers ? serverBiomarkers.length + ' biomarkers' : 'failed: ' + serverErr)
 
         if (serverBiomarkers) {
           // Server parsed successfully — skip all client-side processing
@@ -568,7 +572,7 @@ export default function Screen3() {
     console.log('[HealthOS] Biomarkers matched:', biomarkers.length, biomarkers)
 
     if (!biomarkers || biomarkers.length === 0) {
-      err('No biomarkers found. Make sure this is a blood test / lab report.')
+      err(`No biomarkers found (${rows.length} rows parsed, server: ${serverErr || 'ok'}). Make sure this is a blood test PDF.`)
       return
     }
 
