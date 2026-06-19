@@ -33,9 +33,10 @@ const JoinScreen = lazy(() => import('./screens/JoinScreen'))
 const SmartPanelReport    = lazy(() => import('./screens/SmartPanelReport'))
 const LabDoorstepScreen   = lazy(() => import('./screens/LabDoorstepScreen'))
 const HealthVaultScreen   = lazy(() => import('./screens/HealthVaultScreen'))
-const SignupDesignsPreview  = lazy(() => import('./screens/SignupDesignsPreview'))
-const SignupDesignsPreview2 = lazy(() => import('./screens/SignupDesignsPreview2'))
-const SignupDesignsPreview3 = lazy(() => import('./screens/SignupDesignsPreview3'))
+const SignupDesignsPreview   = lazy(() => import('./screens/SignupDesignsPreview'))
+const SignupDesignsPreview2  = lazy(() => import('./screens/SignupDesignsPreview2'))
+const SignupDesignsPreview3  = lazy(() => import('./screens/SignupDesignsPreview3'))
+const DesktopDesignPreview   = lazy(() => import('./screens/DesktopDesignPreview'))
 const TermsScreen          = lazy(() => import('./screens/TermsScreen'))
 const PaymentScreen        = lazy(() => import('./screens/PaymentScreen'))
 const SettingsScreen       = lazy(() => import('./screens/SettingsScreen'))
@@ -74,13 +75,13 @@ const MAIN_PATHS = ['/home', '/trends', '/upload', '/devices', '/protocol']
 const NO_TOPBAR = new Set([
   '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
-  '/logo-preview', '/name-preview', '/privacy',
+  '/logo-preview', '/name-preview', '/privacy', '/desktop-preview',
 ])
 
 // Screens that should also hide the bottom nav
 const NO_BOTTOMNAV = new Set([
   '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
-  '/smart-panel', '/lab-doorstep',
+  '/smart-panel', '/lab-doorstep', '/desktop-preview',
 ])
 
 const STANDALONE = [] // kept for legacy compat
@@ -316,14 +317,16 @@ const ROUTES = (
     <Route path="/settings"       element={<SettingsScreen />} />
     <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
     <Route path="/name-preview"   element={<NameDesignPreview />} />
-    <Route path="/privacy"        element={<PrivacyScreen />} />
+    <Route path="/privacy"          element={<PrivacyScreen />} />
+    <Route path="/desktop-preview"  element={<DesktopDesignPreview />} />
   </>
 )
 
 function AppShell({ theme, setTheme }) {
   const [showRating, setShowRating] = useState(false)
   const { pathname } = useLocation()
-  const isAuth = NO_TOPBAR.has(pathname) && (pathname === '/' || pathname === '/signup')
+  const FULL_SCREEN_PATHS = new Set(['/', '/signup', '/desktop-preview'])
+  const isAuth = NO_TOPBAR.has(pathname) && FULL_SCREEN_PATHS.has(pathname)
 
   useEffect(() => {
     recordAppOpen()
