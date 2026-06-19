@@ -223,12 +223,20 @@ export default function SignupScreen() {
         body: JSON.stringify({ contact: contactValue, type: tab === 'mobile' ? 'sms' : 'email' }),
       })
       const text = await res.text()
+      console.log('[OTP] raw response:', text)
       const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
-      if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
-      if (data.dev_otp) { setDevOtp(data.dev_otp); setOtp(data.dev_otp.split('')) }
+      console.log('[OTP] parsed:', data)
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP. Please try again.')
       if (data.token) setOtpToken(data.token)
+      if (data.dev_otp) {
+        setDevOtp(data.dev_otp)
+        setOtp(data.dev_otp.split(''))
+      }
       setSt('otp')
-    } catch (e) { setErr(e.message) }
+    } catch (e) {
+      console.error('[OTP] error:', e.message)
+      setErr(e.message)
+    }
     setSending(false)
   }
 
@@ -528,10 +536,10 @@ export default function SignupScreen() {
           )}
 
           {devOtp && (
-            <div style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '14px 18px', marginBottom: 20, textAlign: 'center' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#92400e', letterSpacing: 1, marginBottom: 6 }}>SMS NOT ACTIVE YET — YOUR OTP IS</div>
-              <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: 10, color: '#92400e' }}>{devOtp}</div>
-              <div style={{ fontSize: 11, color: '#b45309', marginTop: 4 }}>Will switch to SMS automatically after DLT approval</div>
+            <div style={{ background: '#fef08a', border: '3px solid #f59e0b', borderRadius: 14, padding: '20px 18px', marginBottom: 24, textAlign: 'center', boxShadow: '0 0 0 4px #fef9c3' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#92400e', letterSpacing: 1, marginBottom: 10, textTransform: 'uppercase' }}>⚠ SMS not active yet — use this OTP</div>
+              <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 12, color: '#7c2d12', fontVariantNumeric: 'tabular-nums' }}>{devOtp}</div>
+              <div style={{ fontSize: 12, color: '#92400e', marginTop: 8, fontWeight: 600 }}>Copy this code and enter it below ↓</div>
             </div>
           )}
 
