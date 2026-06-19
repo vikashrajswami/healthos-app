@@ -189,6 +189,7 @@ export default function SignupScreen() {
   const [showCC,  setShowCC]  = useState(false)
   const [consent, setConsent] = useState({ terms: false, privacy: false, health: false, marketing: false })
   const [devOtp,  setDevOtp]  = useState('')
+  const [otpToken, setOtpToken] = useState('')
 
   const theme = APP_THEMES.find(t => t.id === tid)
   const A     = theme.accent
@@ -225,6 +226,7 @@ export default function SignupScreen() {
       const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
       if (data.dev_otp) { setDevOtp(data.dev_otp); setOtp(data.dev_otp.split('')) }
+      if (data.token) setOtpToken(data.token)
       setSt('otp')
     } catch (e) { setErr(e.message) }
     setSending(false)
@@ -249,7 +251,7 @@ export default function SignupScreen() {
     try {
       const res  = await fetch('/api/verify-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contact: contactValue, code: otp.join('') }),
+        body: JSON.stringify({ contact: contactValue, code: otp.join(''), token: otpToken }),
       })
       const text = await res.text()
       const data = (() => { try { return JSON.parse(text) } catch { return { error: text || 'Server error. Try again.' } } })()

@@ -1,10 +1,20 @@
-import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
-function getSupabase() {
-  return createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-  )
+const SECRET = process.env.OTP_SECRET || process.env.SUPABASE_SERVICE_KEY || 'arogyos-otp-secret-2026'
+const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
+
+function verifyToken(token, contact, code) {
+  try {
+    const { contact: c, otp, ts, sig } = JSON.parse(Buffer.from(token, 'base64url').toString())
+    if (c !== contact) return { ok: false, reason: 'contact mismatch' }
+    if (otp !== code)  return { ok: false, reason: 'wrong code' }
+    if (Date.now() - ts > OTP_TTL_MS) return { ok: false, reason: 'expired' }
+    const expected = crypto.createHmac('sha256', SECRET).update(`${c}:${otp}:${ts}`).digest('hex')
+    if (sig !== expected) return { ok: false, reason: 'invalid signature' }
+    return { ok: true }
+  } catch {
+    return { ok: false, reason: 'invalid token' }
+  }
 }
 
 export default async function handler(req, res) {
@@ -16,40 +26,22 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-    const { contact, code } = req.body || {}
-    if (!contact || !code) return res.status(400).json({ error: 'Missing contact or code' })
+    const { contact, code, token } = req.body || {}
+    if (!contact || !code) return res.status(400).json({ error: 'Missing contact or code', valid: false })
     if (!/^\d{6}$/.test(code)) return res.status(400).json({ error: 'OTP must be 6 digits', valid: false })
 
-    const { data, error } = await getSupabase()
-      .from('otp_codes')
-      .select('*')
-      .eq('contact', contact)
-      .eq('used', false)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    if (error || !data) {
-      return res.status(400).json({ error: 'No active OTP found. Please request a new one.', valid: false })
+    // Primary: verify via signed token (no DB needed)
+    if (token) {
+      const result = verifyToken(token, contact, code)
+      if (result.ok) return res.json({ valid: true })
+      if (result.reason === 'expired') return res.status(400).json({ error: 'OTP has expired. Please request a new one.', valid: false })
+      if (result.reason === 'wrong code') return res.status(400).json({ error: 'Incorrect OTP. Please try again.', valid: false })
     }
 
-    if (new Date(data.expires_at) < new Date()) {
-      try { await getSupabase().from('otp_codes').delete().eq('id', data.id) } catch {}
-      return res.status(400).json({ error: 'OTP has expired. Please request a new one.', valid: false })
-    }
-
-    if (data.code !== code) {
-      return res.status(400).json({ error: 'Incorrect OTP. Please try again.', valid: false })
-    }
-
-    try {
-      await getSupabase().from('otp_codes').update({ used: true, used_at: new Date().toISOString() }).eq('id', data.id)
-    } catch {}
-
-    res.json({ valid: true, type: data.type })
+    return res.status(400).json({ error: 'Invalid or expired OTP. Please request a new one.', valid: false })
 
   } catch (err) {
     console.error('verify-otp error:', err)
-    res.status(500).json({ error: 'Server error. Please try again.', valid: false })
+    return res.status(500).json({ error: 'Server error. Please try again.', valid: false })
   }
 }

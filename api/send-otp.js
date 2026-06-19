@@ -1,15 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
-// Lazy — created inside handler so a bad env var returns JSON 500, not a process crash
-function getSupabase() {
-  return createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-  )
-}
+const SECRET = process.env.OTP_SECRET || process.env.SUPABASE_SERVICE_KEY || 'arogyos-otp-secret-2026'
 
 function generate6Digit() {
   return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+// Sign OTP into a token so verify-otp can check it without DB
+function signOtp(contact, otp) {
+  const ts  = Date.now()
+  const msg = `${contact}:${otp}:${ts}`
+  const sig = crypto.createHmac('sha256', SECRET).update(msg).digest('hex')
+  return Buffer.from(JSON.stringify({ contact, otp, ts, sig })).toString('base64url')
 }
 
 // ── Email via Resend ──────────────────────────────────────────────────────────
@@ -19,15 +21,12 @@ async function sendEmailOTP(email, otp) {
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from:    process.env.RESEND_FROM_EMAIL || 'AROGYOS <onboarding@resend.dev>',
       to:      [email],
       subject: `${otp} is your AROGYOS verification code`,
-      html:    `
+      html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:16px">
           <div style="text-align:center;margin-bottom:24px">
             <div style="font-size:28px;font-weight:900;color:#0f172a">AROGY<span style="color:#14b8a6">OS</span></div>
@@ -40,7 +39,7 @@ async function sendEmailOTP(email, otp) {
           </div>
           <p style="color:#94a3b8;font-size:12px;text-align:center">
             If you did not request this code, please ignore this email.<br/>
-            Do not share this code with anyone — AROGYOS will never ask for it.
+            Do not share this code with anyone.
           </p>
           <div style="text-align:center;margin-top:24px;font-size:11px;color:#cbd5e1">
             AROGYOS Intelligence · support@arogyos.com
@@ -55,62 +54,27 @@ async function sendEmailOTP(email, otp) {
   }
 }
 
-// ── SMS via MSG91 (India) or Twilio (international) ───────────────────────────
+// ── SMS via MSG91 ─────────────────────────────────────────────────────────────
 async function sendSMSOTP(phone, otp) {
-  // MSG91 — best for India
-  if (process.env.MSG91_AUTH_KEY) {
-    const cleanPhone = phone.replace(/\D/g, '')
-    const res = await fetch('https://api.msg91.com/api/v5/otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        authkey:     process.env.MSG91_AUTH_KEY,
-        mobile:      cleanPhone,
-        template_id: process.env.MSG91_TEMPLATE_ID,
-        sender:      process.env.MSG91_SENDER_ID || 'ARGYOS',
-        otp,
-        otp_expiry:  10,
-      }),
-    })
-    const body = await res.text()
-    if (!res.ok) {
-      console.error('MSG91 error:', body)
-      throw new Error('Failed to send SMS. Check MSG91 credentials.')
-    }
-    return
-  }
-
-  // Twilio fallback
-  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-    const sid  = process.env.TWILIO_ACCOUNT_SID
-    const auth = process.env.TWILIO_AUTH_TOKEN
-    const from = process.env.TWILIO_FROM_NUMBER
-
-    const body = new URLSearchParams({
-      To:   phone,
-      From: from,
-      Body: `${otp} is your AROGYOS verification code. Valid for 10 minutes. Do not share.`,
-    })
-
-    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${sid}:${auth}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
-    })
-    if (!res.ok) throw new Error('Failed to send SMS via Twilio')
-    return
-  }
-
-  throw new Error('SMS service not configured. Please add MSG91_AUTH_KEY or Twilio credentials.')
+  const cleanPhone = phone.replace(/\D/g, '')
+  const res = await fetch('https://api.msg91.com/api/v5/otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      authkey:     process.env.MSG91_AUTH_KEY,
+      mobile:      cleanPhone,
+      template_id: process.env.MSG91_TEMPLATE_ID,
+      sender:      process.env.MSG91_SENDER_ID || 'ARGYOS',
+      otp,
+      otp_expiry:  10,
+    }),
+  })
+  const body = await res.text()
+  if (!res.ok) throw new Error('MSG91 error: ' + body)
 }
 
-// ── Main handler ─────────────────────────────────────────────────────────────
-
+// ── Main handler ──────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
-  // Always return JSON — never let Vercel send plain-text 500
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -119,69 +83,40 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-  const { contact, type } = req.body || {}
-  if (!contact || !type) return res.status(400).json({ error: 'Missing contact or type' })
-  if (!['email', 'sms'].includes(type)) return res.status(400).json({ error: 'Invalid type' })
+    const { contact, type } = req.body || {}
+    if (!contact || !type) return res.status(400).json({ error: 'Missing contact or type' })
 
-  // Rate limit: max 3 OTP requests per contact per hour (silently skip if table error)
-  try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    const { count } = await getSupabase()
-      .from('otp_codes')
-      .select('id', { count: 'exact', head: true })
-      .eq('contact', contact)
-      .gte('created_at', oneHourAgo)
-    if (count >= 3) {
-      return res.status(429).json({ error: 'Too many OTP requests. Try again in 1 hour.' })
-    }
-  } catch {}
+    const otp   = generate6Digit()
+    const token = signOtp(contact, otp)
 
-  const otp       = generate6Digit()
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    console.log('[send-otp] contact:', contact, 'type:', type, 'otp:', otp)
 
-  // Delete old unused OTPs for this contact (silently skip errors)
-  try {
-    await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('used', false)
-  } catch {}
-
-  // Store new OTP (non-fatal if DB fails — OTP still shown on screen)
-  try {
-    const { error: dbErr } = await getSupabase().from('otp_codes').insert({
-      contact,
-      code:       otp,
-      expires_at: expiresAt,
-      type,
-    })
-    if (dbErr) console.error('Supabase insert error:', JSON.stringify(dbErr))
-  } catch (dbEx) {
-    console.error('Supabase exception:', dbEx.message)
-  }
-
-  try {
     if (type === 'email') {
-      await sendEmailOTP(contact, otp)
-      res.json({ ok: true, message: 'OTP sent to your email' })
-    } else if (!process.env.MSG91_TEMPLATE_ID) {
-      // DLT not approved yet — show OTP on screen so testing can continue
-      res.json({ ok: true, dev_otp: otp, message: 'SMS pending DLT approval — OTP shown on screen' })
-    } else {
       try {
-        await sendSMSOTP(contact, otp)
-        res.json({ ok: true, message: 'OTP sent via SMS' })
-      } catch (smsErr) {
-        // SMS failed — fall back to showing OTP on screen
-        console.error('SMS send failed, falling back to dev_otp:', smsErr.message)
-        res.json({ ok: true, dev_otp: otp, message: 'SMS unavailable — OTP shown on screen' })
+        await sendEmailOTP(contact, otp)
+        return res.json({ ok: true, token, message: 'OTP sent to your email' })
+      } catch (e) {
+        console.error('[send-otp] email failed:', e.message)
+        return res.json({ ok: true, token, dev_otp: otp, message: 'Email unavailable — OTP shown on screen' })
       }
     }
-  } catch (e) {
-    // Clean up stored OTP if send failed
-    try { await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('code', otp) } catch {}
-    res.status(500).json({ error: e.message || 'Failed to send OTP. Try again.' })
-  }
 
-  } catch (outerErr) {
-    console.error('Unhandled send-otp error:', outerErr)
-    res.status(500).json({ error: 'Server error. Please try again.' })
+    // SMS
+    if (!process.env.MSG91_TEMPLATE_ID) {
+      // DLT not approved yet — show OTP on screen
+      return res.json({ ok: true, token, dev_otp: otp, message: 'SMS pending DLT approval' })
+    }
+
+    try {
+      await sendSMSOTP(contact, otp)
+      return res.json({ ok: true, token, message: 'OTP sent via SMS' })
+    } catch (e) {
+      console.error('[send-otp] SMS failed:', e.message)
+      return res.json({ ok: true, token, dev_otp: otp, message: 'SMS unavailable — OTP shown on screen' })
+    }
+
+  } catch (err) {
+    console.error('[send-otp] unhandled error:', err.message)
+    return res.status(500).json({ error: 'Server error. Please try again.' })
   }
 }
