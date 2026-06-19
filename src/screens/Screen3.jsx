@@ -489,9 +489,9 @@ export default function Screen3() {
           return
         }
 
-        // ── Client-side fallback: load pdfjs directly (no Vite bundling) ─────
+        // ── Client-side fallback: load pdfjs directly (new Function bypasses rolldown) ─────
         upd('Extracting text locally…')
-        const pdfjsLib = await import(/* @vite-ignore */ '/pdf.min.mjs')
+        const pdfjsLib = await new Function('return import("/pdf.min.mjs")')()
         const pdfjs = pdfjsLib.default ?? pdfjsLib
         ;(pdfjs.GlobalWorkerOptions ?? pdfjsLib.GlobalWorkerOptions).workerSrc = '/pdf.worker.min.mjs'
         const getDoc = pdfjs.getDocument ?? pdfjsLib.getDocument
