@@ -25,32 +25,50 @@ export default async function handler(req, res) {
   try {
     const { fileBase64 } = req.body || {}
     if (!fileBase64) return res.status(400).json({ error: 'No file data provided' })
-    if (fileBase64.length > 8_000_000) {
-      return res.status(413).json({ error: 'File too large (max ~6MB)' })
+    if (fileBase64.length > 10_000_000) {
+      return res.status(413).json({ error: 'File too large (max ~7MB)' })
     }
 
     const buffer = Buffer.from(fileBase64, 'base64')
     const data = new Uint8Array(buffer)
 
+    console.log('[parse-lab] PDF size:', buffer.length, 'bytes')
+
     const pdf = await pdfjsLib.getDocument({
       data,
       disableFontFace: true,
       verbosity: 0,
+      useWorkerFetch: false,
+      isEvalSupported: false,
     }).promise
+
+    console.log('[parse-lab] Pages:', pdf.numPages)
 
     let fullText = ''
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i)
       const content = await page.getTextContent()
-      fullText += pdfItemsToText(content.items) + '\n'
+      const pageText = pdfItemsToText(content.items)
+      fullText += pageText + '\n'
+      console.log(`[parse-lab] Page ${i} chars:`, pageText.length)
     }
 
-    const rows = extractRowsFromText(fullText)
-    const biomarkers = parseLabReport(rows)
+    console.log('[parse-lab] Total text length:', fullText.length)
+    console.log('[parse-lab] Text sample:', fullText.slice(0, 500))
 
-    return res.status(200).json({ biomarkers, pages: pdf.numPages })
+    const rows = extractRowsFromText(fullText)
+    console.log('[parse-lab] Rows extracted:', rows.length)
+
+    const biomarkers = parseLabReport(rows)
+    console.log('[parse-lab] Biomarkers found:', biomarkers.length, biomarkers.map(b => b.canonical))
+
+    if (biomarkers.length === 0) {
+      console.warn('[parse-lab] No biomarkers matched. Sample rows:', rows.slice(0, 20))
+    }
+
+    return res.status(200).json({ biomarkers, pages: pdf.numPages, textLength: fullText.length, rowsFound: rows.length })
   } catch (err) {
-    console.error('[parse-lab] Error:', err)
+    console.error('[parse-lab] Error:', err.message, err.stack?.slice(0, 500))
     return res.status(500).json({ error: err?.message || String(err) })
   }
 }

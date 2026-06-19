@@ -959,12 +959,18 @@ export default function Screen4() {
     const c = loadConnections()
     const d = loadDeviceData()
     let changed = false
-    // healthkit was fake-connected by default — remove if no real token or real data
-    if (c.healthkit && !d.healthkit?._ts) {
+    // healthkit was fake-connected by default — only keep if real OAuth data exists (_via:'google')
+    if (c.healthkit && d.healthkit?._via !== 'google') {
       delete c.healthkit
+      delete d.healthkit
       changed = true
     }
-    if (changed) { saveConnections(c); setConnections(c) }
+    if (changed) {
+      saveConnections(c)
+      saveDeviceData(d)
+      setConnections(c)
+      setDeviceData(d)
+    }
   }, [])
 
   // Handle OAuth callback when page loads with ?code= in URL
