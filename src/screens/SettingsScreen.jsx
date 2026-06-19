@@ -356,7 +356,28 @@ export default function SettingsScreen() {
           <Row icon="🗑️" label={t('delete_acct')} danger onClick={() => setModal('delete')} last/>
         </Section>
 
-        <div style={{ textAlign:'center', fontSize:11, color:'#cbd5e1', marginTop:8, lineHeight:1.8 }}>
+        {/* Follow us */}
+        <div style={{ textAlign:'center', marginTop:24, marginBottom:8 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:'#94a3b8', marginBottom:12, letterSpacing:1, textTransform:'uppercase' }}>Follow AROGYOS</div>
+          <div style={{ display:'flex', justifyContent:'center', gap:16 }}>
+            {[
+              { label:'Instagram', href:'https://www.instagram.com/arogyos/', color:'#e1306c', svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> },
+              { label:'LinkedIn',  href:'https://www.linkedin.com/company/arogyos/', color:'#0077b5', svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
+              { label:'YouTube',   href:'https://www.youtube.com/@arogyos', color:'#ff0000', svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
+              { label:'Reddit',    href:'https://www.reddit.com/user/EfficiencyBitter9874/', color:'#ff4500', svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.72 10A2 2 0 0 1 20 11.5a2 2 0 0 1-1 1.74"/><path d="M7.28 10A2 2 0 0 0 4 11.5a2 2 0 0 0 1 1.74"/><path d="M12 8c-1.5-2-4-2-4-2s.5 2 1 3"/><path d="M12 8c1.5-2 4-2 4-2s-.5 2-1 3"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16a4 4 0 0 0 5 0"/></svg> },
+            ].map(s => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
+                style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5, textDecoration:'none', color: s.color }}>
+                <div style={{ width:44, height:44, borderRadius:12, background:'rgba(255,255,255,0.06)', border:`1.5px solid ${s.color}33`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {s.svg}
+                </div>
+                <span style={{ fontSize:10, fontWeight:600, color:'#94a3b8' }}>{s.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ textAlign:'center', fontSize:11, color:'#cbd5e1', marginTop:16, lineHeight:1.8 }}>
           AROGYOS Intelligence Pvt. Ltd.<br/>
           DPDP Act 2023 · GDPR · v1.0.0
         </div>
