@@ -94,8 +94,10 @@ export const BIOMARKER_REGISTRY = [
     ref: { low: 70, high: 99, optLow: 75, optHigh: 90 },
     aliases: [
       // English
-      'glucose','blood glucose','fasting glucose','fasting blood glucose','fasting blood sugar',
+      'glucose','blood glucose','fasting glucose','glucose fasting','fasting blood glucose','fasting blood sugar',
+      'glucose, fasting','glucose (fasting)','random glucose','glucose random','glucose (random)',
       'blood sugar','fbs','rbs','ppbs','rbs (random)','hb sugar','sugar',
+      'serum glucose','plasma glucose','glucose, serum','glucose, plasma',
       // Hindi
       'ग्लूकोज','रक्त शर्करा','खाली पेट शर्करा','शुगर',
       // Arabic
@@ -561,6 +563,141 @@ export const BIOMARKER_REGISTRY = [
       'insulina', // ES/PT/IT
     ],
   },
+  // ── Liver (extended) ───────────────────────────────────────────────────────
+  {
+    id: 'bilirubin_direct', canonical: 'Bilirubin Direct', category: 'Liver', icon: '🫁',
+    stdUnit: 'mg/dL', unitGroup: null,
+    ref: { low: 0, high: 0.3, optLow: 0, optHigh: 0.2 },
+    aliases: [
+      'bilirubin direct','direct bilirubin','direct bili','conjugated bilirubin',
+      'bilirubin, direct','bilirubin-direct','d.bili','dbili',
+      'direktes bilirubin', // DE
+      'प्रत्यक्ष बिलीरुबिन', // HI
+      'البيليروبين المباشر', // AR
+    ],
+  },
+  {
+    id: 'bilirubin_indirect', canonical: 'Bilirubin Indirect', category: 'Liver', icon: '🫁',
+    stdUnit: 'mg/dL', unitGroup: null,
+    ref: { low: 0, high: 0.9, optLow: 0, optHigh: 0.8 },
+    aliases: [
+      'bilirubin indirect','indirect bilirubin','unconjugated bilirubin',
+      'bilirubin, indirect','bilirubin-indirect','i.bili','ibili',
+      'indirekt bilirubin', // DE
+      'अप्रत्यक्ष बिलीरुबिन', // HI
+      'البيليروبين غير المباشر', // AR
+    ],
+  },
+  // ── Proteins ───────────────────────────────────────────────────────────────
+  {
+    id: 'total_protein', canonical: 'Total Protein', category: 'Liver', icon: '🫁',
+    stdUnit: 'g/dL', unitGroup: null,
+    ref: { low: 6.0, high: 8.3, optLow: 6.5, optHigh: 8.0 },
+    aliases: [
+      'total protein','protein total','serum total protein','s.protein','protein, total',
+      'gesamteiweiß','gesamtprotein', // DE
+      'कुल प्रोटीन', // HI
+      'البروتين الكلي', // AR
+      '总蛋白','総タンパク','총단백', // ZH/JA/KO
+      'proteína total', // ES/PT
+      'protéine totale', // FR
+    ],
+  },
+  {
+    id: 'albumin', canonical: 'Albumin', category: 'Liver', icon: '🫁',
+    stdUnit: 'g/dL', unitGroup: null,
+    ref: { low: 3.5, high: 5.0, optLow: 4.0, optHigh: 5.0 },
+    aliases: [
+      'albumin','serum albumin','s.albumin','alb','albumin, serum','albumine',
+      'एल्बुमिन', // HI
+      'الألبومين', // AR
+      '白蛋白','アルブミン','알부민', // ZH/JA/KO
+      'albúmina', // ES/PT
+    ],
+  },
+  {
+    id: 'globulin', canonical: 'Globulin', category: 'Liver', icon: '🫁',
+    stdUnit: 'g/dL', unitGroup: null,
+    ref: { low: 2.0, high: 3.5, optLow: 2.0, optHigh: 3.2 },
+    aliases: [
+      'globulin','globulins','serum globulin','globulin (calculated)','globulin(calculated)',
+      'γ-globulin','gamma globulin',
+      'ग्लोबुलिन', // HI
+      'الغلوبولين', // AR
+      '球蛋白','グロブリン','글로불린', // ZH/JA/KO
+    ],
+  },
+  // ── Electrolytes ───────────────────────────────────────────────────────────
+  {
+    id: 'sodium', canonical: 'Sodium', category: 'Electrolytes', icon: '⚗️',
+    stdUnit: 'mEq/L', unitGroup: null,
+    ref: { low: 136, high: 145, optLow: 138, optHigh: 143 },
+    aliases: [
+      'sodium','serum sodium','s.sodium','na','na+','sodium, serum',
+      'natrium', // DE/NL
+      'सोडियम', // HI
+      'الصوديوم', // AR
+      '钠','ナトリウム','나트륨', // ZH/JA/KO
+      'sodio', // ES/PT/IT
+      'sodium sérique', // FR
+    ],
+  },
+  {
+    id: 'potassium', canonical: 'Potassium', category: 'Electrolytes', icon: '⚗️',
+    stdUnit: 'mEq/L', unitGroup: null,
+    ref: { low: 3.5, high: 5.1, optLow: 3.8, optHigh: 4.8 },
+    aliases: [
+      'potassium','serum potassium','s.potassium','k','k+','potassium, serum',
+      'kalium', // DE/NL/TR
+      'पोटेशियम', // HI
+      'البوتاسيوم', // AR
+      '钾','カリウム','칼륨', // ZH/JA/KO
+      'potasio','potássio', // ES/PT
+    ],
+  },
+  {
+    id: 'chloride', canonical: 'Chloride', category: 'Electrolytes', icon: '⚗️',
+    stdUnit: 'mEq/L', unitGroup: null,
+    ref: { low: 98, high: 107, optLow: 100, optHigh: 106 },
+    aliases: [
+      'chloride','serum chloride','s.chloride','cl','cl-','chloride, serum',
+      'chlorid', // DE
+      'क्लोराइड', // HI
+      'الكلوريد', // AR
+      '氯','塩化物','염화물', // ZH/JA/KO
+      'cloruro','cloreto', // ES/PT
+    ],
+  },
+  {
+    id: 'calcium', canonical: 'Calcium', category: 'Electrolytes', icon: '⚗️',
+    stdUnit: 'mg/dL', unitGroup: null,
+    convFn: { 'mmol/l': v => +(v * 4.008).toFixed(2) },
+    ref: { low: 8.5, high: 10.5, optLow: 9.0, optHigh: 10.0 },
+    aliases: [
+      'calcium','serum calcium','s.calcium','ca','ca2+','calcium total','calcium, total',
+      'total calcium','calcium (total)','ionized calcium',
+      'kalzium', // DE
+      'कैल्शियम', // HI
+      'الكالسيوم', // AR
+      '钙','カルシウム','칼슘', // ZH/JA/KO
+      'calcio', // ES/PT/IT
+    ],
+  },
+  {
+    id: 'phosphorus', canonical: 'Phosphorus', category: 'Electrolytes', icon: '⚗️',
+    stdUnit: 'mg/dL', unitGroup: null,
+    convFn: { 'mmol/l': v => +(v * 3.097).toFixed(2) },
+    ref: { low: 2.5, high: 4.5, optLow: 2.8, optHigh: 4.2 },
+    aliases: [
+      'phosphorus','phosphate','inorganic phosphorus','serum phosphorus','phosphorus, serum',
+      'serum phosphate','phosphate, serum','s.phosphorus','s.phosphate',
+      'phosphor','phosphat', // DE
+      'फास्फोरस', // HI
+      'الفوسفور', // AR
+      '磷','リン','인', // ZH/JA/KO
+      'fósforo','phosphore', // ES+PT/FR
+    ],
+  },
 ]
 
 // ── Normalise a raw biomarker name to canonical form ─────────────────────────
@@ -681,16 +818,42 @@ export function parseLabReport(rows) {
 // ── Extract raw rows from plain text (universal pattern matching) ─────────────
 // Supports: "Glucose 95 mg/dL", "Glukose: 5.2 mmol/L", "血糖 5.1 mmol/L" etc.
 export function extractRowsFromText(text) {
+  const seen = new Set()
   const rows = []
-  // Pattern: label (optional colon/dash) number (optional comma-decimal) optional unit
-  const pattern = /([^\d\n:]+?)\s*[:\-–]?\s*([0-9][0-9.,]*)\s*([a-zA-Zµµ/%×·\^³⁶⁰⁻\s\/]{1,20})?/g
+
+  function addRow(name, value, unit) {
+    name = (name || '').trim()
+    if (name.length < 2 || name.length > 60) return
+    const key = name.toLowerCase()
+    if (seen.has(key)) return
+    seen.add(key)
+    rows.push({ name, value: String(value).replace(',', '.'), unit: (unit || '').trim() })
+  }
+
+  // Pass 1: line-by-line — handles names with embedded digits (HbA1c, T3, T4, B12)
+  // Finds first whitespace-separated standalone number per line → name | value | unit
+  for (const line of text.split('\n')) {
+    const tok = line.trim().split(/\s+/)
+    if (tok.length < 2) continue
+    let vi = -1
+    for (let i = 1; i < tok.length; i++) {
+      if (/^\d+[.,]?\d*$/.test(tok[i])) { vi = i; break }
+    }
+    if (vi < 1) continue
+    const name = tok.slice(0, vi).join(' ')
+    const value = tok[vi]
+    // unit: next token that doesn't start with a digit and isn't a range operator
+    const unitTok = tok[vi + 1]
+    const unit = (unitTok && !/^\d/.test(unitTok) && unitTok !== '-' && unitTok !== '–') ? unitTok : ''
+    addRow(name, value, unit)
+  }
+
+  // Pass 2: regex — catches non-line-structured text and OCR output without newlines
+  const pattern = /([^\d\n:]+?)\s*[:\-–]?\s*([0-9][0-9.,]*)\s*([a-zA-Zµµ/%×·\^³⁶⁰⁻\/]{1,20})?/g
   let m
   while ((m = pattern.exec(text)) !== null) {
-    const name = m[1].trim()
-    const value = m[2].replace(',', '.')
-    const unit  = (m[3] || '').trim()
-    if (name.length < 2 || name.length > 60) continue
-    rows.push({ name, value, unit })
+    addRow(m[1], m[2], m[3])
   }
+
   return rows
 }

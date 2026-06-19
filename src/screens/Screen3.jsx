@@ -355,6 +355,25 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
+// ── Position-aware PDF text reconstruction ────────────────────────────────────
+// Groups text items by y-coordinate so table rows come out as lines, not columns.
+function pdfItemsToText(items) {
+  const ti = items.filter(it => typeof it.str === 'string' && it.str.trim())
+  if (!ti.length) return ''
+  const groups = []
+  for (const item of ti) {
+    const y = item.transform[5]
+    let g = groups.find(g => Math.abs(g.y - y) <= 3)
+    if (!g) { g = { y, items: [] }; groups.push(g) }
+    g.items.push(item)
+  }
+  // Sort top→bottom (descending PDF y), then left→right within each line
+  groups.sort((a, b) => b.y - a.y)
+  return groups
+    .map(g => g.items.sort((a, b) => a.transform[4] - b.transform[4]).map(i => i.str).join(' '))
+    .join('\n')
+}
+
 // ── Tesseract OCR (self-hosted ESM, lazy-loaded, cached) ─────────────────────
 let _tsmod = null
 async function getTesseract() {
@@ -402,38 +421,47 @@ export default function Screen3() {
         pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
         const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise
 
-        // Try text layer first (works for digital/typed PDFs)
+        // Phase 1 — extract text layer using position-aware reconstruction
+        // (preserves row order for tabular lab reports)
         upd('Extracting text…')
-        const pages = []
+        const pdfPages = []
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i)
           const content = await page.getTextContent()
-          pages.push(content.items.map(it => it.str).join(' '))
+          pdfPages.push({ page, text: pdfItemsToText(content.items) })
         }
-        text = pages.join('\n')
+        text = pdfPages.map(p => p.text).join('\n')
 
-        // Scanned/image PDF → render each page as canvas → OCR
-        if (!text || text.trim().length < 20) {
-          upd('Scanned PDF detected — running OCR (may take ~20s)…')
+        // Quick biomarker check to decide if OCR is needed
+        const quickBio = text.trim().length >= 20
+          ? parseLabReport(extractRowsFromText(text))
+          : []
+
+        // Phase 2 — OCR if text layer gave fewer than 3 biomarkers
+        // (handles scanned PDFs, image-in-PDF, and font-encoding issues)
+        if (quickBio.length < 3) {
+          upd(`OCR starting (${pdf.numPages} pages — may take ~30s)…`)
           const { createWorker } = await getTesseract()
           const worker = await createWorker('eng', 1, {
             workerPath: '/tesseract-worker.min.js',
             workerBlobURL: false,
           })
-          const ocrPages = []
-          for (let i = 1; i <= pdf.numPages; i++) {
-            upd(`OCR: page ${i} of ${pdf.numPages}…`)
-            const page = await pdf.getPage(i)
-            const viewport = page.getViewport({ scale: 2.5 })
+          const ocrTexts = []
+          for (let i = 0; i < pdfPages.length; i++) {
+            upd(`OCR: page ${i + 1} of ${pdf.numPages}…`)
+            const vp = pdfPages[i].page.getViewport({ scale: 2.0 })
             const canvas = document.createElement('canvas')
-            canvas.width = viewport.width
-            canvas.height = viewport.height
-            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+            canvas.width = vp.width
+            canvas.height = vp.height
+            await pdfPages[i].page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise
             const { data: { text: t } } = await worker.recognize(canvas)
-            ocrPages.push(t)
+            ocrTexts.push(t)
           }
           await worker.terminate()
-          text = ocrPages.join('\n')
+          const ocrText = ocrTexts.join('\n')
+          // Use whichever source yields more biomarkers
+          const ocrBio = parseLabReport(extractRowsFromText(ocrText))
+          if (ocrBio.length > quickBio.length) text = ocrText
         }
 
       } else if (isImg) {
