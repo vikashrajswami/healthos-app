@@ -104,24 +104,37 @@ function TopBar({ theme, setTheme }) {
 
   const isMain = MAIN_PATHS.includes(pathname)
 
+  const userName = localStorage.getItem('healthos_username') || ''
+  const hour     = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
   return (
     <div style={{
       position: 'sticky', top: 0, zIndex: 50,
       display: 'flex', alignItems: 'center', gap: 10,
       padding: '10px 16px',
-      background: 'rgba(255,255,255,0.92)',
+      background: 'rgba(255,255,255,0.95)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid rgba(0,0,0,0.06)',
       minHeight: 52,
     }}>
-      {/* Left: logo+name together on main, back arrow on sub-pages */}
+      {/* Left: greeting on desktop main, logo+name on mobile main, back on sub-pages */}
       {isMain ? (
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <Logo size={32}/>
-          <span style={{ fontSize:16, fontWeight:800, color:'#0f172a', letterSpacing:-0.3 }}>
-            AROGYO<span style={{ color:'#14b8a6' }}>S</span>
-          </span>
-        </div>
+        <>
+          {/* Mobile: logo + name */}
+          <div className="topbar-mobile-logo" style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <Logo size={32}/>
+            <span style={{ fontSize:16, fontWeight:800, color:'#0f172a', letterSpacing:-0.3 }}>
+              AROGYO<span style={{ color:'#14b8a6' }}>S</span>
+            </span>
+          </div>
+          {/* Desktop: greeting (logo is in sidebar) */}
+          <div className="topbar-desktop-greeting" style={{ display:'none' }}>
+            <span style={{ fontSize:15, fontWeight:700, color:'#0f172a' }}>
+              {greeting}{userName ? `, ${userName}` : ''} 👋
+            </span>
+          </div>
+        </>
       ) : (
         <button onClick={() => nav(-1)} style={{
           display: 'flex', alignItems: 'center', gap: 6,
@@ -136,12 +149,12 @@ function TopBar({ theme, setTheme }) {
         </button>
       )}
 
-      {/* Center: empty on main (name is left), logo on sub-pages */}
+      {/* Center: logo on sub-pages (mobile only) */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {!isMain && <Logo size={28}/>}
       </div>
 
-      {/* Right: theme dots + settings */}
+      {/* Right: theme dots + plus button */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ display: 'flex', gap: 5 }}>
           {THEMES.map(th => (
@@ -164,13 +177,6 @@ function TopBar({ theme, setTheme }) {
             ⭐ Plus
           </button>
         )}
-        <button onClick={() => nav('/settings')} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: '#64748b', display: 'flex', alignItems: 'center',
-          padding: 6, borderRadius: 10,
-        }}>
-          {ICONS.settings}
-        </button>
       </div>
     </div>
   )
@@ -204,31 +210,25 @@ function MedicalDisclaimer() {
   )
 }
 
-// ── Desktop sidebar ───────────────────────────────────────────────────────────
-function DesktopSidebar({ theme, setTheme }) {
+// ── Desktop sidebar (Option 1 — dark) ────────────────────────────────────────
+function DesktopSidebar() {
   const navigate     = useNavigate()
   const { pathname } = useLocation()
   const t            = useT()
 
+  const userName = localStorage.getItem('healthos_username') || 'You'
+  const initial  = userName.charAt(0).toUpperCase()
+
   return (
-    <aside style={{
-      display: 'none', // overridden to flex by CSS media query
-      flexDirection: 'column',
-      width: 220,
-      minHeight: '100vh',
-      background: '#fff',
-      borderRight: '1px solid #eef1f6',
-      padding: '28px 16px 24px',
-      position: 'sticky',
-      top: 0,
-      gap: 4,
-    }} className="desktop-sidebar">
+    <aside className="desktop-sidebar" style={{ display: 'none' }}>
 
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, paddingLeft: 8 }}>
-        <Logo size={30}/>
-        <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: -0.3 }}>
-          AROGY<span style={{ color: 'var(--accent)' }}>OS</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 20px 32px' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #14b8a6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#14b8a6', opacity: 0.4 }}/>
+        </div>
+        <span style={{ color: '#fff', fontWeight: 800, fontSize: 15, letterSpacing: 1 }}>
+          AROGY<span style={{ color: '#14b8a6' }}>OS</span>
         </span>
       </div>
 
@@ -238,14 +238,14 @@ function DesktopSidebar({ theme, setTheme }) {
         return (
           <button key={n.path} onClick={() => navigate(n.path)} style={{
             display: 'flex', alignItems: 'center', gap: 12,
-            padding: '10px 12px', borderRadius: 12, border: 'none',
-            background: active ? 'var(--tint)' : 'none',
-            color: active ? 'var(--accent-dark)' : '#64748b',
-            fontWeight: active ? 700 : 500, fontSize: 14,
-            cursor: 'pointer', textAlign: 'left', transition: 'all .15s',
-            width: '100%',
+            padding: '11px 20px', border: 'none', cursor: 'pointer',
+            background: active ? 'rgba(20,184,166,0.12)' : 'none',
+            borderLeft: active ? '3px solid #14b8a6' : '3px solid transparent',
+            color: active ? '#14b8a6' : 'rgba(255,255,255,0.5)',
+            fontWeight: active ? 700 : 400, fontSize: 13,
+            width: '100%', textAlign: 'left', transition: 'all .12s',
           }}>
-            <span style={{ color: active ? 'var(--accent-dark)' : '#94a3b8' }}>{n.icon}</span>
+            <span style={{ opacity: active ? 1 : 0.5 }}>{n.icon}</span>
             {t(n.labelKey)}
           </button>
         )
@@ -253,40 +253,47 @@ function DesktopSidebar({ theme, setTheme }) {
 
       <div style={{ flex: 1 }}/>
 
-      {/* Theme dots */}
-      <div style={{ display: 'flex', gap: 8, padding: '8px 12px' }}>
-        {THEMES.map(th => (
-          <button key={th.id} onClick={() => setTheme(th.id)} style={{
-            width: 20, height: 20, borderRadius: '50%', background: th.dot, border: 'none',
-            cursor: 'pointer', padding: 0,
-            outline: theme === th.id ? '2.5px solid #0f172a' : '2.5px solid transparent',
-            outlineOffset: 2, transform: theme === th.id ? 'scale(1.2)' : 'scale(1)',
-            transition: 'all .15s',
-          }}/>
-        ))}
-      </div>
+      {/* Upgrade card */}
+      {!isPlusMember() && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <div
+            onClick={() => navigate('/subscribe')}
+            style={{
+              background: 'rgba(20,184,166,0.1)', border: '1px solid rgba(20,184,166,0.25)',
+              borderRadius: 12, padding: '12px 14px', cursor: 'pointer',
+            }}
+          >
+            <div style={{ fontSize: 11, color: '#14b8a6', fontWeight: 700, marginBottom: 4 }}>⭐ UPGRADE TO PLUS</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>Full BioAge · Family dashboard</div>
+          </div>
+        </div>
+      )}
 
       {/* Settings */}
       <button onClick={() => navigate('/settings')} style={{
         display: 'flex', alignItems: 'center', gap: 12,
-        padding: '10px 12px', borderRadius: 12, border: 'none',
-        background: pathname === '/settings' ? 'var(--tint)' : 'none',
-        color: pathname === '/settings' ? 'var(--accent-dark)' : '#64748b',
-        fontWeight: 500, fontSize: 14, cursor: 'pointer', width: '100%',
+        padding: '11px 20px', border: 'none', cursor: 'pointer',
+        background: pathname === '/settings' ? 'rgba(20,184,166,0.12)' : 'none',
+        borderLeft: pathname === '/settings' ? '3px solid #14b8a6' : '3px solid transparent',
+        color: pathname === '/settings' ? '#14b8a6' : 'rgba(255,255,255,0.5)',
+        fontSize: 13, width: '100%', textAlign: 'left',
       }}>
-        {ICONS.settings} Settings
+        <span style={{ opacity: pathname === '/settings' ? 1 : 0.5 }}>{ICONS.settings}</span>
+        Settings
       </button>
 
-      {!isPlusMember() && (
-        <button onClick={() => navigate('/subscribe')} style={{
-          margin: '8px 0 0', padding: '11px 0',
-          background: 'linear-gradient(90deg,var(--accent),var(--accent-dark))',
-          border: 'none', borderRadius: 12, cursor: 'pointer',
-          color: '#fff', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
-        }}>
-          ⭐ Upgrade to Plus
-        </button>
-      )}
+      {/* User row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px 0', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 8 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%', background: '#14b8a6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0,
+        }}>{initial}</div>
+        <div style={{ overflow: 'hidden' }}>
+          <div style={{ fontSize: 12, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userName}</div>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>BioAge Member</div>
+        </div>
+      </div>
     </aside>
   )
 }
@@ -354,7 +361,7 @@ function AppShell({ theme, setTheme }) {
   return (
     <div data-theme={theme} className="app-shell">
       {/* Desktop sidebar — hidden on mobile via CSS */}
-      <DesktopSidebar theme={theme} setTheme={setTheme}/>
+      <DesktopSidebar/>
 
       {/* Main area */}
       <div className="desktop-main">
