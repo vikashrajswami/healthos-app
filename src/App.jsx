@@ -37,6 +37,7 @@ const SignupDesignsPreview   = lazy(() => import('./screens/SignupDesignsPreview
 const SignupDesignsPreview2  = lazy(() => import('./screens/SignupDesignsPreview2'))
 const SignupDesignsPreview3  = lazy(() => import('./screens/SignupDesignsPreview3'))
 const DesktopDesignPreview   = lazy(() => import('./screens/DesktopDesignPreview'))
+const SignupDesktopPreview   = lazy(() => import('./screens/SignupDesktopPreview'))
 const TermsScreen          = lazy(() => import('./screens/TermsScreen'))
 const PaymentScreen        = lazy(() => import('./screens/PaymentScreen'))
 const SettingsScreen       = lazy(() => import('./screens/SettingsScreen'))
@@ -75,7 +76,7 @@ const MAIN_PATHS = ['/home', '/trends', '/upload', '/devices', '/protocol']
 const NO_TOPBAR = new Set([
   '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
-  '/logo-preview', '/name-preview', '/privacy', '/desktop-preview',
+  '/logo-preview', '/name-preview', '/privacy', '/desktop-preview', '/signup-desktop-preview',
 ])
 
 // Screens that should also hide the bottom nav
@@ -325,14 +326,15 @@ const ROUTES = (
     <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
     <Route path="/name-preview"   element={<NameDesignPreview />} />
     <Route path="/privacy"          element={<PrivacyScreen />} />
-    <Route path="/desktop-preview"  element={<DesktopDesignPreview />} />
+    <Route path="/desktop-preview"       element={<DesktopDesignPreview />} />
+    <Route path="/signup-desktop-preview" element={<SignupDesktopPreview />} />
   </>
 )
 
 function AppShell({ theme, setTheme }) {
   const [showRating, setShowRating] = useState(false)
   const { pathname } = useLocation()
-  const FULL_SCREEN_PATHS = new Set(['/', '/signup', '/desktop-preview'])
+  const FULL_SCREEN_PATHS = new Set(['/', '/signup', '/desktop-preview', '/signup-desktop-preview'])
   const isAuth = NO_TOPBAR.has(pathname) && FULL_SCREEN_PATHS.has(pathname)
 
   useEffect(() => {
