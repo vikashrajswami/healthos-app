@@ -144,16 +144,17 @@ export default async function handler(req, res) {
     await getSupabase().from('otp_codes').delete().eq('contact', contact).eq('used', false)
   } catch {}
 
-  // Store new OTP
-  const { error: dbErr } = await getSupabase().from('otp_codes').insert({
-    contact,
-    code:       otp,
-    expires_at: expiresAt,
-    type,
-  })
-  if (dbErr) {
-    console.error('Supabase insert error:', JSON.stringify(dbErr))
-    return res.status(500).json({ error: `Database error: ${dbErr.message || dbErr.code || 'unknown'}` })
+  // Store new OTP (non-fatal if DB fails — OTP still shown on screen)
+  try {
+    const { error: dbErr } = await getSupabase().from('otp_codes').insert({
+      contact,
+      code:       otp,
+      expires_at: expiresAt,
+      type,
+    })
+    if (dbErr) console.error('Supabase insert error:', JSON.stringify(dbErr))
+  } catch (dbEx) {
+    console.error('Supabase exception:', dbEx.message)
   }
 
   try {
@@ -164,8 +165,14 @@ export default async function handler(req, res) {
       // DLT not approved yet — show OTP on screen so testing can continue
       res.json({ ok: true, dev_otp: otp, message: 'SMS pending DLT approval — OTP shown on screen' })
     } else {
-      await sendSMSOTP(contact, otp)
-      res.json({ ok: true, message: 'OTP sent via SMS' })
+      try {
+        await sendSMSOTP(contact, otp)
+        res.json({ ok: true, message: 'OTP sent via SMS' })
+      } catch (smsErr) {
+        // SMS failed — fall back to showing OTP on screen
+        console.error('SMS send failed, falling back to dev_otp:', smsErr.message)
+        res.json({ ok: true, dev_otp: otp, message: 'SMS unavailable — OTP shown on screen' })
+      }
     }
   } catch (e) {
     // Clean up stored OTP if send failed
