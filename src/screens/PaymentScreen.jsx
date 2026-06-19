@@ -52,7 +52,16 @@ export default function PaymentScreen() {
   const location = useLocation()
 
   const st = location.state || {}
-  const [region,  setRegion]  = useState(st.region  || 'india')
+
+  // Auto-detect region from timezone — India = INR, everything else = USD
+  const detectedRegion = (() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      return (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta') ? 'india' : 'intl'
+    } catch { return 'india' }
+  })()
+
+  const [region,  setRegion]  = useState(st.region  || detectedRegion)
   const [billing, setBilling] = useState(st.billing || 'annual')
 
   const plan = PRICING[region][billing]
