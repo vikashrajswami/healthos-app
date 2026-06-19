@@ -355,16 +355,11 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
-// ── Tesseract OCR loader (CDN, lazy) ─────────────────────────────────────────
-async function loadTesseract() {
-  if (window.Tesseract) return window.Tesseract
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script')
-    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
-    s.onload = resolve; s.onerror = reject
-    document.head.appendChild(s)
-  })
-  return window.Tesseract
+// ── Tesseract OCR (npm, lazy-loaded, cached) ──────────────────────────────────
+let _tsmod = null
+async function getTesseract() {
+  if (!_tsmod) _tsmod = await import('tesseract.js')
+  return _tsmod
 }
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
@@ -418,8 +413,8 @@ export default function Screen3() {
         // Scanned/image PDF → render each page as canvas → OCR
         if (!text || text.trim().length < 20) {
           upd('Scanned PDF detected — running OCR (may take ~20s)…')
-          const Tesseract = await loadTesseract()
-          const worker = await Tesseract.createWorker('eng')
+          const { createWorker } = await getTesseract()
+          const worker = await createWorker('eng')
           const ocrPages = []
           for (let i = 1; i <= pdf.numPages; i++) {
             upd(`OCR: page ${i} of ${pdf.numPages}…`)
@@ -439,8 +434,8 @@ export default function Screen3() {
       } else if (isImg) {
         // Images always need OCR — readAsText on binary gives garbage
         upd('Reading image with OCR…')
-        const Tesseract = await loadTesseract()
-        const worker = await Tesseract.createWorker('eng', 1, {
+        const { createWorker } = await getTesseract()
+        const worker = await createWorker('eng', 1, {
           logger: m => { if (m.status === 'recognizing text') upd(`OCR ${Math.round(m.progress * 100)}%…`) },
         })
         const { data: { text: t } } = await worker.recognize(file)
