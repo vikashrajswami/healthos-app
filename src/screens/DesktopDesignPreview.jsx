@@ -427,17 +427,17 @@ export default function DesktopDesignPreview() {
   const [selected, setSelected] = useState(null)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'system-ui,sans-serif', padding: '40px 32px' }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'system-ui,sans-serif', padding: '32px 48px' }}>
 
       {/* Header */}
-      <div style={{ maxWidth: 1100, margin: '0 auto 40px' }}>
-        <button onClick={() => nav('/home')} style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: 600, marginBottom: 16, padding: 0 }}>← Back</button>
-        <div style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Desktop Design Options</div>
-        <div style={{ fontSize: 15, color: '#64748b' }}>Pick the layout you want for the desktop version of AROGYOS.</div>
+      <div style={{ marginBottom: 36 }}>
+        <button onClick={() => nav('/home')} style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: 600, marginBottom: 12, padding: 0 }}>← Back</button>
+        <div style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', marginBottom: 6 }}>Desktop Design Options</div>
+        <div style={{ fontSize: 14, color: '#64748b' }}>Pick the layout you want for the desktop version of AROGYOS.</div>
       </div>
 
       {/* Design cards */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 48 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
         {DESIGNS.map(({ id, name, desc, component: Component }) => (
           <div key={id}>
             {/* Label */}
@@ -465,7 +465,7 @@ export default function DesktopDesignPreview() {
             </div>
 
             {/* Preview */}
-            <div style={{ borderRadius: 20, overflow: 'hidden', cursor: 'pointer' }} onClick={() => setSelected(id)}>
+            <div style={{ borderRadius: 20, overflow: 'hidden', cursor: 'pointer', width: '100%' }} onClick={() => setSelected(id)}>
               <Component />
             </div>
           </div>
