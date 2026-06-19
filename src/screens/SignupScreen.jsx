@@ -138,6 +138,24 @@ function LeftPanel({ A }) {
       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', marginTop: 32, lineHeight: 1.8 }}>
         Trusted by 10,000+ users · 256-bit AES encrypted · GDPR & DPDP Act 2023 compliant
       </div>
+      {/* Social icons — left panel */}
+      <div style={{ marginTop: 20 }}>
+        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>Follow Us</div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[
+            { href: 'https://www.instagram.com/arogyos/', color: '#e1306c', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> },
+            { href: 'https://www.linkedin.com/company/arogyos/', color: '#0ea5e9', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
+            { href: 'https://www.youtube.com/@arogyos', color: '#ff0000', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
+            { href: 'https://www.reddit.com/r/Arogyos/', color: '#ff4500', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.72 10A2 2 0 0 1 20 11.5a2 2 0 0 1-1 1.74"/><path d="M7.28 10A2 2 0 0 0 4 11.5a2 2 0 0 0 1 1.74"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16a4 4 0 0 0 5 0"/></svg> },
+          ].map((s, i) => (
+            <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" style={{
+              width: 34, height: 34, borderRadius: 9, border: `1px solid ${s.color}44`,
+              background: `${s.color}11`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: s.color, textDecoration: 'none',
+            }}>{s.svg}</a>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -450,6 +468,24 @@ export default function SignupScreen() {
 
           <div style={{ fontSize: 11, color: fgMuted, textAlign: 'center', marginTop: 14, lineHeight: 1.8 }}>
             🔒 256-bit AES encrypted · DPDP Act 2023 · GDPR compliant
+          </div>
+          {/* Social icons — signup form bottom */}
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <div style={{ fontSize: 9, color: fgMuted, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>Follow Us</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
+              {[
+                { href: 'https://www.instagram.com/arogyos/', color: '#e1306c', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> },
+                { href: 'https://www.linkedin.com/company/arogyos/', color: '#0ea5e9', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
+                { href: 'https://www.youtube.com/@arogyos', color: '#ff0000', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
+                { href: 'https://www.reddit.com/r/Arogyos/', color: '#ff4500', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.72 10A2 2 0 0 1 20 11.5a2 2 0 0 1-1 1.74"/><path d="M7.28 10A2 2 0 0 0 4 11.5a2 2 0 0 0 1 1.74"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16a4 4 0 0 0 5 0"/></svg> },
+              ].map((s, i) => (
+                <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" style={{
+                  width: 34, height: 34, borderRadius: 9, border: `1px solid ${s.color}44`,
+                  background: `${s.color}11`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: s.color, textDecoration: 'none',
+                }}>{s.svg}</a>
+              ))}
+            </div>
           </div>
         </>
       )}
