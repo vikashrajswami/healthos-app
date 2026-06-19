@@ -446,6 +446,7 @@ export default function Screen3() {
     const err = info => setUploads(prev => prev.map(u => u.id === id ? { ...u, status: 'error', info } : u))
 
     let text = ''
+    let serverErr = ''
 
     try {
       if (isPdf) {
@@ -453,7 +454,6 @@ export default function Screen3() {
 
         // ── Server-side parse (Node.js pdfjs — reliable) ──────────────────
         let serverBiomarkers = null
-        let serverErr = ''
         try {
           const base64 = await new Promise(resolve => {
             const reader = new FileReader()
