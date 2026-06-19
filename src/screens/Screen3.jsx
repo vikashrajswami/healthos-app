@@ -398,9 +398,8 @@ export default function Screen3() {
     try {
       if (isPdf) {
         upd('Loading PDF…')
-        const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs')
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs'
+        const pdfjsLib = await import('pdfjs-dist')
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
         const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise
 
         // Try text layer first (works for digital/typed PDFs)
