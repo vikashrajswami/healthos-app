@@ -155,7 +155,7 @@ function TopBar({ theme, setTheme }) {
         {!isMain && <Logo size={28}/>}
       </div>
 
-      {/* Right: theme dots + plus button */}
+      {/* Right: theme dots + plus button + settings (mobile only) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ display: 'flex', gap: 5 }}>
           {THEMES.map(th => (
@@ -178,6 +178,18 @@ function TopBar({ theme, setTheme }) {
             ⭐ Plus
           </button>
         )}
+        {/* Settings icon — mobile only (desktop has it in sidebar) */}
+        <button className="topbar-settings-btn" onClick={() => nav('/settings')} style={{
+          background: pathname === '/settings' ? 'rgba(20,184,166,0.12)' : 'none',
+          border: 'none', borderRadius: 10, cursor: 'pointer',
+          color: pathname === '/settings' ? '#14b8a6' : '#64748b',
+          padding: '6px', display: 'flex', alignItems: 'center',
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
       </div>
     </div>
   )

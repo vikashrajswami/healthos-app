@@ -122,6 +122,8 @@ html, body {
   /* TopBar: swap mobile logo for desktop greeting */
   .topbar-mobile-logo { display: none !important; }
   .topbar-desktop-greeting { display: block !important; }
+  /* Settings icon hidden on desktop — sidebar has it */
+  .topbar-settings-btn { display: none !important; }
 }
 
 /* ── Screen layout ── */
