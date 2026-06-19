@@ -449,19 +449,51 @@ export default function Screen3() {
 
     try {
       if (isPdf) {
-        upd('Loading PDF…')
+        upd('Reading PDF…')
+
+        // ── Server-side parse (Node.js pdfjs — reliable) ──────────────────
+        let serverBiomarkers = null
+        try {
+          const base64 = await new Promise(resolve => {
+            const reader = new FileReader()
+            reader.onload = e => resolve(e.target.result.split(',')[1])
+            reader.readAsDataURL(file)
+          })
+          upd('Analysing with server…')
+          const resp = await fetch('/api/parse-lab', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileBase64: base64 }),
+          })
+          if (resp.ok) {
+            const json = await resp.json()
+            if (json.biomarkers && json.biomarkers.length > 0) {
+              serverBiomarkers = json.biomarkers
+            }
+          }
+        } catch (_) { /* fall through to client-side */ }
+
+        if (serverBiomarkers) {
+          // Server parsed successfully — skip all client-side processing
+          addReport({ name: file.name, source: 'Upload', biomarkers: serverBiomarkers })
+          pushToCloud()
+          setUploads(prev => prev.map(u => u.id === id
+            ? { ...u, status: 'done', info: `${serverBiomarkers.length} biomarkers extracted`, biomarkers: serverBiomarkers }
+            : u
+          ))
+          setExpanded(id)
+          return
+        }
+
+        // ── Client-side fallback (browser pdfjs + OCR) ────────────────────
+        upd('Extracting text locally…')
         const pdfjsLib = await import('pdfjs-dist')
-        // Support both named-export and default-export module shapes (Vite bundling varies)
         const pdfjs = pdfjsLib.default ?? pdfjsLib
         const workerSrc = '/pdf.worker.min.mjs'
-        if (pdfjs.GlobalWorkerOptions) pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-        else if (pdfjsLib.GlobalWorkerOptions) pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
-
+        ;(pdfjs.GlobalWorkerOptions ?? pdfjsLib.GlobalWorkerOptions).workerSrc = workerSrc
         const getDoc = pdfjs.getDocument ?? pdfjsLib.getDocument
         const pdf = await getDoc({ data: await file.arrayBuffer() }).promise
 
-        // Phase 1 — text layer extraction with dual strategy
-        upd('Extracting text…')
         const pdfPages = []
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i)
@@ -469,14 +501,10 @@ export default function Screen3() {
           pdfPages.push({ page, text: pdfItemsToText(content.items) })
         }
         text = pdfPages.map(p => p.text).join('\n')
-        console.log('[HealthOS] PDF text (first 1500):', text.slice(0, 1500))
 
         const quickBio = text.trim().length >= 20
-          ? parseLabReport(extractRowsFromText(text))
-          : []
-        console.log('[HealthOS] quickBio from text layer:', quickBio.length)
+          ? parseLabReport(extractRowsFromText(text)) : []
 
-        // Phase 2 — OCR only if text layer gives < 3 biomarkers (scanned / image PDF)
         if (quickBio.length < 3) {
           upd(`OCR starting (${pdf.numPages} pages)…`)
           const { createWorker } = await getTesseract()
@@ -489,8 +517,7 @@ export default function Screen3() {
             upd(`OCR page ${i + 1}/${pdf.numPages}…`)
             const vp = pdfPages[i].page.getViewport({ scale: 2.0 })
             const canvas = document.createElement('canvas')
-            canvas.width = vp.width
-            canvas.height = vp.height
+            canvas.width = vp.width; canvas.height = vp.height
             await pdfPages[i].page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise
             const { data: { text: t } } = await worker.recognize(canvas)
             ocrTexts.push(t)
@@ -498,7 +525,6 @@ export default function Screen3() {
           await worker.terminate()
           const ocrText = ocrTexts.join('\n')
           const ocrBio = parseLabReport(extractRowsFromText(ocrText))
-          console.log('[HealthOS] OCR biomarkers:', ocrBio.length)
           if (ocrBio.length > quickBio.length) text = ocrText
         }
 
