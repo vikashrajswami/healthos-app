@@ -355,10 +355,10 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
-// ── Tesseract OCR (npm, lazy-loaded, cached) ──────────────────────────────────
+// ── Tesseract OCR (self-hosted ESM, lazy-loaded, cached) ─────────────────────
 let _tsmod = null
 async function getTesseract() {
-  if (!_tsmod) _tsmod = await import('tesseract.js')
+  if (!_tsmod) _tsmod = await import(/* @vite-ignore */ '/tesseract.esm.min.js')
   return _tsmod
 }
 
@@ -414,7 +414,10 @@ export default function Screen3() {
         if (!text || text.trim().length < 20) {
           upd('Scanned PDF detected — running OCR (may take ~20s)…')
           const { createWorker } = await getTesseract()
-          const worker = await createWorker('eng')
+          const worker = await createWorker('eng', 1, {
+            workerPath: '/tesseract-worker.min.js',
+            workerBlobURL: false,
+          })
           const ocrPages = []
           for (let i = 1; i <= pdf.numPages; i++) {
             upd(`OCR: page ${i} of ${pdf.numPages}…`)
@@ -436,6 +439,8 @@ export default function Screen3() {
         upd('Reading image with OCR…')
         const { createWorker } = await getTesseract()
         const worker = await createWorker('eng', 1, {
+          workerPath: '/tesseract-worker.min.js',
+          workerBlobURL: false,
           logger: m => { if (m.status === 'recognizing text') upd(`OCR ${Math.round(m.progress * 100)}%…`) },
         })
         const { data: { text: t } } = await worker.recognize(file)
