@@ -489,14 +489,13 @@ export default function Screen3() {
           return
         }
 
-        // ── Client-side fallback (browser pdfjs + OCR) ────────────────────
+        // ── Client-side fallback: load pdfjs directly (no Vite bundling) ─────
         upd('Extracting text locally…')
-        const pdfjsLib = await import('pdfjs-dist')
+        const pdfjsLib = await import(/* @vite-ignore */ '/pdf.min.mjs')
         const pdfjs = pdfjsLib.default ?? pdfjsLib
-        const workerSrc = '/pdf.worker.min.mjs'
-        ;(pdfjs.GlobalWorkerOptions ?? pdfjsLib.GlobalWorkerOptions).workerSrc = workerSrc
+        ;(pdfjs.GlobalWorkerOptions ?? pdfjsLib.GlobalWorkerOptions).workerSrc = '/pdf.worker.min.mjs'
         const getDoc = pdfjs.getDocument ?? pdfjsLib.getDocument
-        const pdf = await getDoc({ data: await file.arrayBuffer() }).promise
+        const pdf = await getDoc({ data: await file.arrayBuffer(), disableFontFace: true, verbosity: 0 }).promise
 
         const pdfPages = []
         for (let i = 1; i <= pdf.numPages; i++) {
