@@ -1,4 +1,4 @@
-const CACHE = 'arogyos-v7'
+const CACHE = 'arogyos-v8'
 
 self.addEventListener('install', e => {
   self.skipWaiting()
@@ -25,7 +25,8 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       fetch(e.request).then(res => {
         if (res.ok) {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
+          const clone = res.clone()
+          caches.open(CACHE).then(c => c.put(e.request, clone))
         }
         return res
       }).catch(() => caches.match(e.request))
@@ -33,15 +34,16 @@ self.addEventListener('fetch', e => {
     return
   }
 
-  // Cache-first for JS/CSS/images
+  // Cache-first for JS/CSS/images — stale-while-revalidate
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
         if (res.ok && res.type === 'basic') {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
+          const clone = res.clone()
+          caches.open(CACHE).then(c => c.put(e.request, clone))
         }
         return res
-      })
+      }).catch(() => cached)
       return cached || network
     })
   )
