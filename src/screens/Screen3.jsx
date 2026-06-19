@@ -355,23 +355,56 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
-// ── Position-aware PDF text reconstruction ────────────────────────────────────
-// Groups text items by y-coordinate so table rows come out as lines, not columns.
-function pdfItemsToText(items) {
+// ── PDF text extraction — two strategies, best one wins ──────────────────────
+// Strategy A: group by y-coordinate (reading order for table PDFs)
+function pdfItemsToTextPositional(items, yTol = 8) {
   const ti = items.filter(it => typeof it.str === 'string' && it.str.trim())
   if (!ti.length) return ''
   const groups = []
   for (const item of ti) {
     const y = item.transform[5]
-    let g = groups.find(g => Math.abs(g.y - y) <= 3)
+    let g = groups.find(g => Math.abs(g.y - y) <= yTol)
     if (!g) { g = { y, items: [] }; groups.push(g) }
     g.items.push(item)
   }
-  // Sort top→bottom (descending PDF y), then left→right within each line
   groups.sort((a, b) => b.y - a.y)
   return groups
     .map(g => g.items.sort((a, b) => a.transform[4] - b.transform[4]).map(i => i.str).join(' '))
     .join('\n')
+}
+
+// Strategy B: sort all items top→bottom then left→right (stream-order safe)
+function pdfItemsToTextSorted(items) {
+  const ti = items.filter(it => typeof it.str === 'string' && it.str.trim())
+  if (!ti.length) return ''
+  ti.sort((a, b) => {
+    const dy = b.transform[5] - a.transform[5]
+    if (Math.abs(dy) > 8) return dy
+    return a.transform[4] - b.transform[4]
+  })
+  const lines = []
+  let curY = null
+  let curLine = []
+  for (const item of ti) {
+    const y = item.transform[5]
+    if (curY === null || Math.abs(curY - y) > 8) {
+      if (curLine.length) lines.push(curLine.join(' '))
+      curLine = [item.str]
+      curY = y
+    } else {
+      curLine.push(item.str)
+    }
+  }
+  if (curLine.length) lines.push(curLine.join(' '))
+  return lines.join('\n')
+}
+
+function pdfItemsToText(items) {
+  const a = pdfItemsToTextPositional(items)
+  const b = pdfItemsToTextSorted(items)
+  // pick whichever produces more parseable biomarkers (proxy: count lines with a digit)
+  const score = t => (t.match(/\d/g) || []).length
+  return score(a) >= score(b) ? a : b
 }
 
 // ── Tesseract OCR (self-hosted ESM, lazy-loaded, cached) ─────────────────────
@@ -418,11 +451,16 @@ export default function Screen3() {
       if (isPdf) {
         upd('Loading PDF…')
         const pdfjsLib = await import('pdfjs-dist')
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-        const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise
+        // Support both named-export and default-export module shapes (Vite bundling varies)
+        const pdfjs = pdfjsLib.default ?? pdfjsLib
+        const workerSrc = '/pdf.worker.min.mjs'
+        if (pdfjs.GlobalWorkerOptions) pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+        else if (pdfjsLib.GlobalWorkerOptions) pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 
-        // Phase 1 — extract text layer using position-aware reconstruction
-        // (preserves row order for tabular lab reports)
+        const getDoc = pdfjs.getDocument ?? pdfjsLib.getDocument
+        const pdf = await getDoc({ data: await file.arrayBuffer() }).promise
+
+        // Phase 1 — text layer extraction with dual strategy
         upd('Extracting text…')
         const pdfPages = []
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -431,16 +469,16 @@ export default function Screen3() {
           pdfPages.push({ page, text: pdfItemsToText(content.items) })
         }
         text = pdfPages.map(p => p.text).join('\n')
+        console.log('[HealthOS] PDF text (first 1500):', text.slice(0, 1500))
 
-        // Quick biomarker check to decide if OCR is needed
         const quickBio = text.trim().length >= 20
           ? parseLabReport(extractRowsFromText(text))
           : []
+        console.log('[HealthOS] quickBio from text layer:', quickBio.length)
 
-        // Phase 2 — OCR if text layer gave fewer than 3 biomarkers
-        // (handles scanned PDFs, image-in-PDF, and font-encoding issues)
+        // Phase 2 — OCR only if text layer gives < 3 biomarkers (scanned / image PDF)
         if (quickBio.length < 3) {
-          upd(`OCR starting (${pdf.numPages} pages — may take ~30s)…`)
+          upd(`OCR starting (${pdf.numPages} pages)…`)
           const { createWorker } = await getTesseract()
           const worker = await createWorker('eng', 1, {
             workerPath: '/tesseract-worker.min.js',
@@ -448,7 +486,7 @@ export default function Screen3() {
           })
           const ocrTexts = []
           for (let i = 0; i < pdfPages.length; i++) {
-            upd(`OCR: page ${i + 1} of ${pdf.numPages}…`)
+            upd(`OCR page ${i + 1}/${pdf.numPages}…`)
             const vp = pdfPages[i].page.getViewport({ scale: 2.0 })
             const canvas = document.createElement('canvas')
             canvas.width = vp.width
@@ -459,8 +497,8 @@ export default function Screen3() {
           }
           await worker.terminate()
           const ocrText = ocrTexts.join('\n')
-          // Use whichever source yields more biomarkers
           const ocrBio = parseLabReport(extractRowsFromText(ocrText))
+          console.log('[HealthOS] OCR biomarkers:', ocrBio.length)
           if (ocrBio.length > quickBio.length) text = ocrText
         }
 
