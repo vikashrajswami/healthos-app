@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useVitalLink } from '@tryvital/vital-link'
 import { useNavigate } from 'react-router-dom'
 import { routeGrouped, coveragePercent, CATEGORY_META } from '../lib/dataRouter'
 import { getAllReports } from '../lib/reportStore'
@@ -31,7 +32,16 @@ function saveDeviceData(d)   { localStorage.setItem('healthos_device_data', JSON
 // ── Source definitions — chips are CAPABILITIES shown before connecting ────────
 const SOURCES = [
   {
-    id: 'lab', priority: 1, icon: '🩸', name: 'Lab Reports',
+    id: 'junction', priority: 1, icon: '🔗', name: 'Connect Any Device',
+    sub: 'Tap once — pick your device — approve in the app. Works with 300+ wearables.',
+    brands: 'WHOOP · Oura Ring · Garmin · Fitbit · Samsung · Apple Watch · Dexcom · Withings · and 290 more',
+    weight: 0,
+    capChips: ['WHOOP', 'Oura Ring', 'Garmin', 'Samsung', 'Fitbit', '290+ more'],
+    color: '#0ea5e9', grad: 'linear-gradient(135deg,#0c2340,#0369a1)',
+    ctaLabel: 'Connect My Device', badge: '300+ DEVICES', badgeColor: '#0ea5e9', biomarkers: 20,
+  },
+  {
+    id: 'lab', priority: 2, icon: '🩸', name: 'Lab Reports',
     sub: 'AI reads your blood test PDF and extracts every biomarker',
     brands: 'Any lab in India or worldwide · PDF or photo',
     weight: 50,
@@ -107,6 +117,16 @@ const SOURCES = [
 function getConnectedChips(id, deviceData) {
   const d = deviceData[id]
   switch (id) {
+    case 'junction': {
+      const jd = deviceData.junction
+      if (!jd) return ['Device connected', 'Data syncing...']
+      return [
+        jd.hrv      ? `HRV ${jd.hrv}ms`           : jd.steps ? `${(jd.steps).toLocaleString()} steps` : 'Activity tracked',
+        jd.rhr      ? `RHR ${jd.rhr} bpm`          : 'Heart rate tracked',
+        jd.sleep    ? `Sleep ${jd.sleep}h`         : 'Sleep tracked',
+        jd.source   ? `via ${jd.source}`           : 'via Junction',
+      ]
+    }
     case 'lab': {
       const r = getAllReports()[0]
       if (!r || !r.biomarkers?.length) return ['Upload a report to see data']
@@ -556,6 +576,114 @@ function ScaleModal({ onClose, onConnect }) {
   )
 }
 
+function JunctionModal({ onClose, onConnect }) {
+  const [phase, setPhase] = useState('main')  // main | loading | done | error
+  const [msg,   setMsg]   = useState('')
+  const [devName, setDevName] = useState('')
+  const juidRef = useRef(null)
+
+  const uid = localStorage.getItem('healthos_uid') || 'guest'
+
+  const { open, ready } = useVitalLink({
+    env: import.meta.env.VITE_JUNCTION_ENV || 'sandbox',
+    region: 'us',
+    onSuccess: async () => {
+      setPhase('loading')
+      setMsg('Fetching your data from the device…')
+      try {
+        const r   = await fetch(`/api/webhook?action=jdata&juid=${juidRef.current}`)
+        const data = await r.json()
+        const src  = (data.source || '').toLowerCase()
+        const sourceId = src.includes('oura') || src.includes('whoop') || src.includes('polar') || src.includes('ultrahuman')
+          ? 'ring'
+          : src.includes('dexcom') || src.includes('libre')
+          ? 'cgm'
+          : 'junction'
+        onConnect(sourceId === 'junction' ? 'junction' : sourceId, { ...data, _via: 'junction' })
+        onConnect('junction', { connected: true, source: data.source, _ts: Date.now() })
+        setDevName(data.source || 'Device')
+        setPhase('done')
+      } catch (e) {
+        setMsg(e.message)
+        setPhase('error')
+      }
+    },
+    onExit: () => { if (phase === 'loading') setPhase('main') },
+    onError: (e) => { setMsg(e?.message || 'Connection failed'); setPhase('error') },
+  })
+
+  async function handleConnect() {
+    setPhase('loading')
+    setMsg('Preparing secure connection…')
+    try {
+      const r = await fetch(`/api/webhook?action=jtoken&uid=${encodeURIComponent(uid)}`)
+      const { token, juid } = await r.json()
+      if (!token) throw new Error('Could not get connection token')
+      juidRef.current = juid
+      setPhase('widget')
+      open(token)
+    } catch (e) {
+      setMsg(e.message)
+      setPhase('error')
+    }
+  }
+
+  if (phase === 'loading' || phase === 'widget') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:12}}>🔗</div>
+      <div className="dh-modal-title">Connecting…</div>
+      <div className="dh-modal-desc">{msg || 'A popup will open — select your device and approve access.'}</div>
+      <div className="dh-ble-pulse" style={{borderColor:'#0ea5e9',background:'#0ea5e911'}}/>
+    </div>
+  )
+
+  if (phase === 'done') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:56,marginBottom:8}}>✅</div>
+      <div className="dh-modal-title">{devName || 'Device'} Connected!</div>
+      <div className="dh-modal-desc">Your data is now flowing into AROGYOS automatically.</div>
+      <button className="dh-modal-cta" style={{background:'#0ea5e9',marginTop:12}} onClick={handleConnect}>+ Connect Another Device</button>
+      <button style={backBtn} onClick={onClose}>Done</button>
+    </div>
+  )
+
+  if (phase === 'error') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:8}}>⚠️</div>
+      <div className="dh-modal-title">Connection Failed</div>
+      <div className="dh-modal-desc">{msg}</div>
+      <button className="dh-modal-cta" style={{background:'#0ea5e9'}} onClick={handleConnect}>Try Again</button>
+      <button style={backBtn} onClick={()=>setPhase('main')}>← Back</button>
+    </div>
+  )
+
+  return (
+    <div className="dh-modal-body">
+      <div style={{background:'linear-gradient(135deg,#0c2340,#0369a1)',borderRadius:16,padding:'20px 16px',marginBottom:16,textAlign:'center'}}>
+        <div style={{fontSize:36,marginBottom:6}}>🔗</div>
+        <div style={{color:'#fff',fontWeight:800,fontSize:18}}>Connect Any Device</div>
+        <div style={{color:'#bae6fd',fontSize:12,marginTop:4}}>300+ wearables · one tap · no developer account needed</div>
+      </div>
+
+      <div className="dh-modal-desc" style={{textAlign:'left',marginBottom:12}}>
+        Pick your device, log in to its app, tap <strong>Allow</strong> — data flows automatically.
+      </div>
+
+      <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:16}}>
+        {['WHOOP','Oura Ring','Garmin','Fitbit','Samsung','Apple Watch','Dexcom G7','FreeStyle Libre','Withings','Polar','Wahoo','Strava','Ultrahuman'].map(d=>(
+          <span key={d} style={{background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:600,color:'#334155'}}>{d}</span>
+        ))}
+        <span style={{background:'#0ea5e911',border:'1px solid #0ea5e944',borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:600,color:'#0369a1'}}>+290 more</span>
+      </div>
+
+      <button className="dh-modal-cta" style={{background:'linear-gradient(90deg,#0369a1,#0ea5e9)',fontSize:16,padding:'14px'}} onClick={handleConnect}>
+        🔗 Connect My Device →
+      </button>
+      <div className="dh-modal-note">HIPAA compliant · SOC 2 Type 2 · Your data stays private</div>
+    </div>
+  )
+}
+
 function BluetoothModal({ onClose, onConnect }) {
   const [phase,   setPhase]   = useState('main')   // main | scanning | reading | done | error | nosupport
   const [device,  setDevice]  = useState(null)
@@ -879,6 +1007,7 @@ export default function Screen4() {
       case 'cgm':        return <CGMModal        {...p}/>
       case 'abha':       return <AbhaModal       {...p}/>
       case 'scale':      return <ScaleModal      {...p}/>
+      case 'junction':   return <JunctionModal    {...p}/>
       case 'bluetooth':  return <BluetoothModal  {...p}/>
       case 'epigenetic': return <EpigeneticModal {...p}/>
       default: return null
