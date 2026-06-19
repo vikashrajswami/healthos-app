@@ -4,7 +4,8 @@ import { routeGrouped, coveragePercent, CATEGORY_META } from '../lib/dataRouter'
 import { getAllReports } from '../lib/reportStore'
 import {
   handleOAuthCallback,
-  startOuraOAuth, fetchOuraData, hasOuraClientId, clearToken as clearOuraToken,
+  startOuraOAuth,  fetchOuraData,  hasOuraClientId,
+  startWhoopOAuth, fetchWhoopData, hasWhoopClientId,
   startGoogleFitOAuth, fetchGoogleFitData, hasGoogleClientId, clearToken,
   startDexcomOAuth, fetchDexcomData, hasDexcomClientId,
   saveAbhaId, getAbhaId,
@@ -43,13 +44,13 @@ const SOURCES = [
     ctaLabel: 'Connect Health App', biomarkers: 8,
   },
   {
-    id: 'ring', priority: 3, icon: '💍', name: 'Smart Ring',
-    sub: 'Continuous HRV, deep sleep, skin temperature and recovery score',
-    brands: 'Oura Ring · Ultrahuman · Noise Luna · RingConn · any HRV ring',
+    id: 'ring', priority: 3, icon: '💍', name: 'Smart Ring & Recovery Tracker',
+    sub: 'Continuous HRV, deep sleep, strain score, skin temp and recovery',
+    brands: 'WHOOP · Oura Ring · Ultrahuman · Noise Luna · RingConn · any HRV tracker',
     weight: 10,
-    capChips: ['HRV (ms)', 'Deep sleep (h)', 'Skin temp', 'Recovery score'],
+    capChips: ['HRV (ms)', 'Recovery %', 'Deep sleep (h)', 'Strain score'],
     color: '#b45309', grad: 'linear-gradient(135deg,#1c0a00,#431407)',
-    ctaLabel: 'Connect Ring', badge: 'BEST FOR HRV', badgeColor: '#b45309', biomarkers: 7,
+    ctaLabel: 'Connect Tracker', badge: 'BEST FOR HRV', badgeColor: '#b45309', biomarkers: 8,
   },
   {
     id: 'cgm', priority: 4, icon: '📡', name: 'Continuous Glucose Monitor (CGM)',
@@ -105,9 +106,9 @@ function getConnectedChips(id, deviceData) {
     ] : ['Connected — syncing...']
     case 'ring': return d ? [
       d.hrv      ? `HRV ${d.hrv}ms`           : 'HRV tracked',
-      d.deep     ? `Deep ${d.deep}h`          : 'Sleep tracked',
       d.recovery ? `Recovery ${d.recovery}%`  : 'Recovery scored',
-      `via ${d._via === 'oura' ? 'Oura API' : 'manual entry'}`,
+      d.deep     ? `Deep ${d.deep}h`          : (d.strain != null ? `Strain ${d.strain.toFixed(1)}` : 'Sleep tracked'),
+      d._via === 'whoop' ? 'via WHOOP API' : d._via === 'oura' ? 'via Oura API' : 'manual entry',
     ] : ['Connected — enter data below']
     case 'cgm': return d ? [
       d.glucose  ? `Glucose ${d.glucose} mg/dL` : 'Glucose tracked',
@@ -312,13 +313,36 @@ function HealthKitModal({ onClose, onConnect }) {
 
 function RingModal({ onClose, onConnect }) {
   const [view, setView] = useState('main')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(null) // null | 'whoop' | 'oura'
 
   async function doOuraOAuth() {
     if (!hasOuraClientId()) { setView('setup_oura'); return }
-    setLoading(true)
+    setLoading('oura')
     await startOuraOAuth()
   }
+
+  async function doWhoopOAuth() {
+    if (!hasWhoopClientId()) { setView('setup_whoop'); return }
+    setLoading('whoop')
+    await startWhoopOAuth()
+  }
+
+  if (view === 'setup_whoop') return (
+    <div className="dh-modal-body">
+      <div className="dh-modal-icon">⚙️</div>
+      <div className="dh-modal-title">Set Up WHOOP Connection</div>
+      <div className="dh-modal-desc">Register a free developer app to connect WHOOP directly via API.</div>
+      <div className="dh-modal-steps">
+        <div className="dh-step"><span className="dh-snum">1</span><span>Go to <strong>developer.whoop.com</strong> → Create Application</span></div>
+        <div className="dh-step"><span className="dh-snum">2</span><span>Set redirect URI to <code>https://www.arogyos.com/devices</code></span></div>
+        <div className="dh-step"><span className="dh-snum">3</span><span>Copy your Client ID (no client secret needed)</span></div>
+        <div className="dh-step"><span className="dh-snum">4</span><span>In Vercel → Settings → Environment Variables → add <strong>VITE_WHOOP_CLIENT_ID</strong></span></div>
+        <div className="dh-step"><span className="dh-snum">5</span><span>Redeploy → come back and connect</span></div>
+      </div>
+      <button style={outBtn('#b45309')} onClick={()=>window.open('https://developer.whoop.com','_blank')}>Open WHOOP Developer Portal ↗</button>
+      <button style={backBtn} onClick={()=>setView('main')}>← Back</button>
+    </div>
+  )
 
   if (view === 'setup_oura') return (
     <div className="dh-modal-body">
@@ -341,19 +365,33 @@ function RingModal({ onClose, onConnect }) {
   return (
     <div className="dh-modal-body">
       <div className="dh-modal-icon">💍</div>
-      <div className="dh-modal-title">Connect Smart Ring</div>
-      <div className="dh-modal-desc">Choose your ring to connect. Rings not listed here can sync via Google Fit or manual data entry.</div>
-      <button className="dh-modal-cta" style={{background: loading?'#94a3b8':'#b45309'}} onClick={doOuraOAuth} disabled={loading}>
-        {loading ? 'Connecting...' : '💍 Connect Oura Ring (API) →'}
+      <div className="dh-modal-title">Connect Recovery Tracker</div>
+      <div className="dh-modal-desc">Choose your device. All track the same key metrics — HRV, recovery score, sleep stages and strain.</div>
+
+      {/* WHOOP — strain + HRV */}
+      <button className="dh-modal-cta" style={{background:loading==='whoop'?'#94a3b8':'#1a1a2e',border:'2px solid #00d4ff',marginBottom:4}} onClick={doWhoopOAuth} disabled={!!loading}>
+        {loading==='whoop' ? 'Connecting...' : '⚡ Connect WHOOP (API) →'}
       </button>
-      <button className="dh-modal-cta" style={{background:'#1e3a5f',marginTop:8}} onClick={()=>window.open('https://www.ultrahuman.com/ring-air','_blank')}>
+      <div style={{fontSize:11,color:'#94a3b8',textAlign:'center',marginBottom:12}}>HRV · Recovery % · Strain · Sleep stages · RHR</div>
+
+      {/* Oura Ring */}
+      <button className="dh-modal-cta" style={{background:loading==='oura'?'#94a3b8':'#b45309',marginBottom:4}} onClick={doOuraOAuth} disabled={!!loading}>
+        {loading==='oura' ? 'Connecting...' : '💍 Connect Oura Ring (API) →'}
+      </button>
+      <div style={{fontSize:11,color:'#94a3b8',textAlign:'center',marginBottom:12}}>HRV · Deep sleep · Skin temp · Readiness</div>
+
+      {/* Ultrahuman */}
+      <button className="dh-modal-cta" style={{background:'#0f172a',border:'1.5px solid #334155',marginBottom:4}} onClick={()=>window.open('https://www.ultrahuman.com/ring-air','_blank')}>
         Ultrahuman Ring Air ↗
       </button>
-      <div style={{padding:'10px 0 4px',fontSize:12,color:'#94a3b8',textAlign:'center'}}>
-        Samsung/Noise/other rings → connect via Google Fit on the Health App source above
+      <div style={{fontSize:11,color:'#94a3b8',textAlign:'center',marginBottom:12}}>Order the ring, then enter data manually or via Google Fit</div>
+
+      <div style={{padding:'4px 0 8px',fontSize:12,color:'#94a3b8',textAlign:'center',borderTop:'1px solid #f1f5f9',paddingTop:12}}>
+        Samsung Galaxy Ring · Noise Luna · RingConn · Fitbit<br/>→ sync to Google Fit, then connect via Health App above
       </div>
+
       <button style={outBtn('#b45309')} onClick={()=>setView('manual')}>
-        📝 Any ring — Enter readings manually
+        📝 Enter readings manually (any device)
       </button>
     </div>
   )
@@ -581,7 +619,7 @@ export default function Screen4() {
         setToast({ type:'error', msg: `Connection failed: ${result.error}` })
         return
       }
-      const providerMap = { oura:'ring', google:'healthkit', dexcom:'cgm' }
+      const providerMap = { oura:'ring', whoop:'ring', google:'healthkit', dexcom:'cgm' }
       const sourceId = providerMap[result.provider]
       if (sourceId) markConnected(sourceId, result.data || { _ts: Date.now(), _via: result.provider })
       setToast({ type:'success', msg: `${result.provider.charAt(0).toUpperCase()+result.provider.slice(1)} connected! Data is syncing.` })

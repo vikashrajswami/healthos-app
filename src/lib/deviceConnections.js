@@ -230,6 +230,59 @@ export async function fetchDexcomData() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// WHOOP
+// Register at: https://developer.whoop.com — Create Application
+// Env var: VITE_WHOOP_CLIENT_ID
+// Redirect URI: https://www.arogyos.com/devices
+// ═══════════════════════════════════════════════════════════════════════════════
+const WHOOP_ID = import.meta.env.VITE_WHOOP_CLIENT_ID || ''
+
+export function hasWhoopClientId() { return !!WHOOP_ID }
+
+export async function startWhoopOAuth() {
+  await startOAuth('whoop', {
+    authUrl:     'https://api.prod.whoop.com/oauth/oauth2/auth',
+    clientId:    WHOOP_ID,
+    redirectUri: REDIRECT_URI,
+    scope:       'offline read:recovery read:cycles read:sleep read:workout read:profile read:body_measurement',
+  })
+}
+
+export async function handleWhoopCallback(code) {
+  return exchangeCode(code, 'whoop', {
+    tokenUrl:    'https://api.prod.whoop.com/oauth/oauth2/token',
+    clientId:    WHOOP_ID,
+    redirectUri: REDIRECT_URI,
+  })
+}
+
+export async function fetchWhoopData() {
+  const token = getToken('whoop')
+  if (!token) return null
+  const h = { Authorization: `Bearer ${token.access_token}` }
+  try {
+    const [recR, sleepR, cycleR] = await Promise.all([
+      fetch('https://api.prod.whoop.com/developer/v1/recovery?limit=1', { headers: h }).then(r => r.json()),
+      fetch('https://api.prod.whoop.com/developer/v1/sleep?limit=1',    { headers: h }).then(r => r.json()),
+      fetch('https://api.prod.whoop.com/developer/v1/cycle?limit=1',    { headers: h }).then(r => r.json()),
+    ])
+    const rec   = recR.records?.[0]?.score
+    const sl    = sleepR.records?.[0]?.score
+    const cycle = cycleR.records?.[0]?.score
+    return {
+      hrv:      rec?.hrv_rmssd_on_wrist          ? Math.round(rec.hrv_rmssd_on_wrist)                    : null,
+      rhr:      rec?.resting_heart_rate           ?? null,
+      recovery: rec?.recovery_score               ?? null,
+      sleep:    sl?.total_in_bed_time_milli       ? +(sl.total_in_bed_time_milli / 3600000).toFixed(1)   : null,
+      deep:     sl?.slow_wave_sleep_duration_milli ? +(sl.slow_wave_sleep_duration_milli / 3600000).toFixed(1) : null,
+      rem:      sl?.rem_sleep_duration_milli       ? +(sl.rem_sleep_duration_milli / 3600000).toFixed(1)  : null,
+      strain:   cycle?.strain                      ?? null,
+      _ts: Date.now(), _via: 'whoop',
+    }
+  } catch { return null }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // ABHA — Ayushman Bharat Health Account
 // Real ABDM integration requires NHA HIU registration (government process).
 // This stores the ABHA number locally and provides instructions.
@@ -267,6 +320,9 @@ export async function handleOAuthCallback() {
     if (provider === 'oura') {
       await handleOuraCallback(code)
       data = await fetchOuraData()
+    } else if (provider === 'whoop') {
+      await handleWhoopCallback(code)
+      data = await fetchWhoopData()
     } else if (provider === 'google') {
       await handleGoogleCallback(code)
       data = await fetchGoogleFitData()
