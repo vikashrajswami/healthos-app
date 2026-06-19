@@ -80,6 +80,11 @@ function Timer({ secs, A, onResend }) {
 }
 
 export default function SignupScreen() {
+  if (localStorage.getItem('healthos_uid')) {
+    window.location.replace('/home')
+    return null
+  }
+
   const nav = useNavigate()
   const [tid,     setTid]     = useState('teal')
   const [tab,     setTab]     = useState('mobile')
@@ -201,7 +206,7 @@ export default function SignupScreen() {
       <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.8 }}>
         Your health profile is active.<br/>Begin your biological age assessment.
       </div>
-      <button onClick={() => nav('/')} style={{ marginTop: 36, padding: '16px 40px', background: 'transparent', color: A, border: `1.5px solid ${A}`, borderRadius: 32, fontSize: 14, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer' }}>
+      <button onClick={() => nav('/home')} style={{ marginTop: 36, padding: '16px 40px', background: 'transparent', color: A, border: `1.5px solid ${A}`, borderRadius: 32, fontSize: 14, fontWeight: 700, letterSpacing: 1.5, cursor: 'pointer' }}>
         OPEN HEALTHOS →
       </button>
     </div>

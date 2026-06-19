@@ -713,7 +713,7 @@ export default function SignupDesignsPreview3() {
       <div style={{ background:'#fff', borderBottom:'1px solid #e2e8f0', padding:'16px 28px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:8 }}>
           <button onClick={() => nav('/signup-preview-2')} style={{ background:'none', border:'none', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600, padding:0 }}>← V2 Designs</button>
-          <button onClick={() => nav('/')} style={{ marginLeft:'auto', background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'7px 14px', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600 }}>Back to App</button>
+          <button onClick={() => nav('/home')} style={{ marginLeft:'auto', background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'7px 14px', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600 }}>Back to App</button>
         </div>
         <div style={{ fontSize:20, fontWeight:900, color:'#0f172a', marginBottom:4 }}>Signup Designs V3 — All App Colours</div>
         <div style={{ fontSize:13, color:'#64748b' }}>Each design adapts to all 3 AROGYOS themes · Click the dots below each phone to switch colour</div>

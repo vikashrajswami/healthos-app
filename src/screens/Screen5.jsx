@@ -204,7 +204,7 @@ export default function Screen5() {
           <div className="proto-cta-text">
             Get your personalised BioAge estimate to understand which of these habits will have the highest impact for you.
           </div>
-          <button className="proto-cta-btn" onClick={() => nav('/')}>
+          <button className="proto-cta-btn" onClick={() => nav('/home')}>
             Get My BioAge →
           </button>
         </div>

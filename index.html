@@ -40,10 +40,13 @@
   <body>
     <div id="root"></div>
     <script>
-      // Redirect new users to signup before React loads â€” runs synchronously
-      if (!localStorage.getItem('healthos_uid') && window.location.pathname === '/') {
-        window.location.replace('/signup');
-      }
+      (function() {
+        var uid = localStorage.getItem('healthos_uid');
+        var p = window.location.pathname;
+        if (uid && (p === '/' || p === '/signup')) {
+          window.location.replace('/home');
+        }
+      })();
     </script>
     <script type="module" src="/src/main.jsx"></script>
     <script>

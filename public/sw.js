@@ -1,10 +1,6 @@
-const CACHE = 'arogyos-v6'
-const STATIC = ['/']
+const CACHE = 'arogyos-v7'
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC))
-  )
   self.skipWaiting()
 })
 
@@ -22,12 +18,27 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (url.pathname.startsWith('/api')) return
 
+  const isHTML = e.request.headers.get('accept')?.includes('text/html')
+
+  if (isHTML) {
+    // Network-first for HTML — always serve fresh page so redirect logic is current
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
+        }
+        return res
+      }).catch(() => caches.match(e.request))
+    )
+    return
+  }
+
+  // Cache-first for JS/CSS/images
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
         if (res.ok && res.type === 'basic') {
-          const clone = res.clone()
-          caches.open(CACHE).then(c => c.put(e.request, clone))
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
         }
         return res
       })

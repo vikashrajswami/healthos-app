@@ -266,7 +266,7 @@ export default function JoinScreen() {
           ✅ Your BioAge has been sent to <b>{inviterName}'s</b> family tracker
         </div>
 
-        <button className="join-btn-primary" onClick={() => window.location.href = '/'}>
+        <button className="join-btn-primary" onClick={() => window.location.href = '/home'}>
           Open My AROGYOS Dashboard →
         </button>
 

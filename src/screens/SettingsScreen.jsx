@@ -255,7 +255,7 @@ export default function SettingsScreen() {
   function handleLogout() {
     Object.keys(localStorage).filter(k => k.startsWith('healthos_')).forEach(k => localStorage.removeItem(k))
     sessionStorage.clear()
-    window.location.replace('/signup')
+    window.location.replace('/')
   }
 
   if (deleted) return (

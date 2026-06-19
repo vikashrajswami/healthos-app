@@ -161,7 +161,7 @@ export default function PaymentScreen() {
         A confirmation will be sent to your registered contact.
       </div>
       <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 32 }}>Powered by {isIN ? 'Razorpay' : 'Paddle'} · PCI DSS compliant</div>
-      <button onClick={() => nav('/')} style={{ padding: '15px 36px', background: 'linear-gradient(90deg,#14b8a6,#0d9488)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
+      <button onClick={() => nav('/home')} style={{ padding: '15px 36px', background: 'linear-gradient(90deg,#14b8a6,#0d9488)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
         Open AROGYOS →
       </button>
     </div>

@@ -16,7 +16,7 @@ export default function Screen2() {
             Complete your BioAge quiz on the Home screen to get your baseline score.
             Upload lab reports over time and AROGYOS will automatically track how your biological age changes.
           </div>
-          <button className="es-cta" onClick={() => nav('/')}>Go to Home →</button>
+          <button className="es-cta" onClick={() => nav('/home')}>Go to Home →</button>
         </div>
       </div>
     )

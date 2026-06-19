@@ -13,19 +13,11 @@ import { pushToCloud } from './lib/sync'
 import Screen1 from './screens/Screen1'
 import SignupScreen from './screens/SignupScreen'
 
-// Redirect new users (no uid) to signup before showing home
-function HomeGuard() {
-  if (!localStorage.getItem('healthos_uid')) {
-    window.location.replace('/signup')
-    return null
-  }
-  return <Screen1 />
-}
-
-// Test helper — clear all data and go to signup
+// Test helper — clear all data and go to root (signup)
 function ResetAndSignup() {
   Object.keys(localStorage).filter(k => k.startsWith('healthos_')).forEach(k => localStorage.removeItem(k))
-  return <Navigate to="/signup" replace />
+  window.location.replace('/')
+  return null
 }
 
 // Secondary screens — lazy loaded (loaded on first navigation)
@@ -76,25 +68,25 @@ const ICONS = {
   settings: <svg width="20" height="20" viewBox="0 0 24 24" {...S}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
 }
 
-const MAIN_PATHS = ['/', '/trends', '/upload', '/devices', '/protocol']
+const MAIN_PATHS = ['/home', '/trends', '/upload', '/devices', '/protocol']
 
 // Screens that manage their own full-page header — suppress global TopBar
 const NO_TOPBAR = new Set([
-  '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
+  '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
   '/logo-preview', '/name-preview', '/privacy',
 ])
 
 // Screens that should also hide the bottom nav
 const NO_BOTTOMNAV = new Set([
-  '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
+  '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
   '/smart-panel', '/lab-doorstep',
 ])
 
 const STANDALONE = [] // kept for legacy compat
 
 const NAV = [
-  { path: '/',         icon: ICONS.home,     labelKey: 'home' },
+  { path: '/home',     icon: ICONS.home,     labelKey: 'home' },
   { path: '/trends',   icon: ICONS.trends,   labelKey: 'trends' },
   { path: '/upload',   icon: ICONS.reports,  labelKey: 'reports' },
   { path: '/devices',  icon: ICONS.devices,  labelKey: 'devices' },
@@ -237,7 +229,9 @@ function AppShell({ theme, setTheme }) {
       <div style={{ paddingBottom: 70 }}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/"               element={<HomeGuard />} />
+            <Route path="/"               element={<SignupScreen />} />
+            <Route path="/signup"         element={<SignupScreen />} />
+            <Route path="/home"           element={<Screen1 />} />
             <Route path="/trends"         element={<Screen2 />} />
             <Route path="/upload"         element={<Screen3 />} />
             <Route path="/devices"        element={<Screen4 />} />
@@ -253,7 +247,6 @@ function AppShell({ theme, setTheme }) {
             <Route path="/signup-preview"   element={<SignupDesignsPreview />} />
             <Route path="/signup-preview-2" element={<SignupDesignsPreview2 />} />
             <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
-            <Route path="/signup"         element={<SignupScreen />} />
             <Route path="/reset"          element={<ResetAndSignup />} />
             <Route path="/terms"          element={<TermsScreen />} />
             <Route path="/payment"        element={<PaymentScreen />} />

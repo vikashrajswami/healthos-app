@@ -113,7 +113,7 @@ export default function Screen9() {
           ✓ 5 Health Guide chats / month<br/>
           ✓ Basic habit protocol
         </div>
-        <button className="continue-btn" onClick={() => nav('/')}>Continue Free</button>
+        <button className="continue-btn" onClick={() => nav('/home')}>Continue Free</button>
       </div>
 
       <div style={{ textAlign:'center', padding:'16px 0 8px', fontSize:11, color:'#94a3b8' }}>

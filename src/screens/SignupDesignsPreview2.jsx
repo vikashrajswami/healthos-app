@@ -793,7 +793,7 @@ export default function SignupDesignsPreview2() {
           <div style={{ fontSize:20, fontWeight:900, color:'#0f172a' }}>Signup Designs V2 — Premium Edition</div>
           <div style={{ fontSize:12, color:'#94a3b8', marginTop:2 }}>Inspired by Whoop · Oura Ring · Levels Health · Eight Sleep</div>
         </div>
-        <button onClick={() => nav('/')} style={{ background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'7px 14px', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600 }}>Back to App</button>
+        <button onClick={() => nav('/home')} style={{ background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'7px 14px', color:'#64748b', fontSize:13, cursor:'pointer', fontWeight:600 }}>Back to App</button>
       </div>
 
       {/* Feature chips */}
