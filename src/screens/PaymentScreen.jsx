@@ -15,13 +15,12 @@ const PRICING = {
   },
 }
 
-const PADDLE_PRODUCTS = {
-  monthly:  import.meta.env.VITE_PADDLE_PRODUCT_ID_MONTHLY,
-  halfyear: import.meta.env.VITE_PADDLE_PRODUCT_ID_HALFYEAR,
-  annual:   import.meta.env.VITE_PADDLE_PRODUCT_ID_ANNUAL,
+const PADDLE_PRICES = {
+  monthly:  import.meta.env.VITE_PADDLE_PRICE_MONTHLY,
+  halfyear: import.meta.env.VITE_PADDLE_PRICE_HALFYEAR,
+  annual:   import.meta.env.VITE_PADDLE_PRICE_ANNUAL,
 }
-const PADDLE_VENDOR   = import.meta.env.VITE_PADDLE_VENDOR_ID
-const PADDLE_SANDBOX  = import.meta.env.VITE_PADDLE_SANDBOX === 'true'
+const PADDLE_TOKEN = import.meta.env.VITE_PADDLE_TOKEN
 
 const FEATURES = [
   'Unlimited lab report uploads & AI biomarker extraction',
@@ -124,25 +123,33 @@ export default function PaymentScreen() {
     }
   }
 
-  // ── International: Paddle overlay ──────────────────────────────────────────
+  // ── International: Paddle Billing v2 ─────────────────────────────────────
   async function payWithPaddle() {
     setErr('')
     setLoading(true)
     try {
-      const uid       = getUid()
-      const productId = PADDLE_PRODUCTS[billing]
-      if (!productId || !PADDLE_VENDOR) throw new Error('Payment not configured yet')
+      const uid     = getUid()
+      const priceId = PADDLE_PRICES[billing]
+      if (!priceId || !PADDLE_TOKEN) throw new Error('International payments not configured yet')
 
-      await loadScript('https://cdn.paddle.com/paddle/paddle.js')
+      await loadScript('https://cdn.paddle.com/paddle/v2/paddle.js')
 
-      if (PADDLE_SANDBOX) window.Paddle.Environment.set('sandbox')
-      window.Paddle.Setup({ vendor: Number(PADDLE_VENDOR) })
+      window.Paddle.Initialize({
+        token: PADDLE_TOKEN,
+        eventCallback(data) {
+          if (data.name === 'checkout.completed') {
+            setPlusMember()
+            setStep('success')
+          }
+          if (data.name === 'checkout.closed') {
+            setLoading(false)
+          }
+        },
+      })
 
       window.Paddle.Checkout.open({
-        product:     productId,
-        passthrough: JSON.stringify({ uid, billing, region }),
-        successCallback: () => { setPlusMember(); setStep('success') },
-        closeCallback:   () => { setLoading(false) },
+        items:      [{ priceId, quantity: 1 }],
+        customData: { uid, billing, region },
       })
     } catch (e) {
       setErr(e.message || 'Could not initiate payment. Please try again.')
