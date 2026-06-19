@@ -10,6 +10,11 @@ import {
   startDexcomOAuth, fetchDexcomData, hasDexcomClientId,
   saveAbhaId, getAbhaId,
 } from '../lib/deviceConnections'
+import {
+  isBluetoothSupported, scanForDevice, connectDevice,
+  startHRM, readScale, readBodyComposition, readBP,
+  detectCategory, getBLEDevices, saveBLEDevice, removeBLEDevice,
+} from '../lib/bluetoothConnect'
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
 function loadConnections() {
@@ -80,7 +85,16 @@ const SOURCES = [
     ctaLabel: 'Connect Scale', biomarkers: 5,
   },
   {
-    id: 'epigenetic', priority: 7, icon: '🧬', name: 'Epigenetic Clock Test',
+    id: 'bluetooth', priority: 7, icon: '📶', name: 'Bluetooth Devices',
+    sub: 'Pair any BLE heart rate monitor, smart scale or blood pressure device directly — no account needed',
+    brands: 'Polar H10 · Wahoo TICKR · Omron BP Monitor · Withings Scale · any BLE device',
+    weight: 5,
+    capChips: ['Live HRV', 'Live heart rate', 'Body weight', 'Blood pressure'],
+    color: '#2563eb', grad: 'linear-gradient(135deg,#0f1e40,#1e3a8a)',
+    ctaLabel: 'Scan for Device', badge: 'NO ACCOUNT NEEDED', badgeColor: '#2563eb', biomarkers: 5,
+  },
+  {
+    id: 'epigenetic', priority: 8, icon: '🧬', name: 'Epigenetic Clock Test',
     sub: 'DNA methylation — the gold standard for true biological age',
     brands: 'TruDiagnostic · Elysium Health · home kit · import results as PDF',
     weight: 0,
@@ -128,6 +142,19 @@ function getConnectedChips(id, deviceData) {
       'Open Aarogya Setu to approve',
       'Data imports after consent',
     ]
+    case 'bluetooth': {
+      const devs  = getBLEDevices()
+      const names = Object.keys(devs)
+      if (!names.length) return ['Scan to pair a device']
+      return names.slice(0, 4).map(n => {
+        const { data: bd } = devs[n]
+        if (bd?.hrv)    return `${n.split(' ')[0]} · HRV ${bd.hrv}ms`
+        if (bd?.hr)     return `${n.split(' ')[0]} · HR ${bd.hr} bpm`
+        if (bd?.weight) return `${n.split(' ')[0]} · ${bd.weight}kg`
+        if (bd?.systolic) return `${n.split(' ')[0]} · ${bd.systolic}/${bd.diastolic} mmHg`
+        return `${n.split(' ')[0]} paired`
+      })
+    }
     case 'epigenetic': return d ? [
       d.bioAge   ? `DNA BioAge ${d.bioAge}`   : 'DNA BioAge',
       d.pace     ? `DunedinPACE ${d.pace}`    : 'DunedinPACE',
@@ -529,6 +556,195 @@ function ScaleModal({ onClose, onConnect }) {
   )
 }
 
+function BluetoothModal({ onClose, onConnect }) {
+  const [phase,   setPhase]   = useState('main')   // main | scanning | reading | done | error | nosupport
+  const [device,  setDevice]  = useState(null)
+  const [liveHR,  setLiveHR]  = useState(null)
+  const [liveHRV, setLiveHRV] = useState(null)
+  const [charRef, setCharRef] = useState(null)
+  const [msg,     setMsg]     = useState('')
+  const pairedDevs = getBLEDevices()
+
+  async function startScan() {
+    if (!isBluetoothSupported()) { setPhase('nosupport'); return }
+    setPhase('scanning')
+    try {
+      const dev = await scanForDevice()
+      setDevice(dev)
+      setPhase('reading')
+      setMsg(`Connecting to ${dev.name}…`)
+
+      const { server, type, battery } = await connectDevice(dev)
+      setMsg(`Reading data from ${dev.name}…`)
+
+      let data = {}
+
+      if (type === 'bp') {
+        setMsg('Take a blood pressure reading now…')
+        const bp = await readBP(server)
+        data = { ...bp, battery }
+        saveBLEDevice(dev.name, 'bp', data)
+        setPhase('done')
+        onConnect('bluetooth', { _ts: Date.now() })
+
+      } else if (type === 'scale_body') {
+        setMsg('Step on the scale…')
+        const bc = await readBodyComposition(server)
+        data = { ...bc, battery }
+        saveBLEDevice(dev.name, 'scale_body', data)
+        setPhase('done')
+        onConnect('bluetooth', { _ts: Date.now() })
+
+      } else if (type === 'scale') {
+        setMsg('Step on the scale…')
+        const sc = await readScale(server)
+        data = { ...sc, battery }
+        saveBLEDevice(dev.name, 'scale', data)
+        setPhase('done')
+        onConnect('bluetooth', { _ts: Date.now() })
+
+      } else {
+        // HRM — stream live for 30s then save
+        setMsg('Measuring heart rate & HRV — stay still for 30 seconds…')
+        const hrData = { battery }
+        let samples = 0
+        const hrChar = await startHRM(server, ({ hr, hrv }) => {
+          setLiveHR(hr)
+          if (hrv) { setLiveHRV(hrv); hrData.hrv = hrv }
+          hrData.hr = hr
+          samples++
+          if (samples >= 30) {
+            hrChar.stopNotifications().catch(() => {})
+            saveBLEDevice(dev.name, 'hrm', hrData)
+            onConnect('bluetooth', { _ts: Date.now() })
+            setPhase('done')
+          }
+        })
+        setCharRef(hrChar)
+      }
+
+    } catch (e) {
+      if (e.message === 'USE_CHROME') { setPhase('nosupport'); return }
+      if (e.name === 'NotFoundError') { setPhase('main'); return }  // user cancelled picker
+      setMsg(e.message || 'Connection failed')
+      setPhase('error')
+    }
+  }
+
+  function stop() {
+    charRef?.stopNotifications().catch(() => {})
+    setPhase('main')
+    setDevice(null)
+    setLiveHR(null)
+    setLiveHRV(null)
+  }
+
+  if (phase === 'nosupport') return (
+    <div className="dh-modal-body">
+      <div className="dh-modal-icon">⚠️</div>
+      <div className="dh-modal-title">Use Chrome Browser</div>
+      <div className="dh-modal-desc">
+        Web Bluetooth only works in <strong>Google Chrome</strong> on Android or desktop.<br/><br/>
+        Open <strong>arogyos.com</strong> in Chrome and try again.
+      </div>
+      <button className="dh-modal-cta" style={{background:'#2563eb'}} onClick={()=>window.open('https://www.google.com/chrome/','_blank')}>Download Chrome ↗</button>
+      <button style={backBtn} onClick={onClose}>← Back</button>
+    </div>
+  )
+
+  if (phase === 'scanning') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:60,marginBottom:16}}>📶</div>
+      <div className="dh-modal-title">Looking for Devices…</div>
+      <div className="dh-modal-desc">Your browser will show a popup with all nearby Bluetooth devices.<br/>Select your device from the list.</div>
+      <div className="dh-ble-pulse"/>
+    </div>
+  )
+
+  if (phase === 'reading') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:8}}>📡</div>
+      <div className="dh-modal-title" style={{fontSize:16}}>{device?.name}</div>
+      <div className="dh-modal-desc">{msg}</div>
+      {liveHR && (
+        <div style={{margin:'16px 0'}}>
+          <div style={{fontSize:56,fontWeight:800,color:'#dc2626',lineHeight:1}}>{liveHR}</div>
+          <div style={{fontSize:13,color:'#64748b'}}>bpm</div>
+          {liveHRV && <div style={{fontSize:24,fontWeight:700,color:'#0d9488',marginTop:8}}>{liveHRV} ms HRV</div>}
+        </div>
+      )}
+      {!liveHR && <div className="dh-ble-pulse"/>}
+      <button style={backBtn} onClick={stop}>Cancel</button>
+    </div>
+  )
+
+  if (phase === 'done') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:60,marginBottom:12}}>✅</div>
+      <div className="dh-modal-title">{device?.name} Connected!</div>
+      {liveHRV && <div style={{fontSize:28,fontWeight:800,color:'#0d9488',margin:'12px 0'}}>HRV {liveHRV}ms</div>}
+      {liveHR  && <div style={{fontSize:20,fontWeight:700,color:'#dc2626'}}>HR {liveHR} bpm</div>}
+      <div className="dh-modal-desc" style={{marginTop:12}}>Data saved to your account. Pair another device or close.</div>
+      <button className="dh-modal-cta" style={{background:'#2563eb'}} onClick={startScan}>+ Pair Another Device</button>
+      <button style={backBtn} onClick={onClose}>Done</button>
+    </div>
+  )
+
+  if (phase === 'error') return (
+    <div className="dh-modal-body" style={{textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:8}}>⚠️</div>
+      <div className="dh-modal-title">Connection Failed</div>
+      <div className="dh-modal-desc">{msg}</div>
+      <button className="dh-modal-cta" style={{background:'#2563eb'}} onClick={startScan}>Try Again</button>
+      <button style={backBtn} onClick={()=>setPhase('main')}>← Back</button>
+    </div>
+  )
+
+  // main view
+  const paired = Object.values(pairedDevs)
+  return (
+    <div className="dh-modal-body">
+      <div className="dh-modal-icon">📶</div>
+      <div className="dh-modal-title">Bluetooth Devices</div>
+      <div className="dh-modal-desc">Pair any Bluetooth health device directly — no account, no subscription required.</div>
+
+      {paired.length > 0 && (
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:'#475569',marginBottom:8}}>PAIRED DEVICES</div>
+          {paired.map(d => (
+            <div key={d.name} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 12px',background:'#f0fdf4',border:'1.5px solid #86efac',borderRadius:10,marginBottom:6}}>
+              <div>
+                <div style={{fontWeight:700,fontSize:14,color:'#0f172a'}}>{d.name}</div>
+                <div style={{fontSize:11,color:'#64748b'}}>
+                  {d.data?.hrv ? `HRV ${d.data.hrv}ms · ` : ''}
+                  {d.data?.hr  ? `HR ${d.data.hr}bpm · ` : ''}
+                  {d.data?.weight ? `${d.data.weight}kg · ` : ''}
+                  {d.data?.systolic ? `BP ${d.data.systolic}/${d.data.diastolic} · ` : ''}
+                  {d.data?.battery ? `🔋${d.data.battery}%` : ''}
+                </div>
+              </div>
+              <button style={{fontSize:11,color:'#dc2626',background:'none',border:'none',cursor:'pointer'}} onClick={()=>{ removeBLEDevice(d.name); onClose(); }}>Remove</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="dh-modal-list">
+        <div className="dh-ml-item">✅ <strong>Polar H10</strong> — best-in-class HRV accuracy</div>
+        <div className="dh-ml-item">✅ <strong>Wahoo TICKR X</strong> — HRV + running dynamics</div>
+        <div className="dh-ml-item">✅ <strong>Omron BP Monitor</strong> — blood pressure</div>
+        <div className="dh-ml-item">✅ <strong>Withings Body+</strong> — weight + body fat</div>
+        <div className="dh-ml-item">✅ Any BLE heart rate monitor or smart scale</div>
+      </div>
+
+      <button className="dh-modal-cta" style={{background:'#2563eb'}} onClick={startScan}>
+        📶 Scan for Nearby Devices
+      </button>
+      <div className="dh-modal-note">Make sure Bluetooth is on and your device is nearby.<br/>Works in Chrome on Android and desktop only.</div>
+    </div>
+  )
+}
+
 function EpigeneticModal({ onClose, onConnect, nav }) {
   const [view, setView] = useState('main')
   const [f, setF] = useState({bioAge:'',pace:'',lab:''})
@@ -663,6 +879,7 @@ export default function Screen4() {
       case 'cgm':        return <CGMModal        {...p}/>
       case 'abha':       return <AbhaModal       {...p}/>
       case 'scale':      return <ScaleModal      {...p}/>
+      case 'bluetooth':  return <BluetoothModal  {...p}/>
       case 'epigenetic': return <EpigeneticModal {...p}/>
       default: return null
     }
