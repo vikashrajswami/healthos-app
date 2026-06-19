@@ -16,9 +16,9 @@ const PRICING = {
 }
 
 const PADDLE_PRICES = {
-  monthly:  import.meta.env.VITE_PADDLE_PRICE_MONTHLY,
-  halfyear: import.meta.env.VITE_PADDLE_PRICE_HALFYEAR,
-  annual:   import.meta.env.VITE_PADDLE_PRICE_ANNUAL,
+  monthly:  import.meta.env.VITE_PADDLE_PRICE_MONTHLY  || 'pri_01kvfpm2vbdayzq7shd05emeb2',
+  halfyear: import.meta.env.VITE_PADDLE_PRICE_HALFYEAR || 'pri_01kvfpqd1xbz1ddhn6mnnv8kv5',
+  annual:   import.meta.env.VITE_PADDLE_PRICE_ANNUAL   || 'pri_01kvfpswdyf69qeynr269pfjv7',
 }
 const PADDLE_TOKEN = import.meta.env.VITE_PADDLE_TOKEN
 
