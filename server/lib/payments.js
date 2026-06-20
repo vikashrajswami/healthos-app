@@ -69,17 +69,25 @@ export async function saveSubscription(uid, data) {
   if (!sb) return
 
   // Deactivate any old subscriptions for this user first
-  await sb.from('subscriptions').update({ status: 'superseded' }).eq('uid', uid)
+  await sb.from('subscriptions').update({ status: 'superseded' }).eq('uid', uid).neq('status', 'superseded')
 
-  const trialEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+  const status = data.status || 'trialing'
+  // For trialing: period ends in 30 days. For active: calculate from billing cycle.
+  const periodDays = status === 'trialing' ? 30
+    : data.billing_cycle === 'monthly'  ? 30
+    : data.billing_cycle === 'halfyear' ? 182
+    : 365
+  const periodEnd = new Date(Date.now() + periodDays * 24 * 60 * 60 * 1000).toISOString()
+
   await sb.from('subscriptions').insert({
     uid,
-    plan:             'plus',
-    status:           'trialing',
-    trial_ends_at:    trialEnd,
-    current_period_end: trialEnd,
-    updated_at:       new Date().toISOString(),
+    plan:               'plus',
+    status,
+    trial_ends_at:      status === 'trialing' ? periodEnd : null,
+    current_period_end: periodEnd,
+    updated_at:         new Date().toISOString(),
     ...data,
+    status,  // ensure caller's status wins over spread
   })
 }
 
