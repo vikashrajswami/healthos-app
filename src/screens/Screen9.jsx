@@ -99,7 +99,7 @@ export default function Screen9() {
         Secure payment via {isIndia ? 'Razorpay' : 'Paddle'} · PCI-DSS certified
       </div>
 
-      <button className="start-trial-btn" onClick={() => nav('/payment', { state: { region, billing } })}>
+      <button className="start-trial-btn" onClick={() => nav('/checkout', { state: { region, billing } })}>
         Start 30-Day Free Trial →
       </button>
 

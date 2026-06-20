@@ -112,7 +112,7 @@ In an emergency, call your local emergency services (India: 112; USA: 911; UK: 9
 
 BILLING: Subscriptions are billed in advance for the chosen period (monthly or annual). Your subscription automatically renews unless cancelled at least 24 hours before the renewal date.
 
-PAYMENT PROCESSING: Indian users may pay via UPI, credit card, or debit card through Razorpay (a PCI DSS Level 1 certified payment processor). International users may pay via credit or debit card through Stripe (PCI DSS Level 1 certified). AROGYOS does not store full card numbers or CVV/CVC at any point — payment data is processed solely by the payment processor.
+PAYMENT PROCESSING: Indian users may pay via UPI, credit card, or debit card through Razorpay (a PCI DSS Level 1 certified payment processor). International users may pay via credit or debit card through Paddle (a PCI DSS Level 1 certified payment processor and Merchant of Record). AROGYOS does not store full card numbers or CVV/CVC at any point — payment data is processed solely by the payment processor.
 
 REFUND POLICY: Subscriptions cancelled within 7 days of first purchase (and before consuming any doorstep lab service or downloading a report) are eligible for a full refund. No refunds are provided after 7 days or after consumption of included services. Refund requests must be submitted to support@arogyos.com.
 

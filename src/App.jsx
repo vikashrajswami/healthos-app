@@ -76,7 +76,7 @@ const MAIN_PATHS = ['/home', '/trends', '/upload', '/devices', '/protocol']
 // Screens that manage their own full-page header — suppress global TopBar
 const NO_TOPBAR = new Set([
   '/', '/signup', '/signup-preview', '/signup-preview-2', '/signup-preview-3',
-  '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/payment', '/settings',
+  '/smart-panel', '/lab-doorstep', '/vault', '/terms', '/checkout', '/settings',
   '/logo-preview', '/name-preview', '/privacy', '/desktop-preview', '/signup-desktop-preview',
 ])
 
@@ -354,7 +354,8 @@ const ROUTES = (
     <Route path="/signup-preview-3" element={<SignupDesignsPreview3 />} />
     <Route path="/reset"          element={<ResetAndSignup />} />
     <Route path="/terms"          element={<TermsScreen />} />
-    <Route path="/payment"        element={<PaymentScreen />} />
+    <Route path="/checkout"       element={<PaymentScreen />} />
+    <Route path="/payment"        element={<Navigate to="/checkout" replace />} />
     <Route path="/settings"       element={<SettingsScreen />} />
     <Route path="/logo-preview"   element={<LogoPreviewScreen />} />
     <Route path="/name-preview"   element={<NameDesignPreview />} />
