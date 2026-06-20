@@ -5,7 +5,8 @@
     "api/parse-lab.js": { "maxDuration": 60 }
   },
   "redirects": [
-    { "source": "/payment", "destination": "/checkout", "permanent": true }
+    { "source": "/payment",  "destination": "/upgrade", "permanent": true },
+    { "source": "/checkout", "destination": "/upgrade", "permanent": true }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },

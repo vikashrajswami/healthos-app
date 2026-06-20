@@ -330,7 +330,7 @@ export default function SettingsScreen() {
           <Row icon="📋" label="Terms & Conditions"   onClick={() => nav('/terms')}/>
           <Row icon="🔒" label="Privacy Policy"       onClick={() => nav('/privacy')}/>
           <Row icon="📦" label="Download My Data"     value="Export all your health records" onClick={() => alert('Data export will be emailed to you within 24 hours.')}/>
-          <Row icon="💳" label="Subscription & Billing" value="Manage your plan"            onClick={() => nav('/checkout')} last/>
+          <Row icon="💳" label="Subscription & Billing" value="Manage your plan"            onClick={() => nav('/upgrade')} last/>
         </Section>
 
         {/* Notifications */}
