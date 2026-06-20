@@ -33,11 +33,15 @@ export default async function handler(req, res) {
             otp_expiry:  10,
           }),
         })
-        if (smsRes.ok) {
+        const smsBody = await smsRes.text()
+        console.log('[send-otp] MSG91 response:', smsBody)
+        let smsJson = {}
+        try { smsJson = JSON.parse(smsBody) } catch {}
+        // MSG91 returns type:"success" only when SMS was actually queued
+        if (smsRes.ok && smsJson.type === 'success') {
           return res.status(200).json({ ok: true, token, message: 'OTP sent via SMS' })
         }
-        const errText = await smsRes.text()
-        console.error('[send-otp] MSG91 error:', errText)
+        console.error('[send-otp] MSG91 did not deliver — showing OTP on screen:', smsBody)
       } catch (smsErr) {
         console.error('[send-otp] SMS fetch error:', smsErr.message)
       }
