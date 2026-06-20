@@ -11,7 +11,7 @@ function signOtp(contact, otp) {
   const ts  = Date.now()
   const msg = `${contact}:${otp}:${ts}`
   const sig = crypto.createHmac('sha256', SECRET).update(msg).digest('hex')
-  return Buffer.from(JSON.stringify({ contact, otp, ts, sig })).toString('base64url')
+  return Buffer.from(JSON.stringify({ contact, otp, ts, sig })).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
 // ── Email via Resend ──────────────────────────────────────────────────────────

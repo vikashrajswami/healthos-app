@@ -5,7 +5,8 @@ const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
 function verifyToken(token, contact, code) {
   try {
-    const { contact: c, otp, ts, sig } = JSON.parse(Buffer.from(token, 'base64url').toString())
+    const b64 = token.replace(/-/g, '+').replace(/_/g, '/')
+    const { contact: c, otp, ts, sig } = JSON.parse(Buffer.from(b64, 'base64').toString())
     if (c !== contact) return { ok: false, reason: 'contact mismatch' }
     if (otp !== code)  return { ok: false, reason: 'wrong code' }
     if (Date.now() - ts > OTP_TTL_MS) return { ok: false, reason: 'expired' }
