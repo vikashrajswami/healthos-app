@@ -29,11 +29,12 @@ export function getBiomarkerTrends() {
   reports.forEach(report => {
     if (!report.biomarkers?.length) return
     report.biomarkers.forEach(b => {
-      if (!b.name) return
-      const val = parseFloat(b.value)
+      const key = b.canonical || b.name
+      if (!key) return
+      const val = parseFloat(b.stdValue ?? b.value)
       if (isNaN(val)) return
-      if (!trends[b.name]) trends[b.name] = []
-      trends[b.name].push({
+      if (!trends[key]) trends[key] = []
+      trends[key].push({
         date: report.date,
         value: val,
         unit: b.unit || '',

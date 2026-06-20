@@ -1,11 +1,13 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildReport } from '../lib/reportGenerator'
-import { addReport, getAllReports } from '../lib/reportStore'
+import { addReport, getAllReports, getCurrentValues } from '../lib/reportStore'
 import { pushToCloud } from '../lib/sync'
 import { extractRowsFromText, parseLabReport, parseBiomarkerRow } from '../lib/labNormalizer'
 import UpgradeModal from '../components/UpgradeModal'
 import { isPlusMember, getMonthlyUploads, recordUpload } from '../lib/planStatus'
+import { getProfile } from '../lib/userProfile'
+import { calcBioAgeFromBiomarkers, detectConditions, getAyurvedaProfile, INDIAN_REFS } from '../lib/bioage'
 
 
 const ACCEPTED = '.pdf,.jpg,.jpeg,.png,.webp'
@@ -355,6 +357,188 @@ function LabOrderCard({ onOrder }) {
   )
 }
 
+// ── Doctor Share Card ─────────────────────────────────────────────────────────
+function DoctorShareCard() {
+  const [copied, setCopied] = useState(false)
+  const profile  = getProfile()
+  const reports  = getAllReports()
+  const current  = getCurrentValues()
+
+  const summary = useMemo(() => {
+    if (!reports.length) return null
+    const latest = reports[reports.length - 1]
+    const res    = profile?.actualAge && latest.biomarkers?.length
+      ? calcBioAgeFromBiomarkers(profile.actualAge, latest.biomarkers)
+      : null
+    const date   = new Date(latest.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+
+    const lines = ['🧬 *AROGYOS Health Report*', '']
+    if (res) lines.push(`*Biological Age:* ${res.bioage} yrs (Actual: ${profile.actualAge})`)
+    lines.push(`*Tested on:* ${date}`)
+    if (latest.biomarkers?.length) lines.push(`*Biomarkers:* ${latest.biomarkers.length} extracted`)
+    lines.push('')
+    lines.push('*📊 Key Values:*')
+
+    const KEY_MARKERS = ['hsCRP', 'HbA1c', 'LDL', 'HDL', 'Vitamin D', 'B12', 'TSH', 'Creatinine', 'Hemoglobin']
+    for (const name of KEY_MARKERS) {
+      const val = current[name]
+      if (!val) continue
+      const ref = INDIAN_REFS[name]
+      const unit = val.unit || ref?.unit || ''
+      lines.push(`• *${name}:* ${val.value} ${unit} (${val.status || '—'})`)
+    }
+
+    lines.push('')
+    lines.push('_Analysed by AROGYOS — India\'s BioAge Platform_')
+    lines.push('https://healthos-app-two.vercel.app')
+    return lines.join('\n')
+  }, [reports, current, profile])
+
+  if (!summary) return null
+
+  function shareWhatsApp() {
+    const url = 'https://wa.me/?text=' + encodeURIComponent(summary)
+    window.open(url, '_blank', 'noopener')
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(summary)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  return (
+    <div style={{ background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 14, padding: '14px 16px', marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <span style={{ fontSize: 24 }}>👨‍⚕️</span>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Share with Your Doctor</div>
+          <div style={{ fontSize: 11, color: '#64748b' }}>One-tap send your biomarker summary</div>
+        </div>
+      </div>
+
+      {/* Preview */}
+      <div style={{ background: '#f8fafc', borderRadius: 10, padding: '10px 12px', marginBottom: 12, fontSize: 11, color: '#64748b', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 100, overflow: 'hidden', position: 'relative' }}>
+        {summary.slice(0, 280)}…
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 30, background: 'linear-gradient(transparent, #f8fafc)' }} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={shareWhatsApp}
+          style={{ flex: 1, padding: '11px 0', background: '#25D366', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Share on WhatsApp
+        </button>
+        <button
+          onClick={copyLink}
+          style={{ padding: '11px 14px', background: copied ? '#f0fdf4' : '#f1f5f9', color: copied ? '#15803d' : '#64748b', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+        >
+          {copied ? '✓ Copied' : '📋 Copy'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Ayurveda Correlation Section ──────────────────────────────────────────────
+function AyurvedaSection() {
+  const [expanded, setExpanded] = useState(null)
+  const profile  = getProfile()
+  const reports  = getAllReports()
+
+  const { profile: ayurProfiles, conditions } = useMemo(() => {
+    if (!reports.length || !profile?.actualAge) return { profile: [], conditions: {} }
+    const latest = reports[reports.length - 1]
+    const matched = (latest.biomarkers || []).map(bm => {
+      const val = parseFloat(bm.value || bm.stdValue)
+      const name = bm.canonical || bm.name
+      return { canonical: name, value: val }
+    }).filter(m => !isNaN(m.value))
+    const cond = detectConditions(matched)
+    return { profile: getAyurvedaProfile(cond), conditions: cond }
+  }, [reports, profile])
+
+  if (!ayurProfiles.length) {
+    return (
+      <div style={{ background: '#fdf4ff', border: '1.5px solid #e9d5ff', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: 24 }}>🌿</span>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#7c3aed' }}>Ayurveda + Modern Biomarkers</div>
+        </div>
+        <div style={{ fontSize: 12, color: '#6b21a8', lineHeight: 1.6 }}>
+          Upload a lab report to see your Ayurvedic dosha analysis — matched to your biomarkers with clinical evidence for each herb.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>🌿</span> Ayurveda + Biomarker Correlation
+      </div>
+      <div style={{ fontSize: 11, color: '#64748b', marginBottom: 12, lineHeight: 1.5 }}>
+        Your lab markers mapped to Ayurvedic doshas. Each herb below has published clinical evidence.
+      </div>
+
+      {ayurProfiles.map((dosha, di) => (
+        <div key={di} style={{ background: dosha.bg, border: `1.5px solid ${dosha.color}33`, borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
+            <span style={{ fontSize: 28 }}>{dosha.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: dosha.color }}>{dosha.label}</div>
+              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2, lineHeight: 1.4 }}>{dosha.description}</div>
+            </div>
+          </div>
+
+          {/* Affected biomarkers */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
+            {dosha.biomarkers.map(m => (
+              <span key={m} style={{ background: dosha.color + '18', color: dosha.color, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20 }}>{m}</span>
+            ))}
+          </div>
+
+          {/* Herbs */}
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Evidence-Based Herbs</div>
+          {dosha.herbs.map((herb, hi) => (
+            <div key={hi} style={{ background: '#fff', borderRadius: 10, padding: '10px 12px', marginBottom: 8, cursor: 'pointer', borderLeft: `3px solid ${dosha.color}` }}
+              onClick={() => setExpanded(expanded === `${di}-${hi}` ? null : `${di}-${hi}`)}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{herb.icon} {herb.name}</div>
+                <span style={{ background: dosha.color + '18', color: dosha.color, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>{expanded === `${di}-${hi}` ? '▲' : '▼ Evidence'}</span>
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>Dose: {herb.dose}</div>
+              {expanded === `${di}-${hi}` && (
+                <div style={{ marginTop: 8, padding: '8px 10px', background: dosha.bg, borderRadius: 8, fontSize: 11, color: '#374151', lineHeight: 1.6 }}>
+                  📚 {herb.why}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Diet recommendation */}
+          <div style={{ background: dosha.color + '0d', borderRadius: 10, padding: '10px 12px', marginTop: 4 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: dosha.color, marginBottom: 4 }}>🍽️ Dietary Approach</div>
+            <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.5 }}>{dosha.diet}</div>
+          </div>
+        </div>
+      ))}
+
+      <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', lineHeight: 1.5 }}>
+        Always consult a qualified Ayurvedic practitioner. Herbs may interact with medications.
+      </div>
+    </div>
+  )
+}
+
 // ── PDF text extraction — two strategies, best one wins ──────────────────────
 // Strategy A: group by y-coordinate (reading order for table PDFs)
 function pdfItemsToTextPositional(items, yTol = 8) {
@@ -411,7 +595,7 @@ function pdfItemsToText(items) {
 let _tsmod = null
 async function getTesseract() {
   if (!_tsmod) {
-    const m = await import(/* @vite-ignore */ '/tesseract.esm.min.js')
+    const m = await new Function('return import("/tesseract.esm.min.js")')()
     _tsmod = m.default   // ESM build only has a default export
   }
   return _tsmod
@@ -684,6 +868,9 @@ export default function Screen3() {
         </>
       )}
 
+      {/* Doctor sharing — only after first upload */}
+      {hasReport && <DoctorShareCard />}
+
       {/* Health Vault entry banner */}
       <div className="s3-vault-banner" onClick={() => nav('/vault')}>
         <div className="s3-vb-left">
@@ -705,6 +892,9 @@ export default function Screen3() {
 
       {/* Why test section — always visible */}
       <WhyTestSection onBook={() => nav('/lab-doorstep')} />
+
+      {/* Ayurveda correlation — always rendered, biomarker content conditional */}
+      <AyurvedaSection />
 
       {/* Compact lab order card */}
       <LabOrderCard onOrder={() => nav('/lab-doorstep')} />

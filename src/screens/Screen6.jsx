@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { getCurrentValues } from '../lib/reportStore'
+import { detectConditions } from '../lib/bioage'
 
 /* ── Allergen catalogue ── */
 const ALLERGENS = [
@@ -191,6 +193,53 @@ const TABS = [
   { id: 'vegan',       label: '🌱', name: 'Vegan'      },
 ]
 
+/* ── Biomarker personalization banner ── */
+function BiomarkerBanner({ conditions }) {
+  const [open, setOpen] = useState(false)
+
+  const adjustments = []
+  if (conditions.highInflammation)  adjustments.push({ icon: '🔥', label: 'High Inflammation', tip: 'Turmeric + black pepper in every meal. Fatty fish 5×/week. Avoid refined oils.', color: '#dc2626' })
+  if (conditions.highBloodSugar)    adjustments.push({ icon: '🍬', label: 'Blood Sugar Elevated', tip: 'Eat protein before carbs at each meal. Swap white rice → brown rice or barley. 14-hour fast window.', color: '#d97706' })
+  if (conditions.diabetes)          adjustments.push({ icon: '⚠️', label: 'Diabetic Range HbA1c', tip: 'Maximum dietary intervention: no refined carbs, fenugreek seeds soaked overnight daily, bitter melon juice fasting.', color: '#dc2626' })
+  if (conditions.highLDL)           adjustments.push({ icon: '❤️', label: 'LDL Elevated', tip: 'Replace ghee with olive oil for cold use. 30g walnuts daily. 3g plant sterols via fortified foods.', color: '#e11d48' })
+  if (conditions.highTriglycerides) adjustments.push({ icon: '🧴', label: 'High Triglycerides', tip: 'Cut added sugar to <6g/day. Omega-3 (fish or flaxseed). Limit fruit juice and fruit to 2 servings/day.', color: '#d97706' })
+  if (conditions.lowVitD)           adjustments.push({ icon: '☀️', label: 'Vitamin D Deficient', tip: 'Fatty fish 5×/week or supplement 2,000–4,000 IU/day with K2. 20 mins sunlight exposure before 10 AM.', color: '#7c3aed' })
+  if (conditions.lowB12)            adjustments.push({ icon: '💊', label: 'B12 Low', tip: 'Eggs + dairy daily for non-vegan. Vegans: supplement 1,000 mcg methylcobalamin + nutritional yeast.', color: '#7c3aed' })
+  if (conditions.anemia)            adjustments.push({ icon: '🩸', label: 'Low Hemoglobin', tip: 'Spinach + lemon (vitamin C triples iron absorption). Avoid tea/coffee 1 hr before/after meals. Rajma, masoor dal daily.', color: '#dc2626' })
+  if (conditions.liverStress)       adjustments.push({ icon: '🟤', label: 'Liver Enzymes Elevated', tip: 'Zero alcohol. Coffee 2 cups/day reduces ALT. Cruciferous vegetables (broccoli, cauliflower) daily.', color: '#b45309' })
+  if (conditions.kidneyStress)      adjustments.push({ icon: '🔵', label: 'Kidney Stress', tip: 'Limit protein to 0.8g/kg body weight. Reduce sodium. Avoid creatine supplements. Increase water to 2.5–3L/day.', color: '#0284c7' })
+
+  if (!adjustments.length) return null
+
+  return (
+    <div style={{ background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: open ? 12 : 0 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#15803d' }}>
+            🧬 Personalised for your biomarkers
+          </div>
+          <div style={{ fontSize: 11, color: '#166534', marginTop: 2 }}>
+            {adjustments.length} condition{adjustments.length > 1 ? 's' : ''} detected · dietary adjustments applied
+          </div>
+        </div>
+        <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', color: '#15803d', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: '4px 8px' }}>
+          {open ? '▲ Hide' : '▼ View'}
+        </button>
+      </div>
+      {open && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {adjustments.map((a, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '10px 12px', borderLeft: `3px solid ${a.color}` }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>{a.icon} {a.label}</div>
+              <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{a.tip}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Allergy gate ── */
 function AllergyGate({ onSubmit }) {
   const [selected, setSelected] = useState(new Set())
@@ -259,7 +308,20 @@ function AllergyGate({ onSubmit }) {
 export default function Screen6() {
   const [submitted,   setSubmitted]   = useState(false)
   const [allergenIds, setAllergenIds] = useState([])
-  const [diet,        setDiet]        = useState('veg')
+
+  const currentBiomarkers = useMemo(() => getCurrentValues(), [])
+  const conditions = useMemo(() => {
+    const vals = Object.entries(currentBiomarkers).map(([name, d]) => ({ canonical: name, ...d }))
+    return detectConditions(vals)
+  }, [currentBiomarkers])
+
+  // Auto-suggest diet based on conditions
+  const suggestedDiet = useMemo(() => {
+    if (conditions.diabetes || conditions.highBloodSugar) return 'veg'
+    return 'veg'
+  }, [conditions])
+
+  const [diet, setDiet] = useState(suggestedDiet)
 
   function handleSubmit(ids) {
     setAllergenIds(ids)
@@ -283,6 +345,9 @@ export default function Screen6() {
   return (
     <div className="screen">
       <button className="nav-back">← Your Diet Plan</button>
+
+      {/* Biomarker personalization */}
+      <BiomarkerBanner conditions={conditions} />
 
       {/* Allergy summary bar */}
       <div className="allergy-bar">
