@@ -93,7 +93,7 @@ async function handleRazorpay(req, res) {
   if (!uid) return res.json({ received: true, skipped: 'no uid in notes' })
 
   if (event === 'payment.captured') {
-    // First-time capture → user just started their trial
+    // First-time capture → trial starts (no recurring charge yet)
     await saveSubscription(uid, {
       region:           notes.region  || 'india',
       billing_cycle:    notes.billing || 'annual',
@@ -104,8 +104,8 @@ async function handleRazorpay(req, res) {
       currency:         payment.currency,
       status:           'trialing',
     })
-  } else if (event === 'payment.captured' || event === 'subscription.charged') {
-    // Recurring charge after trial → subscription is now fully active
+  } else if (event === 'subscription.charged') {
+    // Recurring charge after trial → now fully active
     await saveSubscription(uid, {
       region:           notes.region  || 'india',
       billing_cycle:    notes.billing || 'annual',

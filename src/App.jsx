@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import './styles/global.css'
 import Logo from './components/Logo'
 import { LangProvider, useT } from './lib/i18n'
-import { isPlusMember } from './lib/planStatus'
+import { isPlusMember, syncSubscriptionStatus } from './lib/planStatus'
 import RatingPrompt from './components/RatingPrompt'
 import { recordAppOpen, daysSinceFirstOpen, hasRatingPromptBeenShown } from './lib/insights'
 import { registerDailySync } from './lib/notifications'
@@ -374,7 +374,10 @@ function AppShell({ theme, setTheme }) {
   useEffect(() => {
     recordAppOpen()
     registerDailySync()
-    if (localStorage.getItem('healthos_uid')) pushToCloud()
+    if (localStorage.getItem('healthos_uid')) {
+      pushToCloud()
+      syncSubscriptionStatus()  // silently sync plan status from server
+    }
     const quizDone = !!localStorage.getItem('healthos_profile') &&
       JSON.parse(localStorage.getItem('healthos_profile') || '{}').quizDone
     if (quizDone && daysSinceFirstOpen() >= 7 && !hasRatingPromptBeenShown()) {

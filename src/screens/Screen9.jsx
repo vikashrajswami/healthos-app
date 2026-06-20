@@ -96,7 +96,7 @@ export default function Screen9() {
 
       <div className="fine-print">
         🔒 Free for 30 days · then {p.price}{p.period} · billed automatically unless cancelled ·
-        Secure payment via {isIndia ? 'Razorpay' : 'Stripe'} · PCI-DSS certified
+        Secure payment via {isIndia ? 'Razorpay' : 'Paddle'} · PCI-DSS certified
       </div>
 
       <button className="start-trial-btn" onClick={() => nav('/payment', { state: { region, billing } })}>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { setPlusMember } from '../lib/planStatus'
 
@@ -38,9 +38,21 @@ function loadScript(src) {
     const s = document.createElement('script')
     s.src = src
     s.onload = resolve
-    s.onerror = reject
+    s.onerror = () => reject(new Error('Failed to load payment SDK. Check your internet connection.'))
     document.head.appendChild(s)
   })
+}
+
+// Safe fetch wrapper — always returns {ok, data, error}
+async function safeFetch(url, opts) {
+  try {
+    const res = await fetch(url, opts)
+    let data = {}
+    try { data = await res.json() } catch { data = { error: `Server error (${res.status})` } }
+    return { ok: res.ok, data }
+  } catch (e) {
+    return { ok: false, data: { error: e.message || 'Network error. Please try again.' } }
+  }
 }
 
 function getUid() {
@@ -50,10 +62,9 @@ function getUid() {
 export default function PaymentScreen() {
   const nav      = useNavigate()
   const location = useLocation()
+  const st       = location.state || {}
 
-  const st = location.state || {}
-
-  // Auto-detect region from timezone — India = INR, everything else = USD
+  // Auto-detect region from timezone
   const detectedRegion = (() => {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -63,15 +74,14 @@ export default function PaymentScreen() {
 
   const [region,  setRegion]  = useState(st.region  || detectedRegion)
   const [billing, setBilling] = useState(st.billing || 'annual')
-
-  const plan = PRICING[region][billing]
-  const isIN = region === 'india'
-
   const [step,    setStep]    = useState('form')
   const [err,     setErr]     = useState('')
   const [loading, setLoading] = useState(false)
 
-  // ── India: Razorpay checkout ────────────────────────────────────────────────
+  const plan = PRICING[region][billing]
+  const isIN = region === 'india'
+
+  // ── India: Razorpay ──────────────────────────────────────────────────────────
   async function payWithRazorpay() {
     setErr('')
     setLoading(true)
@@ -79,18 +89,19 @@ export default function PaymentScreen() {
       const uid = getUid()
 
       // 1. Create order on server
-      const orderRes = await fetch('/api/payment-order', {
-        method: 'POST',
+      const { ok: orderOk, data: orderData } = await safeFetch('/api/payment-order', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, billing, region }),
+        body:    JSON.stringify({ uid, billing, region }),
       })
-      const { orderId, amount, currency, keyId, error: orderErr } = await orderRes.json()
-      if (orderErr) throw new Error(orderErr)
+      if (!orderOk || orderData.error) throw new Error(orderData.error || 'Could not create order')
+      const { orderId, amount, currency, keyId } = orderData
 
       // 2. Load Razorpay SDK
       await loadScript('https://checkout.razorpay.com/v1/checkout.js')
+      if (!window.Razorpay) throw new Error('Payment SDK failed to load')
 
-      // 3. Open Razorpay checkout modal
+      // 3. Open Razorpay modal
       const rzp = new window.Razorpay({
         key:         keyId,
         order_id:    orderId,
@@ -100,21 +111,25 @@ export default function PaymentScreen() {
         description: 'AROGYOS Plus — 30-day free trial',
         image:       '/logo192.png',
         handler: async (resp) => {
-          // 4. Verify on server + store subscription
-          const verifyRes = await fetch('/api/payment-verify', {
-            method: 'POST',
+          // 4. Verify on server
+          const { ok: vOk, data: vData } = await safeFetch('/api/payment-verify', {
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            body:    JSON.stringify({
               razorpay_order_id:   resp.razorpay_order_id,
               razorpay_payment_id: resp.razorpay_payment_id,
               razorpay_signature:  resp.razorpay_signature,
               uid, billing, region, amount, currency,
             }),
           })
-          const { success, error: verifyErr } = await verifyRes.json()
-          if (!success) { setErr(verifyErr || 'Verification failed'); setLoading(false); return }
+          if (!vOk || !vData.success) {
+            setErr(vData.error || 'Payment verification failed. Contact support@arogyos.com')
+            setLoading(false)
+            return
+          }
           setPlusMember()
           setStep('success')
+          setLoading(false)
         },
         modal: {
           ondismiss: () => { setLoading(false) },
@@ -122,52 +137,65 @@ export default function PaymentScreen() {
         theme: { color: '#14b8a6' },
       })
       rzp.on('payment.failed', (resp) => {
-        setErr(resp.error?.description || 'Payment failed. Please try again.')
+        setErr(resp.error?.description || 'Payment failed. Please try another method.')
         setLoading(false)
       })
       rzp.open()
     } catch (e) {
-      setErr(e.message || 'Could not initiate payment. Please try again.')
+      setErr(e.message || 'Could not start payment. Please try again.')
       setLoading(false)
     }
   }
 
-  // ── International: Paddle Billing v2 ─────────────────────────────────────
+  // ── International: Paddle ────────────────────────────────────────────────────
   async function payWithPaddle() {
     setErr('')
     setLoading(true)
     try {
       const uid     = getUid()
       const priceId = PADDLE_PRICES[billing]
-      if (!priceId || !PADDLE_TOKEN) throw new Error('International payments not configured yet')
+
+      if (!PADDLE_TOKEN) throw new Error('International payments are temporarily unavailable. Please use INR or contact support.')
+      if (!priceId)      throw new Error('Invalid plan selected. Please refresh and try again.')
 
       await loadScript('https://cdn.paddle.com/paddle/v2/paddle.js')
+      if (!window.Paddle) throw new Error('Payment SDK failed to load')
 
-      window.Paddle.Initialize({
-        token: PADDLE_TOKEN,
-        eventCallback(data) {
-          if (data.name === 'checkout.completed') {
-            setPlusMember()
-            setStep('success')
-          }
-          if (data.name === 'checkout.closed') {
-            setLoading(false)
-          }
-        },
-      })
+      // Initialize once per page session — re-calling Initialize throws
+      if (!window._paddleInitialized) {
+        window.Paddle.Initialize({
+          token: PADDLE_TOKEN,
+          eventCallback(data) {
+            if (data.name === 'checkout.completed') {
+              setPlusMember()
+              setStep('success')
+              setLoading(false)
+            }
+            if (data.name === 'checkout.closed') {
+              setLoading(false)
+            }
+            if (data.name === 'checkout.error') {
+              setErr('Payment error. Please try again or use a different card.')
+              setLoading(false)
+            }
+          },
+        })
+        window._paddleInitialized = true
+      }
 
       window.Paddle.Checkout.open({
         items:      [{ priceId, quantity: 1 }],
         customData: { uid, billing, region },
       })
     } catch (e) {
-      setErr(e.message || 'Could not initiate payment. Please try again.')
+      setErr(e.message || 'Could not start payment. Please try again.')
       setLoading(false)
     }
   }
 
   const handlePay = isIN ? payWithRazorpay : payWithPaddle
 
+  // ── Success screen ───────────────────────────────────────────────────────────
   if (step === 'success') return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
       <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg,#14b8a6,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, marginBottom: 24, color: '#fff', fontWeight: 800 }}>✓</div>
@@ -183,6 +211,7 @@ export default function PaymentScreen() {
     </div>
   )
 
+  // ── Payment form ─────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: 'system-ui,-apple-system,sans-serif' }}>
 
@@ -264,7 +293,7 @@ export default function PaymentScreen() {
           </div>
         </div>
 
-        {/* Pay button */}
+        {/* Pay section */}
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', padding: '22px 18px', marginBottom: 18 }}>
           {isIN ? (
             <>
@@ -280,23 +309,23 @@ export default function PaymentScreen() {
           ) : (
             <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center', marginBottom: 16, lineHeight: 1.5 }}>
               Pay securely via <strong>Paddle</strong> — all major cards, PayPal, local methods.<br/>
-              <span style={{ fontSize: 11, color: '#94a3b8' }}>All taxes handled automatically for your country</span>
+              <span style={{ fontSize: 11, color: '#94a3b8' }}>All taxes calculated and handled for your country</span>
             </div>
           )}
 
           {err && (
-            <div style={{ fontSize: 13, color: '#ef4444', marginBottom: 14, fontWeight: 600, textAlign: 'center' }}>⚠ {err}</div>
+            <div style={{ fontSize: 13, color: '#ef4444', marginBottom: 14, fontWeight: 600, textAlign: 'center', background: '#fef2f2', padding: '10px 14px', borderRadius: 10 }}>⚠ {err}</div>
           )}
 
           <button onClick={handlePay} disabled={loading} style={{
             width: '100%', padding: 17,
-            background: 'linear-gradient(90deg,#14b8a6,#059669)',
+            background: loading ? '#94a3b8' : 'linear-gradient(90deg,#14b8a6,#059669)',
             color: '#fff', border: 'none', borderRadius: 13, fontSize: 16, fontWeight: 800,
-            cursor: loading ? 'wait' : 'pointer',
-            boxShadow: '0 6px 24px rgba(20,184,166,0.35)',
-            opacity: loading ? .7 : 1, transition: 'opacity .15s',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            boxShadow: loading ? 'none' : '0 6px 24px rgba(20,184,166,0.35)',
+            transition: 'all .15s',
           }}>
-            {loading ? 'Opening payment…' : `Start 30-Day Free Trial · ${plan.price}${plan.period}`}
+            {loading ? '⏳ Opening payment…' : `Start 30-Day Free Trial · ${plan.price}${plan.period}`}
           </button>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
