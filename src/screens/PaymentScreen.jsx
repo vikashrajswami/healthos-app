@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { setPlusMember } from '../lib/planStatus'
 
@@ -78,6 +78,9 @@ export default function PaymentScreen() {
   const [err,     setErr]     = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Paddle init is per-mount so state setters are always fresh (not stale closures)
+  const paddleReady = useRef(false)
+
   const plan = PRICING[region][billing]
   const isIN = region === 'india'
 
@@ -155,15 +158,26 @@ export default function PaymentScreen() {
       const uid     = getUid()
       const priceId = PADDLE_PRICES[billing]
 
-      if (!PADDLE_TOKEN) throw new Error('International payments are temporarily unavailable. Please use INR or contact support.')
-      if (!priceId)      throw new Error('Invalid plan selected. Please refresh and try again.')
+      if (!PADDLE_TOKEN) {
+        throw new Error('International payments are not configured. Please contact support@arogyos.com or switch to INR.')
+      }
+      if (!priceId) throw new Error('Invalid plan. Please refresh and try again.')
 
       await loadScript('https://cdn.paddle.com/paddle/v2/paddle.js')
-      if (!window.Paddle) throw new Error('Payment SDK failed to load')
 
-      // Initialize once per page session — re-calling Initialize throws
-      if (!window._paddleInitialized) {
-        window.Paddle.Initialize({
+      // Wait up to 3s for Paddle global to be ready after script load
+      let attempts = 0
+      while (!window.Paddle && attempts < 30) {
+        await new Promise(r => setTimeout(r, 100))
+        attempts++
+      }
+      if (!window.Paddle) throw new Error('Paddle SDK failed to load. Check your internet connection.')
+
+      // Initialize once per component mount — use ref so each mount gets fresh
+      // state setters (avoids stale closure when user navigates away and back)
+      if (!paddleReady.current) {
+        const isSandbox = PADDLE_TOKEN.startsWith('test_')
+        const initConfig = {
           token: PADDLE_TOKEN,
           eventCallback(data) {
             if (data.name === 'checkout.completed') {
@@ -179,13 +193,20 @@ export default function PaymentScreen() {
               setLoading(false)
             }
           },
-        })
-        window._paddleInitialized = true
+        }
+        if (isSandbox) initConfig.environment = 'sandbox'
+        window.Paddle.Initialize(initConfig)
+        paddleReady.current = true
       }
 
       window.Paddle.Checkout.open({
         items:      [{ priceId, quantity: 1 }],
-        customData: { uid, billing, region },
+        customData: { uid, billing },
+        settings: {
+          displayMode: 'overlay',
+          theme:       'light',
+          locale:      'en',
+        },
       })
     } catch (e) {
       setErr(e.message || 'Could not start payment. Please try again.')
