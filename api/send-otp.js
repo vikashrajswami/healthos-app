@@ -37,11 +37,12 @@ export default async function handler(req, res) {
         console.log('[send-otp] MSG91 response:', smsBody)
         let smsJson = {}
         try { smsJson = JSON.parse(smsBody) } catch {}
-        // MSG91 returns type:"success" only when SMS was actually queued
+        // MSG91 accepts the request but DLT approval needed for actual delivery
+        // Always include dev_otp until DLT is confirmed working
         if (smsRes.ok && smsJson.type === 'success') {
-          return res.status(200).json({ ok: true, token, message: 'OTP sent via SMS' })
+          return res.status(200).json({ ok: true, token, dev_otp: otp, message: 'OTP sent via SMS — also shown below until DLT approved' })
         }
-        console.error('[send-otp] MSG91 did not deliver — showing OTP on screen:', smsBody)
+        console.error('[send-otp] MSG91 error — showing OTP on screen:', smsBody)
       } catch (smsErr) {
         console.error('[send-otp] SMS fetch error:', smsErr.message)
       }
