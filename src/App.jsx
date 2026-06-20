@@ -44,6 +44,7 @@ const SettingsScreen       = lazy(() => import('./screens/SettingsScreen'))
 const LogoPreviewScreen    = lazy(() => import('./screens/LogoPreviewScreen'))
 const NameDesignPreview    = lazy(() => import('./screens/NameDesignPreview'))
 const PrivacyScreen        = lazy(() => import('./screens/PrivacyScreen'))
+const DailyHubScreen       = lazy(() => import('./screens/DailyHubScreen'))
 
 function PageLoader() {
   return (
@@ -62,7 +63,7 @@ const THEMES = [
 const S = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }
 
 const ICONS = {
-  home:     <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M3 11L12 3l9 8v10h-5v-6h-8v6H3z"/></svg>,
+  home:     <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M12 2C12 2 7 8 7 13a5 5 0 0 0 10 0c0-5-5-11-5-11z"/><circle cx="12" cy="13" r="2" fill="currentColor" stroke="none"/></svg>,
   trends:   <svg width="22" height="22" viewBox="0 0 24 24" {...S}><polyline points="3,18 9,11 13,15 21,6"/><line x1="3" y1="21" x2="21" y2="21"/></svg>,
   reports:  <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>,
   devices:  <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="7" y="7" width="10" height="10" rx="2.5"/><path d="M9 7V5h6v2"/><path d="M9 17v2h6v-2"/><polyline points="11.5,11 11.5,12.5 13,12.5"/></svg>,
@@ -334,7 +335,8 @@ const ROUTES = (
   <>
     <Route path="/"               element={<SignupScreen />} />
     <Route path="/signup"         element={<SignupScreen />} />
-    <Route path="/home"           element={<Screen1 />} />
+    <Route path="/home"           element={<DailyHubScreen />} />
+    <Route path="/home-classic"   element={<Screen1 />} />
     <Route path="/trends"         element={<Screen2 />} />
     <Route path="/upload"         element={<Screen3 />} />
     <Route path="/devices"        element={<Screen4 />} />
@@ -359,6 +361,7 @@ const ROUTES = (
     <Route path="/privacy"          element={<PrivacyScreen />} />
     <Route path="/desktop-preview"       element={<DesktopDesignPreview />} />
     <Route path="/signup-desktop-preview" element={<SignupDesktopPreview />} />
+    <Route path="/daily"             element={<DailyHubScreen />} />
   </>
 )
 

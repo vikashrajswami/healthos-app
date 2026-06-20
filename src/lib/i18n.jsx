@@ -26,7 +26,7 @@ export const LANGUAGES = [
 // ── Translation strings ────────────────────────────────────────────────────────
 const T = {
   // Navigation
-  home:        { en:'Home',      hi:'होम',       zh:'主页',     es:'Inicio',   ar:'الرئيسية', fr:'Accueil',  bn:'হোম',      pt:'Início',   ru:'Главная',  ur:'ہوم',      id:'Beranda',  de:'Start',    ja:'ホーム',    tr:'Ana Sayfa',ko:'홈',       ta:'முகப்பு',  mr:'मुख्यपृष्ठ',it:'Home',    te:'హోమ్',     th:'หน้าแรก' },
+  home:        { en:'Today',     hi:'आज',        zh:'今天',     es:'Hoy',      ar:'اليوم',    fr:"Aujourd'hui",bn:'আজ',      pt:'Hoje',     ru:'Сегодня',  ur:'آج',       id:'Hari ini', de:'Heute',    ja:'今日',      tr:'Bugün',    ko:'오늘',     ta:'இன்று',    mr:'आज',       it:'Oggi',    te:'నేడు',     th:'วันนี้' },
   trends:      { en:'Trends',    hi:'ट्रेंड्स',  zh:'趋势',     es:'Tendencias',ar:'الاتجاهات',fr:'Tendances',bn:'ট্রেন্ড',  pt:'Tendências',ru:'Тренды',  ur:'رجحانات',  id:'Tren',     de:'Trends',   ja:'トレンド',  tr:'Eğilimler',ko:'트렌드',   ta:'போக்குகள்',mr:'ट्रेंड्स', it:'Tendenze', te:'ట్రెండ్స్', th:'แนวโน้ม' },
   reports:     { en:'Reports',   hi:'रिपोर्ट',   zh:'报告',     es:'Informes', ar:'التقارير', fr:'Rapports', bn:'রিপোর্ট',  pt:'Relatórios',ru:'Отчёты',  ur:'رپورٹیں',  id:'Laporan',  de:'Berichte', ja:'レポート',  tr:'Raporlar', ko:'보고서',   ta:'அறிக்கைகள்',mr:'अहवाल',  it:'Rapporti', te:'నివేదికలు',th:'รายงาน' },
   devices:     { en:'Devices',   hi:'डिवाइस',   zh:'设备',     es:'Dispositivos',ar:'الأجهزة',fr:'Appareils',bn:'ডিভাইস',  pt:'Dispositivos',ru:'Устройства',ur:'آلات',   id:'Perangkat',de:'Geräte',   ja:'デバイス',  tr:'Cihazlar', ko:'기기',     ta:'சாதனங்கள்',mr:'उपकरणे',  it:'Dispositivi',te:'పరికరాలు',th:'อุปกรณ์' },
