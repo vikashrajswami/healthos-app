@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect } from 'react'
+import { useState, lazy, Suspense, useEffect, Component } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import './styles/global.css'
 import Logo from './components/Logo'
@@ -52,6 +52,30 @@ function PageLoader() {
       Loading…
     </div>
   )
+}
+
+class AppErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { crashed: false } }
+  static getDerivedStateFromError() { return { crashed: true } }
+  componentDidCatch(err) {
+    // Auto-reload on chunk load failures (stale deploy cache)
+    if (err?.name === 'ChunkLoadError' || /Loading chunk|Failed to fetch dynamically imported module/.test(err?.message || '')) {
+      window.location.reload()
+    }
+  }
+  render() {
+    if (!this.state.crashed) return this.props.children
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100vh', background:'#fff', gap:16, padding:24, textAlign:'center' }}>
+        <span style={{ fontSize:40 }}>⚠️</span>
+        <div style={{ fontSize:18, fontWeight:700, color:'#0f172a' }}>Something went wrong</div>
+        <div style={{ fontSize:14, color:'#64748b' }}>Tap below to reload the app</div>
+        <button onClick={() => window.location.reload()} style={{ background:'#14b8a6', color:'#fff', border:'none', borderRadius:12, padding:'12px 28px', fontSize:15, fontWeight:700, cursor:'pointer' }}>
+          Reload
+        </button>
+      </div>
+    )
+  }
 }
 
 const THEMES = [
@@ -415,10 +439,12 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('healthos_theme') || 'teal')
   function setAndSaveTheme(t) { setTheme(t); localStorage.setItem('healthos_theme', t) }
   return (
-    <LangProvider>
-      <BrowserRouter>
-        <AppShell theme={theme} setTheme={setAndSaveTheme}/>
-      </BrowserRouter>
-    </LangProvider>
+    <AppErrorBoundary>
+      <LangProvider>
+        <BrowserRouter>
+          <AppShell theme={theme} setTheme={setAndSaveTheme}/>
+        </BrowserRouter>
+      </LangProvider>
+    </AppErrorBoundary>
   )
 }
