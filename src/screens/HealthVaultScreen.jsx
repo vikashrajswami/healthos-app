@@ -98,7 +98,7 @@ function RecordsTab({ reports, onDelete, onAdd }) {
   return (
     <div className="hv-records">
       {reports.map(r => {
-        const flagged = (r.biomarkers || []).filter(b => b.status && b.status !== 'NORMAL')
+        const flagged = (r.biomarkers || []).filter(b => { const s = b.status || b.flag; return s && s !== 'NORMAL' })
         const isOpen  = expanded === r.id
         return (
           <div key={r.id} className="hv-report-card">
@@ -124,27 +124,38 @@ function RecordsTab({ reports, onDelete, onAdd }) {
 
             {flagged.length > 0 && !isOpen && (
               <div className="hv-rc-flags">
-                {flagged.slice(0, 3).map(b => (
-                  <span key={b.name} className="hv-flag-chip" style={{ color: STATUS_COLOR[b.status] || '#64748b', background: `${STATUS_COLOR[b.status]}14` }}>
-                    {STATUS_ICON[b.status]} {b.name}: {b.value} {b.unit}
-                  </span>
-                ))}
+                {flagged.slice(0, 3).map(b => {
+                  const nm = b.name || b.canonical || '—'
+                  const st = b.status || b.flag || ''
+                  return (
+                    <span key={nm} className="hv-flag-chip" style={{ color: STATUS_COLOR[st] || '#64748b', background: `${STATUS_COLOR[st]}14` }}>
+                      {STATUS_ICON[st]} {nm}: {b.value ?? b.stdValue} {b.unit || b.stdUnit || ''}
+                    </span>
+                  )
+                })}
                 {flagged.length > 3 && <span className="hv-flag-more">+{flagged.length - 3} more</span>}
               </div>
             )}
 
             {isOpen && r.biomarkers?.length > 0 && (
               <div className="hv-bio-table">
-                {r.biomarkers.map(b => (
-                  <div key={b.name} className="hv-bio-row">
-                    <div className="hv-bio-name">{b.name}</div>
-                    <div className="hv-bio-val">{b.value}<span className="hv-bio-unit"> {b.unit}</span></div>
-                    <div className="hv-bio-status" style={{ color: STATUS_COLOR[b.status] || '#94a3b8' }}>
-                      {STATUS_ICON[b.status] || '·'} {b.status || '—'}
+                {r.biomarkers.map(b => {
+                  const nm  = b.name || b.canonical || '—'
+                  const val = b.value ?? b.stdValue ?? '—'
+                  const unt = b.unit || b.stdUnit || ''
+                  const st  = b.status || b.flag || ''
+                  const nr  = b.normalRange || (b.ref ? `${b.ref.low}–${b.ref.high}` : '')
+                  return (
+                    <div key={nm} className="hv-bio-row">
+                      <div className="hv-bio-name">{nm}</div>
+                      <div className="hv-bio-val">{val}<span className="hv-bio-unit"> {unt}</span></div>
+                      <div className="hv-bio-status" style={{ color: STATUS_COLOR[st] || '#94a3b8' }}>
+                        {STATUS_ICON[st] || '·'} {st || '—'}
+                      </div>
+                      <div className="hv-bio-range">{nr}</div>
                     </div>
-                    <div className="hv-bio-range">{b.normalRange || ''}</div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 
@@ -423,7 +434,7 @@ export default function HealthVaultScreen() {
 
   const totalBiomarkers = useMemo(() => {
     const names = new Set()
-    reports.forEach(r => r.biomarkers?.forEach(b => names.add(b.name)))
+    reports.forEach(r => r.biomarkers?.forEach(b => names.add(b.name || b.canonical)))
     return names.size
   }, [reports])
 

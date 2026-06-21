@@ -4,6 +4,24 @@ export function getAllReports() {
   try { return JSON.parse(localStorage.getItem(KEY) || '[]') } catch { return [] }
 }
 
+function normalizeBiomarker(b) {
+  // Already in display format
+  if (b.name) return b
+  // Convert from labNormalizer format (canonical, stdValue, stdUnit, flag, ref)
+  const normalRange = b.normalRange
+    || (b.ref ? `${b.ref.low}–${b.ref.high} ${b.stdUnit || ''}`.trim() : '')
+  return {
+    name:        b.canonical || b.biomarkerId || 'Unknown',
+    value:       b.stdValue ?? b.rawValue,
+    unit:        b.stdUnit  || b.rawUnit || '',
+    status:      b.flag     || 'NORMAL',
+    normalRange,
+    canonical:   b.canonical,
+    category:    b.category,
+    icon:        b.icon,
+  }
+}
+
 export function addReport(report) {
   const existing = getAllReports()
   const entry = {
@@ -11,6 +29,7 @@ export function addReport(report) {
     date: report.date || new Date().toISOString().split('T')[0],
     addedAt: new Date().toISOString(),
     ...report,
+    biomarkers: (report.biomarkers || []).map(normalizeBiomarker),
   }
   const updated = [entry, ...existing]
   try { localStorage.setItem(KEY, JSON.stringify(updated)) } catch {}
@@ -29,7 +48,7 @@ export function getBiomarkerTrends() {
   reports.forEach(report => {
     if (!report.biomarkers?.length) return
     report.biomarkers.forEach(b => {
-      const key = b.canonical || b.name
+      const key = b.name || b.canonical
       if (!key) return
       const val = parseFloat(b.stdValue ?? b.value)
       if (isNaN(val)) return
@@ -37,9 +56,9 @@ export function getBiomarkerTrends() {
       trends[key].push({
         date: report.date,
         value: val,
-        unit: b.unit || '',
-        status: b.status || '',
-        normalRange: b.normalRange || '',
+        unit: b.unit || b.stdUnit || b.rawUnit || '',
+        status: b.status || b.flag || '',
+        normalRange: b.normalRange || (b.ref ? `${b.ref.low}–${b.ref.high}` : ''),
         reportId: report.id,
       })
     })
