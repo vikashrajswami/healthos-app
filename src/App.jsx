@@ -156,19 +156,8 @@ function TopBar({ theme, setTheme }) {
         {!isMain && <Logo size={28}/>}
       </div>
 
-      {/* Right: theme dots + plus button + settings (mobile only) */}
+      {/* Right: plus button + settings (mobile only) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', gap: 5 }}>
-          {THEMES.map(th => (
-            <button key={th.id} onClick={() => setTheme(th.id)} style={{
-              width: 18, height: 18, borderRadius: '50%', background: th.dot,
-              border: theme === th.id ? '2.5px solid #0f172a' : '2.5px solid transparent',
-              cursor: 'pointer', padding: 0, outline: 'none',
-              transform: theme === th.id ? 'scale(1.2)' : 'scale(1)',
-              transition: 'all .15s',
-            }}/>
-          ))}
-        </div>
         {!isPlusMember() && (
           <button onClick={() => nav('/subscribe')} style={{
             background: 'linear-gradient(90deg,#14b8a6,#059669)',

@@ -325,30 +325,12 @@ export default function SignupScreen() {
               <div style={{ fontSize: 9, color: A, fontWeight: 700, letterSpacing: 2 }}>INTELLIGENCE</div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '6px 10px', border: '1px solid rgba(255,255,255,0.08)' }}>
-            {APP_THEMES.map(t => (
-              <button key={t.id} onClick={() => setTid(t.id)} title={t.label} style={{
-                width: 22, height: 22, borderRadius: '50%', background: t.dot, border: 'none', cursor: 'pointer',
-                outline: tid === t.id ? `2.5px solid #fff` : '2.5px solid transparent',
-                outlineOffset: 2, transform: tid === t.id ? 'scale(1.2)' : 'scale(1)', transition: 'all .15s',
-              }}/>
-            ))}
-          </div>
         </div>
       )}
 
       {/* Desktop header inside right panel */}
       {isDesktop && st === 'form' && (
         <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
-            {APP_THEMES.map(t => (
-              <button key={t.id} onClick={() => setTid(t.id)} title={t.label} style={{
-                width: 20, height: 20, borderRadius: '50%', background: t.dot, border: 'none', cursor: 'pointer',
-                outline: tid === t.id ? `2.5px solid #0f172a` : '2.5px solid transparent',
-                outlineOffset: 2, transform: tid === t.id ? 'scale(1.2)' : 'scale(1)', transition: 'all .15s',
-              }}/>
-            ))}
-          </div>
           <div style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, marginBottom: 10 }}>Get started free</div>
           <div style={{ fontSize: 14, color: '#64748b', lineHeight: 1.7 }}>
             Enter your number to receive an OTP.<br/>No email required. No credit card.
