@@ -1,4 +1,4 @@
-const CACHE = 'arogyos-v11'
+const CACHE = 'arogyos-v12'
 
 self.addEventListener('install', e => {
   self.skipWaiting()
