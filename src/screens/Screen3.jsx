@@ -644,7 +644,7 @@ export default function Screen3() {
             reader.onload = e => resolve(e.target.result.split(',')[1])
             reader.readAsDataURL(file)
           })
-          upd('Analysing with server…')
+          upd('Loading......')
           const resp = await fetch('/api/parse-lab', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
