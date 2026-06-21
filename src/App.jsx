@@ -8,6 +8,9 @@ import RatingPrompt from './components/RatingPrompt'
 import { recordAppOpen, daysSinceFirstOpen, hasRatingPromptBeenShown } from './lib/insights'
 import { registerDailySync } from './lib/notifications'
 import { pushToCloud } from './lib/sync'
+import { migrateReports } from './lib/reportStore'
+
+migrateReports()
 
 // Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'

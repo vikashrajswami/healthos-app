@@ -4,6 +4,20 @@ export function getAllReports() {
   try { return JSON.parse(localStorage.getItem(KEY) || '[]') } catch { return [] }
 }
 
+// One-time migration: normalize any reports saved before the field rename fix
+export function migrateReports() {
+  try {
+    const reports = getAllReports()
+    const needsMigration = reports.some(r => r.biomarkers?.some(b => !b.name && b.canonical))
+    if (!needsMigration) return
+    const fixed = reports.map(r => ({
+      ...r,
+      biomarkers: (r.biomarkers || []).map(normalizeBiomarker),
+    }))
+    localStorage.setItem(KEY, JSON.stringify(fixed))
+  } catch {}
+}
+
 function normalizeBiomarker(b) {
   // Already in display format
   if (b.name) return b
