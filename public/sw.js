@@ -1,4 +1,4 @@
-const CACHE = 'arogyos-v12'
+const CACHE = 'arogyos-v13'
 
 self.addEventListener('install', e => {
   self.skipWaiting()
@@ -6,9 +6,10 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => clients.forEach(c => c.navigate(c.url)))
   )
   self.clients.claim()
 })
@@ -18,34 +19,16 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (url.pathname.startsWith('/api')) return
 
-  const isHTML = e.request.headers.get('accept')?.includes('text/html')
-
-  if (isHTML) {
-    // Network-first for HTML — always serve fresh page so redirect logic is current
-    e.respondWith(
-      fetch(e.request).then(res => {
-        if (res.ok) {
-          const clone = res.clone()
-          caches.open(CACHE).then(c => c.put(e.request, clone))
-        }
-        return res
-      }).catch(() => caches.match(e.request))
-    )
-    return
-  }
-
-  // Cache-first for JS/CSS/images — stale-while-revalidate
+  // Network-first for everything — always serve fresh JS/CSS/HTML
+  // Falls back to cache only when offline
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
-        if (res.ok && res.type === 'basic') {
-          const clone = res.clone()
-          caches.open(CACHE).then(c => c.put(e.request, clone))
-        }
-        return res
-      }).catch(() => cached)
-      return cached || network
-    })
+    fetch(e.request).then(res => {
+      if (res.ok && res.type === 'basic') {
+        const clone = res.clone()
+        caches.open(CACHE).then(c => c.put(e.request, clone))
+      }
+      return res
+    }).catch(() => caches.match(e.request))
   )
 })
 
