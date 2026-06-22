@@ -10,8 +10,6 @@ import { registerDailySync } from './lib/notifications'
 import { pushToCloud } from './lib/sync'
 import { migrateReports } from './lib/reportStore'
 
-migrateReports()
-
 // Critical screens — eager loaded (shown on first paint)
 import Screen1 from './screens/Screen1'
 import SignupScreen from './screens/SignupScreen'
@@ -441,6 +439,7 @@ function AppShell({ theme, setTheme }) {
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('healthos_theme') || 'teal')
   function setAndSaveTheme(t) { setTheme(t); localStorage.setItem('healthos_theme', t) }
+  useEffect(() => { try { migrateReports() } catch {} }, [])
   return (
     <AppErrorBoundary>
       <LangProvider>

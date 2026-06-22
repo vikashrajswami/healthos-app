@@ -1,15 +1,17 @@
 const KEY = 'healthos_reports'
 
-export function getAllReports() {
+function getRaw() {
   try { return JSON.parse(localStorage.getItem(KEY) || '[]') } catch { return [] }
 }
 
-// One-time migration: normalize any reports saved before the field rename fix
-export function migrateReports() {
+// Run once on first call to normalize old-format biomarkers (canonical → name)
+let _migrated = false
+function ensureMigrated() {
+  if (_migrated) return
+  _migrated = true
   try {
-    const reports = getAllReports()
-    const needsMigration = reports.some(r => r.biomarkers?.some(b => !b.name && b.canonical))
-    if (!needsMigration) return
+    const reports = getRaw()
+    if (!reports.some(r => r.biomarkers?.some(b => !b.name && (b.canonical || b.biomarkerId)))) return
     const fixed = reports.map(r => ({
       ...r,
       biomarkers: (r.biomarkers || []).map(normalizeBiomarker),
@@ -17,6 +19,13 @@ export function migrateReports() {
     localStorage.setItem(KEY, JSON.stringify(fixed))
   } catch {}
 }
+
+export function getAllReports() {
+  ensureMigrated()
+  return getRaw()
+}
+
+export function migrateReports() { ensureMigrated() }
 
 function normalizeBiomarker(b) {
   // Already in display format
